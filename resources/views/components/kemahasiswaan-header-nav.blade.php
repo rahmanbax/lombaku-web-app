@@ -9,7 +9,19 @@
             <li><a href="/dashboard/kemahasiswaan/lomba">Lomba</a></li>
             <li><a href="/dashboard/kemahasiswaan/mahasiswa">Mahasiswa</a></li>
         </ul>
-        <button class="flex items-center bg-gray-100 p-2 rounded-lg"><span class="truncate font-semibold max-w-[150px]">Kemahasiswaan FIT </span><span class="material-symbols-outlined">keyboard_arrow_down</span></span></button>
+        <div class="relative">
+            <!-- Button Kemahasiswaan FIT -->
+            <button id="profile-button" class="flex items-center bg-white p-2 rounded-lg cursor-pointer">
+                <span class="truncate font-semibold max-w-[150px]">Kemahasiswaan FIT </span>
+                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+            </button>
+
+            <!-- Dropdown Modal -->
+            <div id="profile-menu" class="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg min-w-50 hidden">
+                <!-- <a href="/edit-profile" class="block px-4 py-2 hover:bg-gray-100">Edit Profil</a> -->
+                <a href="/logout" class="px-3 py-2 hover:bg-gray-100 text-red-500 flex items-center gap-2"><span class="material-symbols-outlined">logout</span>Logout</a>
+            </div>
+        </div>
     </nav>
 </header>
 
@@ -30,6 +42,8 @@
     const menuBtn = document.getElementById('menu-button');
     const closeBtn = document.getElementById('close-button');
     const mobileMenu = document.getElementById('mobile-menu');
+    const profileButton = document.getElementById('profile-button');
+    const profileMenu = document.getElementById('profile-menu');
 
     menuBtn.addEventListener('click', () => {
         mobileMenu.classList.remove('hidden');
@@ -39,5 +53,17 @@
     closeBtn.addEventListener('click', () => {
         mobileMenu.classList.remove('flex');
         mobileMenu.classList.add('hidden');
+    });
+
+    // Toggle dropdown saat tombol diklik
+    profileButton.addEventListener('click', () => {
+        profileMenu.classList.toggle('hidden');
+    });
+
+    // Tutup dropdown saat klik di luar modal
+    document.addEventListener('click', (event) => {
+        if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
+            profileMenu.classList.add('hidden');
+        }
     });
 </script>

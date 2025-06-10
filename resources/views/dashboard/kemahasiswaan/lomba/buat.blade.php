@@ -63,45 +63,6 @@
             </div>
         </section>
 
-        <section class="mt-10">
-            <h1 class="font-semibold">Daftar Lomba</h1>
-            <div class="flex gap-2 mt-4">
-                <!-- search -->
-                <input type="text" placeholder="Cari Lomba" class="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring focus:ring-blue-500">
-                <a href="/dashboard/kemahasiswaan/lomba/buat" class="whitespace-nowrap py-2 px-3 bg-blue-500 text-white rounded-lg">Publikasikan Lomba</a>
-            </div>
-
-            <div class="mt-4 overflow-x-auto">
-                <table class="lg:w-full rounded-lg overflow-hidden table-auto">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="p-3 text-left">Nama Lomba</th>
-                            <th class="p-3 text-left">Tingkat</th>
-                            <th class="p-3 text-left">Status</th>
-                            <th class="p-3 text-left">Pendaftar</th>
-                            <th class="p-3 text-left">Tanggal Akhir Daftar</th>
-                            <th class="p-3 text-left">Tanggal Selesai</th>
-                            <th class="p-3 text-left">Penyelenggara</th>
-                            <th class="p-3 text-left">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Example Row -->
-                        <tr class="bg-gray-50">
-                            <td class="p-3">Lomba Desain Grafis</td>
-                            <td class="p-3">Internasional</td>
-                            <td class="p-3">Butuh Persetujuan</td>
-                            <td class="p-3">2</td>
-                            <td class="p-3">31/12/2025</td>
-                            <td class="p-3">31/12/2025</td>
-                            <td class="p-3">Himpunan Mahasiswa Desain</td>
-                            <td class="p-3"><button class="w-8 h-8 flex items-center"><span class="material-symbols-outlined h-fit">more_vert</span></button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </section>
     </main>
 </body>
 

@@ -58,29 +58,21 @@
 
         <!-- mahasiswa stats -->
         <section class="grid place-items-center grid-cols-4 lg:grid-cols-12 gap-4 mt-5">
-            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden">
-                <div class="p-3">
-                    <h2 class="text-sm font-medium text-black/60">Jumlah Terdaftar</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
-                </div>
+            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden p-3 h-full">
+                <h2 class="text-sm font-medium text-black/60">Jumlah Terdaftar</h2>
+                <p class="text-2xl font-semibold mt-1">10</p>
             </div>
-            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden">
-                <div class="p-3">
-                    <h2 class="text-sm font-medium text-black/60">Butuh Persetujuan Pembimbing</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
-                </div>
+            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden p-3">
+                <h2 class="text-sm font-medium text-black/60">Butuh Persetujuan Pembimbing</h2>
+                <p class="text-2xl font-semibold mt-1">10</p>
             </div>
-            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden">
-                <div class="p-3">
-                    <h2 class="text-sm font-medium text-black/60">Sedang Berkompetisi</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
-                </div>
+            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden p-3">
+                <h2 class="text-sm font-medium text-black/60">Sedang Berkompetisi</h2>
+                <p class="text-2xl font-semibold mt-1">10</p>
             </div>
-            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden">
-                <div class="p-3">
-                    <h2 class="text-sm font-medium text-black/60">Prestasi</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
-                </div>
+            <div class="bg-gray-100 col-span-2 lg:col-span-3 w-full rounded-lg overflow-hidden p-3">
+                <h2 class="text-sm font-medium text-black/60">Prestasi</h2>
+                <p class="text-2xl font-semibold mt-1">10</p>
             </div>
             <div class="bg-gray-100 col-span-4 lg:col-span-12 w-full rounded-lg overflow-hidden flex justify-center p-5">
                 <div class="max-w-100">
@@ -92,8 +84,7 @@
     </main>
 
     <script>
-        
-// Data Custom
+        // Data Custom
         const barData = {
             labels: ['Internasional', 'Nasional', 'Internal'], // Label Bar
             datasets: [{
