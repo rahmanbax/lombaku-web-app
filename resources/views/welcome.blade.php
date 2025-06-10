@@ -17,18 +17,7 @@
         </div>
 
         <!-- lomba cards -->
-        <section class="grid grid-cols-4 lg:grid-cols-12 gap-4 mt-5 mx-0 lg:mx-10">
-            <!-- card -->
-            <div class="bg-white col-span-2 lg:col-span-3 rounded-lg overflow-hidden shadow-md">
-                <img class="aspect-square object-cover rounded-lg overflow-hidden" src="https://images.unsplash.com/photo-1604134967494-8a9ed3adea0d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
-                <div class="p-3 ">
-                    <div class="flex gap-1 items-center text-black/60"><span class="material-symbols-outlined">calendar_month</span>
-                        <p class="text-xs ">12 April 2025</p>
-
-                    </div>
-                    <h2 class="text-sm font-medium mt-2">Lorem ipsum dolor sit amet</h2>
-                </div>
-            </div>
+        <section class="grid place-items-center grid-cols-4 lg:grid-cols-12 gap-4 mt-5">
             <!-- card -->
             <div class="bg-white col-span-2 lg:col-span-3 rounded-lg overflow-hidden shadow-md">
                 <img class="aspect-square object-cover rounded-lg overflow-hidden" src="https://images.unsplash.com/photo-1604134967494-8a9ed3adea0d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
