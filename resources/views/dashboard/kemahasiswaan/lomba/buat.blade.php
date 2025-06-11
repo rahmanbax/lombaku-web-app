@@ -7,6 +7,7 @@
     <title>Document</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Load Chart.js -->
+
 </head>
 
 <body>
@@ -15,53 +16,94 @@
     <main class=" lg:w-[1038px] mx-auto p-4 lg:py-10 lg:px-0">
 
 
-        <!-- lomba stats -->
-        <section class="grid grid-cols-4 lg:grid-cols-12 gap-4 mt-5">
-            <div class="col-span-4 w-full flex flex-col gap-4">
-                <h1 class="font-semibold">Lomba</h1>
-                <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
-                    <h2 class="text-sm font-medium text-black/60">Terdaftar</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+        <!-- buat lomba form -->
+        <form action="">
+            <section class="grid  grid-cols-4 lg:grid-cols-12 gap-4 mt-5">
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="foto_lomba" class="text-black/60 font-semibold">Foto Lomba</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        name="foto_lomba"
+                        id="foto_lomba"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500
+           file:mr-4 file:py-2 file:px-4
+           file:rounded-md file:border-0
+           file:text-sm file:font-semibold
+           file:bg-blue-50 file:text-blue-700
+           hover:file:bg-blue-100" />
                 </div>
-                <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
-                    <h2 class="text-sm font-medium text-black/60">Mahasiswa Terdaftar</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
-
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="nama_lomba" class="text-black/60 font-semibold">Nama Lomba</label>
+                    <input type="text"
+                        name="nama_lomba"
+                        id="nama_lomba"
+                        placeholder="Masukkan Nama Lomba"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-            </div>
-            <div class="col-span-4 w-full flex flex-col gap-4">
-                <h1 class="font-semibold">Status</h1>
-                <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
-                    <h2 class="text-sm font-medium text-black/60">Butuh Persetujuan</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="deskripsi" class="text-black/60 font-semibold">Deskripsi Lomba</label>
+                    <textarea name="deskripsi" id="deskripsi" placeholder="Masukkan Deskripsi Lomba" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 h-30" id=""></textarea>
                 </div>
-                <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
-                    <h2 class="text-sm font-medium text-black/60">Belum dimulai</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="kategori" class="text-black/60 font-semibold">Kategori</label>
+                    <select name="kategori" id="kategori"
+                        class="w-full border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="lomba">Lomba</option>
+                        <option value="seminar">Seminar</option>
+                    </select>
                 </div>
-                <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
-                    <h2 class="text-sm font-medium text-black/60">Sedang Berlangsung</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="tingkatan" class="text-black/60 font-semibold">Tingkatan</label>
+                    <select name="tingkatan" id="tingkatan"
+                        class="w-full border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="nasional">Nasional</option>
+                        <option value="internasional">Internasional</option>
+                    </select>
                 </div>
-                <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
-                    <h2 class="text-sm font-medium text-black/60">Selesai</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="lokasi" class="text-black/60 font-semibold">Lokasi</label>
+                    <select name="lokasi" id="lokasi"
+                        class="w-full border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                    </select>
                 </div>
-            </div>
-            <div class="col-span-4 w-full flex flex-col gap-4">
-                <h1 class="font-semibold">Butuh Persetujuan</h1>
-                <div class="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                    <div class="flex-1">
-                        <h2 class="text-base font-medium ">Lorem Ipsum Dolor Sit Aemt Colosseum</h2>
-                        <p class="text-xs text-black/50">Himpunan Mahasiswa Islam</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button class="py-1 px-3 text-blue-500 border border-blue-500 rounded-lg text-sm font-semibold">Lihat</button>
-                        <button class="py-1 px-3 bg-blue-500 text-white rounded-lg text-sm font-semibold">Setujui</button>
-                    </div>
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="tanggal_akhir_pendaftaran" class="text-black/60 font-semibold">Tanggal Akhir Pendaftaran</label>
+                    <input type="date"
+                        name="tanggal_akhir_pendaftaran"
+                        id="tanggal_akhir_pendaftaran"
+                        placeholder="Masukkan Nama Lomba"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-            </div>
-        </section>
+                <div class="col-span-2 lg:col-span-6 w-full">
+                    <label for="tanggal_mulai_seleksi" class="text-black/60 font-semibold">Tanggal Mulai Kompetisi</label>
+                    <input type="date"
+                        name="tanggal_mulai_seleksi"
+                        id="tanggal_mulai_seleksi"
+                        placeholder="Masukkan Nama Lomba"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div class="col-span-2 lg:col-span-6 w-full">
+                    <label for="tanggal_akhir_seleksi" class="text-black/60 font-semibold">Tanggal Akhir Kompetisi</label>
+                    <input type="date"
+                        name="tanggal_akhir_seleksi"
+                        id="tanggal_akhir_seleksi"
+                        placeholder="Masukkan Nama Lomba"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="tanggal_pengumuman" class="text-black/60 font-semibold">Tanggal Pengumuman</label>
+                    <input type="date"
+                        name="tanggal_pengumuman"
+                        id="tanggal_pengumuman"
+                        placeholder="Masukkan Nama Lomba"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <button type="submit" class="mt-4 col-span-4 lg:col-span-12 rounded-lg bg-blue-500 text-white px-3 py-2">Publikasikan lomba</button>
+            </section>
+        </form>
 
     </main>
 </body>

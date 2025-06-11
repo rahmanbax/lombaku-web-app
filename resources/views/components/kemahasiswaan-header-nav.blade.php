@@ -32,9 +32,9 @@
             close
         </span>
     </button>
-    <a href="/" class="block">Dashboard</a>
-    <a href="/" class="block">Lomba</a>
-    <a href="/" class="block">Mahasiswa</a>
+    <a href="/dashboard/kemahasiswaan" class="block">Dashboard</a>
+    <a href="/dashboard/kemahasiswaan/lomba" class="block">Lomba</a>
+    <a href="/dashboard/kemahasiswaan/mahasiswa" class="block">Mahasiswa</a>
 </div>
 
 <!-- Script -->
