@@ -1,39 +1,115 @@
-<nav class="bg-blue-600 p-4 shadow-lg">
-    <div class="container mx-auto flex items-center justify-between">
-        <!-- Logo Section -->
-        <a href="/" class="text-white text-2xl font-semibold">Lombaku</a>
+    <!-- Navbar -->
+    <nav class="minimal-navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <span class="logo-text">Lombaku</span>
+            </div>
 
-        <!-- Nav Links Section -->
-        <div class="hidden md:flex space-x-6">
-            <a href="/" class="text-white hover:text-blue-200">Beranda</a>
-            <a href="/lomba" class="text-white hover:text-blue-200">Lomba</a>
-            <a href="/about" class="text-white hover:text-blue-200">Tentang Kami</a>
-            <a href="/contact" class="text-white hover:text-blue-200">Kontak</a>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="nav-items" id="navItems">
+                <a href="#" class="nav-link">Beranda</a>
+
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        Kategori <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Akademik</a>
+                        <a href="#" class="dropdown-item">Seni & Desain</a>
+                        <a href="#" class="dropdown-item">Teknologi</a>
+                        <a href="#" class="dropdown-item">Olahraga</a>
+                        <a href="#" class="dropdown-item">Bisnis</a>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        Kegiatan Saya <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Lomba Diikuti</a>
+                        <a href="#" class="dropdown-item">Lomba Diselenggarakan</a>
+                        <a href="#" class="dropdown-item">Favorit</a>
+                        <a href="#" class="dropdown-item">Riwayat</a>
+                    </div>
+                </div>
+
+                <button class="login-btn">Masuk</button>
+            </div>
         </div>
+    </nav>
+  
 
-        <!-- Mobile Hamburger Menu (visible on small screens) -->
-        <button id="navbar-toggle" class="text-white md:hidden">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navItems = document.getElementById('navItems');
 
-    <!-- Mobile Dropdown Menu (hidden by default) -->
-    <div id="navbar-menu" class="md:hidden hidden">
-        <div class="flex flex-col items-center">
-            <a href="/" class="text-white py-2">Beranda</a>
-            <a href="/lomba" class="text-white py-2">Lomba</a>
-            <a href="/about" class="text-white py-2">Tentang Kami</a>
-            <a href="/contact" class="text-white py-2">Kontak</a>
-        </div>
-    </div>
-</nav>
+        hamburger.addEventListener('click', () => {
+            navItems.classList.toggle('active');
+        });
 
-<script>
-    // Toggle mobile menu visibility
-    const toggleButton = document.getElementById('navbar-toggle');
-    const menu = document.getElementById('navbar-menu');
-    
-    toggleButton.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
-    });
-</script>
+        // Dropdown toggle for mobile
+        const dropdowns = document.querySelectorAll('.dropdown');
+
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+
+            toggle.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    dropdown.classList.toggle('active');
+                }
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                if (!navItems.contains(e.target) && !hamburger.contains(e.target)) {
+                    navItems.classList.remove('active');
+                }
+
+                dropdowns.forEach(dropdown => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        // Search functionality
+        const searchButton = document.querySelector('.search-button');
+        const searchInput = document.querySelector('.search-input');
+
+        searchButton.addEventListener('click', function() {
+            if (searchInput.value.trim() !== '') {
+                alert(`Anda mencari: "${searchInput.value}"`);
+                // Di aplikasi nyata, ini akan mengirimkan permintaan pencarian
+            } else {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (searchInput.value.trim() !== '') {
+                    alert(`Anda mencari: "${searchInput.value}"`);
+                } else {
+                    searchInput.focus();
+                }
+            }
+        });
+
+        // Admin button functionality
+        const adminButton = document.querySelector('.admin-btn');
+        adminButton.addEventListener('click', function() {
+            alert('Fitur pendaftaran admin lomba akan segera tersedia!');
+            // Di aplikasi nyata, ini akan mengarahkan ke halaman pendaftaran admin
+        });
+    </script>

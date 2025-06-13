@@ -1,58 +1,597 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar Minimalis dengan Search Bar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <x-public-header-nav />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar Minimalis */
+        .minimal-navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.2rem 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon i {
+            color: white;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #000;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-items {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-link:hover {
+            color: #000;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #000;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown:hover .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 0.7rem 1.5rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+            color: #000;
+        }
+
+        .login-btn {
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-btn:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #000;
+        }
+
+        /* Hero Section */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 1rem;
+            text-align: center;
+            background-color: white;
+            margin: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 1.5rem;
+            max-width: 700px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #555;
+            max-width: 600px;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #ddd, transparent);
+            margin: 3rem auto;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        /* Search Bar Styles */
+        .search-container {
+            position: relative;
+            max-width: 650px;
+            width: 100%;
+            margin: 0 auto 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 25px;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 60px;
+            outline: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            padding-right: 70px;
+        }
+
+        .search-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            background: #2c3e50;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-button:hover {
+            background: #3498db;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .search-button i {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+            font-size: 1.05rem;
+        }
+
+        .feature-item i {
+            color: #000;
+            font-size: 1.1rem;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #000;
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            padding: 0 1rem;
+        }
+
+        .footer-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .admin-btn {
+            background-color: white;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+
+        .admin-btn:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.25);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .copyright {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Card Styles */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-date {
+            padding: 0.5rem 1.5rem;
+            color: #777;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .card-content {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #000;
+        }
+
+        .card-description {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .card-button {
+            display: inline-block;
+            background-color: #000;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .card-button:hover {
+            background-color: #333;
+        }
+
+        /* Responsive Cards */
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .card-image {
+                height: 200px;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-items {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 2rem;
+                gap: 1.5rem;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+                transition: right 0.4s ease;
+                z-index: 1000;
+            }
+
+            .nav-items.active {
+                right: 0;
+            }
+
+            .dropdown-menu {
+                position: static;
+                box-shadow: none;
+                margin: 0.5rem 0 0 1rem;
+                display: none;
+            }
+
+            .dropdown.active .dropdown-menu {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .search-input {
+                padding: 14px 20px;
+                padding-right: 60px;
+            }
+
+            .search-button {
+                width: 40px;
+                height: 40px;
+            }
+
+            .footer {
+                padding: 2rem 1rem;
+            }
+
+            .footer-text {
+                font-size: 1.2rem;
+            }
+
+            .admin-btn {
+                padding: 0.9rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <x-public-header-nav />
 
-    <main class=" lg:w-[1038px] mx-auto p-4 lg:py-10 lg:px-0">
-        <div class="text-center">
-            <h1 class="text-xl font-bold">Cari Lomba di Lombaku!</h1>
-            <p class="text-sm text-black/60 mt-2">Update terus info lomba terkini, dari kampus sampai internasional – semua ada di sini.</p>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Cari Lomba di Lombaku!</h1>
+        <p>Update terus info terkini, dari kampus sampai internasional semuanya ada disini</p>
+
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Cari lomba, kategori, atau penyelenggara...">
+            <button class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
 
-        <!-- lomba cards -->
-        <section class="grid place-items-center grid-cols-4 lg:grid-cols-12 gap-4 mt-5">
-            <!-- card -->
-            <div class="bg-white col-span-2 lg:col-span-3 rounded-lg overflow-hidden shadow-md">
-                <img class="aspect-square object-cover rounded-lg overflow-hidden" src="https://images.unsplash.com/photo-1604134967494-8a9ed3adea0d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
-                <div class="p-3 ">
-                    <div class="flex gap-1 items-center text-black/60"><span class="material-symbols-outlined">calendar_month</span>
-                        <p class="text-xs ">12 April 2025</p>
+        <div class="divider"></div>
 
-                    </div>
-                    <h2 class="text-sm font-medium mt-2">Lorem ipsum dolor sit amet</h2>
+        <div class="card-container">
+            <div class="card">
+                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Desain Minimalis" class="card-image">
+                <div class="card-date">15 Juni 2025</div>
+                <div class="card-content">
+                    <h3 class="card-title">Desain Minimalis</h3>
+                    <p class="card-description">Tampilan elegan dengan palet warna hitam-putih yang modern dan profesional.</p>
+                    <a href="#" class="card-button">Lihat Detail</a>
                 </div>
             </div>
-            <!-- card -->
-            <div class="bg-white col-span-2 lg:col-span-3 rounded-lg overflow-hidden shadow-md">
-                <img class="aspect-square object-cover rounded-lg overflow-hidden" src="https://images.unsplash.com/photo-1604134967494-8a9ed3adea0d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
-                <div class="p-3 ">
-                    <div class="flex gap-1 items-center text-black/60"><span class="material-symbols-outlined">calendar_month</span>
-                        <p class="text-xs ">12 April 2025</p>
 
-                    </div>
-                    <h2 class="text-sm font-medium mt-2">Lorem ipsum dolor sit amet</h2>
+            <div class="card">
+                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="UI Modern" class="card-image">
+                <div class="card-date">10 Juni 2025</div>
+                <div class="card-content">
+                    <h3 class="card-title">UI Modern</h3>
+                    <p class="card-description">Dropdown yang disederhanakan untuk pengalaman pengguna yang lebih baik.</p>
+                    <a href="#" class="card-button">Lihat Detail</a>
                 </div>
             </div>
-        </section>
 
-        <div class="w-full flex justify-center mt-5">
-            <a href="/lomba" class="py-2 px-3 bg-white border border-blue-500 text-blue-500 rounded-lg text-sm font-semibold mt-0">Lihat semua lomba</a>
+            <div class="card">
+                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Efek Interaktif" class="card-image">
+                <div class="card-date">5 Juni 2025</div>
+                <div class="card-content">
+                    <h3 class="card-title">Efek Interaktif</h3>
+                    <p class="card-description">Transisi halus dan efek hover yang elegan untuk interaksi yang menyenangkan.</p>
+                    <a href="#" class="card-button">Lihat Detail</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Responsive Design" class="card-image">
+                <div class="card-date">1 Juni 2025</div>
+                <div class="card-content">
+                    <h3 class="card-title">Responsive Design</h3>
+                    <p class="card-description">Tampilan optimal di semua perangkat, dari desktop hingga mobile.</p>
+                    <a href="#" class="card-button">Lihat Detail</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Search Terintegrasi" class="card-image">
+                <div class="card-date">25 Mei 2025</div>
+                <div class="card-content">
+                    <h3 class="card-title">Search Terintegrasi</h3>
+                    <p class="card-description">Fitur pencarian yang terintegrasi dengan baik untuk kemudahan navigasi.</p>
+                    <a href="#" class="card-button">Lihat Detail</a>
+                </div>
+            </div>
         </div>
-    </main>
 
-    <section class="mt-10 bg-blue-50 px-4 py-8 flex flex-col items-center gap-2 ">
-        <h2 class="text-base font-semibold text-center">Butuh mahasiswa potensial untuk mengikuti lomba anda?</h2>
-        <a href="/login" class="py-2 px-3 text-white bg-blue-500 rounded-lg text-sm font-semibold mt-0">Daftar Sebagai Admin Lomba</a>
-    </section>
+    </div>
 
-    <x-footer />
+      <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">Butuh mahasiswa untuk mahasiswa potensial untuk mengikuti lomba anda?</p>
+            <button class="admin-btn">Daftar sebagai Admin Lomba</button>
+        </div>
+        <div class="footer-bottom">
+            <p class="copyright">lombaku@2025</p>
+        </div>
+    </footer>
 </body>
 
 </html>
