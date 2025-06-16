@@ -1,42 +1,115 @@
-<!-- Header + Button -->
-<header class="w-full flex justify-center bg-white border-b border-gray-200">
-    <nav class="w-full flex justify-between p-4 lg:px-0 items-center lg:w-[1038px]">
-        <button id="menu-button" class="w-10 h-10 flex justify-center items-center lg:hidden cursor-pointer">
-            <span class="material-symbols-outlined">menu</span>
-        </button>
-        <ul class="hidden lg:flex gap-11 font-semibold">
-            <li><a href="/">Home</a></li>
-            <li><a href="/">Lomba</a></li>
-        </ul>
-        <a href="/login" class="py-1 px-2 bg-white border border-emerald-500 text-emerald-500 rounded-lg text-sm font-semibold">Masuk/ Daftar</a>
+    <!-- Navbar -->
+    <nav class="minimal-navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <span class="logo-text">Lombaku</span>
+            </div>
+
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="nav-items" id="navItems">
+                <a href="#" class="nav-link">Beranda</a>
+
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        Kategori <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Akademik</a>
+                        <a href="#" class="dropdown-item">Seni & Desain</a>
+                        <a href="#" class="dropdown-item">Teknologi</a>
+                        <a href="#" class="dropdown-item">Olahraga</a>
+                        <a href="#" class="dropdown-item">Bisnis</a>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        Kegiatan Saya <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Lomba Diikuti</a>
+                        <a href="#" class="dropdown-item">Lomba Diselenggarakan</a>
+                        <a href="#" class="dropdown-item">Favorit</a>
+                        <a href="#" class="dropdown-item">Riwayat</a>
+                    </div>
+                </div>
+
+                <button class="login-btn">Masuk</button>
+            </div>
+        </div>
     </nav>
-</header>
+  
 
-<!-- Modal Navigasi (Mobile) -->
-<div id="mobile-menu" class="fixed inset-0 bg-white z-50 flex-col items-center justify-center gap-8 font-semibold text-lg hidden lg:hidden">
-    <button id="close-button" class="absolute top-4 right-4 text-gray-700 cursor-pointer">
-        <span class="material-symbols-outlined">
-            close
-        </span>
-    </button>
-    <a href="/" class="block">Home</a>
-    <a href="/" class="block">Lomba</a>
-    <a href="/login" class="py-2 px-3 border border-emerald-500 text-emerald-500 rounded-lg text-sm font-semibold">Masuk/ Daftar</a>
-</div>
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navItems = document.getElementById('navItems');
 
-<!-- Script -->
-<script>
-    const menuBtn = document.getElementById('menu-button');
-    const closeBtn = document.getElementById('close-button');
-    const mobileMenu = document.getElementById('mobile-menu');
+        hamburger.addEventListener('click', () => {
+            navItems.classList.toggle('active');
+        });
 
-    menuBtn.addEventListener('click', () => {
-        mobileMenu.classList.remove('hidden');
-        mobileMenu.classList.add('flex');
-    });
+        // Dropdown toggle for mobile
+        const dropdowns = document.querySelectorAll('.dropdown');
 
-    closeBtn.addEventListener('click', () => {
-        mobileMenu.classList.remove('flex');
-        mobileMenu.classList.add('hidden');
-    });
-</script>
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+
+            toggle.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    dropdown.classList.toggle('active');
+                }
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                if (!navItems.contains(e.target) && !hamburger.contains(e.target)) {
+                    navItems.classList.remove('active');
+                }
+
+                dropdowns.forEach(dropdown => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        // Search functionality
+        const searchButton = document.querySelector('.search-button');
+        const searchInput = document.querySelector('.search-input');
+
+        searchButton.addEventListener('click', function() {
+            if (searchInput.value.trim() !== '') {
+                alert(`Anda mencari: "${searchInput.value}"`);
+                // Di aplikasi nyata, ini akan mengirimkan permintaan pencarian
+            } else {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (searchInput.value.trim() !== '') {
+                    alert(`Anda mencari: "${searchInput.value}"`);
+                } else {
+                    searchInput.focus();
+                }
+            }
+        });
+
+        // Admin button functionality
+        const adminButton = document.querySelector('.admin-btn');
+        adminButton.addEventListener('click', function() {
+            alert('Fitur pendaftaran admin lomba akan segera tersedia!');
+            // Di aplikasi nyata, ini akan mengarahkan ke halaman pendaftaran admin
+        });
+    </script>
