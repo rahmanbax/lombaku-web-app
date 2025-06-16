@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,43 +22,35 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f9fafb;
         }
-
         .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .card:hover {
             transform: translateY(-5px);
         }
-
         .dropdown-menu {
             display: none;
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
             transform: translateY(10px);
         }
-
         .dropdown.active .dropdown-menu {
             display: block;
             opacity: 1;
             transform: translateY(0);
         }
-
         .nav-items {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease;
         }
-
         .nav-items.active {
             max-height: 500px;
         }
-
         @media (min-width: 768px) {
             .nav-items {
                 max-height: none;
@@ -68,7 +59,6 @@
         }
     </style>
 </head>
-
 <body class="bg-gray-50">
     <!-- Navbar -->
     <nav class="bg-white shadow-md py-3 px-4 md:px-8 sticky top-0 z-50">
@@ -112,25 +102,7 @@
                     </div>
                 </div>
 
-                <!-- Bagian login/logout yang diperbaiki -->
-                @auth
-                <div class="flex items-center space-x-4">
-                    <div class="hidden md:flex items-center space-x-2">
-                        <i class="fas fa-user-circle text-blue-600 text-xl"></i>
-                        <span class="font-medium">{{ Auth::user()->nama }}</span>
-                    </div>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                        </button>
-                    </form>
-                </div>
-                @else
-                <a href="{{ route('login') }}" class="mt-2 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Masuk
-                </a>
-                @endauth
+                <button class="mt-2 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Masuk</button>
             </div>
         </div>
     </nav>
@@ -144,10 +116,11 @@
 
         <div class="max-w-2xl mx-auto mb-16">
             <div class="flex bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden">
-                <input
-                    type="text"
-                    class="search-input flex-grow px-6 py-4 focus:outline-none"
-                    placeholder="Cari lomba, kategori, atau penyelenggara...">
+                <input 
+                    type="text" 
+                    class="search-input flex-grow px-6 py-4 focus:outline-none" 
+                    placeholder="Cari lomba, kategori, atau penyelenggara..."
+                >
                 <button class="search-button bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 transition-colors">
                     <i class="fas fa-search"></i>
                 </button>
@@ -283,7 +256,7 @@
                         other.classList.remove('active');
                     }
                 });
-
+                
                 // Toggle current dropdown
                 dropdown.classList.toggle('active');
             });
