@@ -14,7 +14,7 @@ Route::get('1', function () {
     if (!Auth::check()) {
         return redirect('/login');
     }
-    
+
     // Ambil data user dari session
     $user = [
         'id' => session('user_id'),
@@ -26,7 +26,7 @@ Route::get('1', function () {
         'nim_atau_nip' => session('nim_atau_nip'),
         'instansi' => session('instansi'),
     ];
-    
+
     return view('1', ['user' => $user]);
 })->name('dashboard');
 
@@ -56,6 +56,14 @@ Route::get('/dashboard/kemahasiswaan/lomba', function () {
 
 Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
     return view('dashboard.kemahasiswaan.mahasiswa.index');
+});
+
+Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
+    return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
+});
+
+Route::get('/project/{id}', function ($id) {
+    return view('project.detail', ['id' => $id]);
 });
 
 Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {

@@ -65,7 +65,6 @@
                             <th class="p-3 text-left">Nama Mahasiswa</th>
                             <th class="p-3 text-left">NIM</th>
                             <th class="p-3 text-left">Jurusan</th>
-                            <th class="p-3 text-left">Dosen Wali</th>
                             <th class="p-3 text-left">Lomba Diikuti</th>
                             <th class="p-3 text-left">Jumlah Prestasi</th>
                             <th class="p-3 text-left">Aksi</th>
@@ -77,7 +76,6 @@
                             <td class="p-3">Abdurrahman Baasyir</td>
                             <td class="p-3">6701220067</td>
                             <td class="p-3">D3 Sistem Informasi</td>
-                            <td class="p-3">Bayu Rima Aditya</td>
                             <td class="p-3">6</td>
                             <td class="p-3">1</td>
                             <td class="p-3"><button class="w-8 h-8 flex items-center"><span class="material-symbols-outlined h-fit">more_vert</span></button></td>
