@@ -14,10 +14,23 @@ class LombaController extends Controller
      * Menampilkan semua data lomba.
      * GET /api/lomba
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager loading untuk relasi 'tags' dan 'pembuat' untuk efisiensi query
-        $lombas = Lomba::with(['tags', 'pembuat'])->latest()->get();
+        // Mulai query builder
+        $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
+
+        // Cek jika ada parameter 'search' di URL
+        if ($request->has('search')) {
+            $searchTerm = $request->query('search');
+
+            // Tambahkan kondisi WHERE untuk memfilter berdasarkan kata kunci
+            $query->where(function ($subQuery) use ($searchTerm) {
+                $subQuery->where('nama_lomba', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Eksekusi query dengan urutan terbaru
+        $lombas = $query->latest()->get();
 
         return response()->json([
             'success' => true,

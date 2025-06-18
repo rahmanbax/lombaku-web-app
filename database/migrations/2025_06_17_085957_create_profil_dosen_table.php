@@ -14,9 +14,6 @@ return new class extends Migration
         Schema::create('profil_dosen', function (Blueprint $table) {
             $table->id('id_profil_dosen');
 
-            // foto profil
-            $table->string('foto_profil')->nullable();
-
             $table->integer('nip')->unique();
 
             // id user

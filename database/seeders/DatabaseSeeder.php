@@ -150,14 +150,14 @@ class DatabaseSeeder extends Seeder
         // 3. PROFILES (profil_mahasiswa, profil_dosen, profil_admin_lomba)
         // =================================================================
         DB::table('profil_mahasiswa')->insert([
-            ['id_user' => 6, 'nim' => 11223301, 'id_program_studi' => 1, 'foto_profil' => 'profiles/default.png', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 7, 'nim' => 11223302, 'id_program_studi' => 1, 'foto_profil' => 'profiles/default.png', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 8, 'nim' => 33221101, 'id_program_studi' => 3, 'foto_profil' => 'profiles/default.png', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 6, 'nim' => 11223301, 'id_program_studi' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 7, 'nim' => 11223302, 'id_program_studi' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 8, 'nim' => 33221101, 'id_program_studi' => 3, 'created_at' => now(), 'updated_at' => now()],
         ]);
         
         DB::table('profil_dosen')->insert([
-            ['id_user' => 4, 'nip' => 99887701, 'id_program_studi' => 1, 'foto_profil' => 'profiles/default.png', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 5, 'nip' => 99887702, 'id_program_studi' => 3, 'foto_profil' => 'profiles/default.png', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 4, 'nip' => 99887701, 'id_program_studi' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 5, 'nip' => 99887702, 'id_program_studi' => 3, 'created_at' => now(), 'updated_at' => now()],
         ]);
         
         // Asumsi: profil_admin_lomba memiliki relasi one-to-one dengan user ber-role admin_lomba

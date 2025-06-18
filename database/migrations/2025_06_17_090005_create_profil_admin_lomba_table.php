@@ -14,9 +14,6 @@ return new class extends Migration
         Schema::create('profil_admin_lomba', function (Blueprint $table) {
             $table->id('id_profil_admin_lomba');
 
-            // foto profil
-            $table->string('foto_profil')->nullable();
-
             // alamat
             $table->string('alamat')->nullable();
             
