@@ -19,7 +19,7 @@ class AuthController extends Controller
             'nama' => 'required|max:100',
             'email' => 'required|email|unique:users',
             'notelp' => 'nullable|max:15',
-            'nim_atau_nip' => 'nullable|integer',
+            'nim_atau_nip' => 'nullable|numeric',
             'instansi' => 'nullable|max:100',
             'role' => 'nullable|in:mahasiswa,dosen,admin_lomba,admin_prodi,kemahasiswaan',
             'id_program_studi' => 'nullable|exists:program_studi,id_program_studi'
@@ -39,14 +39,14 @@ class AuthController extends Controller
             'nama' => $request->nama,
             'email' => $request->email,
             'notelp' => $request->notelp,
-            'nim_atau_nip' => $request->nim_atau_nip,
+            'nim_atau_nip' => is_numeric($request->nim_atau_nip) ? $request->nim_atau_nip : null,
             'instansi' => $request->instansi,
             'role' => $request->role ?? 'mahasiswa',
             'id_program_studi' => $request->id_program_studi
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
- return redirect()->intended('login')->with('success', 'Registrasi berhasil, silakan login.');
+        return redirect()->intended('login')->with('success', 'Registrasi berhasil, silakan login.');
         return response()->json([
             'success' => true,
             'message' => 'Registrasi berhasil',
@@ -65,7 +65,7 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
             $user = Auth::user();
-            
+
             // Menyimpan data pengguna dalam session
             session([
                 'user_id' => $user->id,
@@ -90,7 +90,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect('/');
     }
 }

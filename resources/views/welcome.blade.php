@@ -29,27 +29,48 @@
             background-color: #f9fafb;
         }
 
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        /* Navbar Styles */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
+        .logo-container {
+            transition: transform 0.3s ease;
         }
 
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+
+        /* Dropdown Styles */
         .dropdown-menu {
-            display: none;
             opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            visibility: hidden;
             transform: translateY(10px);
+            transition: all 0.3s ease;
+            display: block;
+            /* Always show but control with opacity/visibility */
         }
 
         .dropdown.active .dropdown-menu {
-            display: block;
             opacity: 1;
+            visibility: visible;
             transform: translateY(0);
         }
 
+        .dropdown-item {
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8fafc;
+            padding-left: 1.25rem;
+        }
+
+        /* Mobile Menu */
         .nav-items {
             max-height: 0;
             overflow: hidden;
@@ -66,74 +87,21 @@
                 overflow: visible;
             }
         }
+
+        /* Card Styles */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
     </style>
 </head>
 
 <body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md py-3 px-4 md:px-8 sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="bg-blue-600 text-white p-2 rounded-lg">
-                    <i class="fas fa-trophy text-lg"></i>
-                </div>
-                <span class="text-xl font-bold text-gray-800">Lombaku</span>
-            </div>
-
-            <button class="md:hidden text-gray-600 focus:outline-none" id="hamburger">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-
-            <div class="nav-items md:flex md:items-center md:space-x-6" id="navItems">
-                <a href="#" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors">Beranda</a>
-
-                <div class="dropdown relative my-2 md:my-0">
-                    <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                        <span>Kategori</span> <i class="fas fa-chevron-down text-xs dropdown-icon"></i>
-                    </button>
-                    <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Akademik</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Seni & Desain</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Teknologi</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Olahraga</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Bisnis</a>
-                    </div>
-                </div>
-
-                <div class="dropdown relative my-2 md:my-0">
-                    <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                        <span>Kegiatan Saya</span> <i class="fas fa-chevron-down text-xs dropdown-icon"></i>
-                    </button>
-                    <div class="dropdown-menu absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg py-2 z-50">
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Lomba Diikuti</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Lomba Diselenggarakan</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Favorit</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Riwayat</a>
-                    </div>
-                </div>
-
-                <!-- Bagian login/logout yang diperbaiki -->
-                @auth
-                <div class="flex items-center space-x-4">
-                    <div class="hidden md:flex items-center space-x-2">
-                        <i class="fas fa-user-circle text-blue-600 text-xl"></i>
-                        <span class="font-medium">{{ Auth::user()->nama }}</span>
-                    </div>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                        </button>
-                    </form>
-                </div>
-                @else
-                <a href="{{ route('login') }}" class="mt-2 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Masuk
-                </a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+    <x-public-header-nav />
 
     <!-- Hero Section -->
     <div class="container mx-auto px-4 py-8 md:py-16">
@@ -168,7 +136,7 @@
                 <div class="p-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Desain Minimalis</h3>
                     <p class="text-gray-600 mb-4">Tampilan elegan dengan palet warna hitam-putih yang modern dan profesional.</p>
-                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <a href="{{ route('detail') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         Lihat Detail
                     </a>
                 </div>
@@ -270,14 +238,17 @@
             navItems.classList.toggle('active');
         });
 
-        // Dropdown toggle
+        // Dropdown toggle - Improved version
         const dropdowns = document.querySelectorAll('.dropdown');
 
         dropdowns.forEach(dropdown => {
             const toggle = dropdown.querySelector('.dropdown-toggle');
 
-            toggle.addEventListener('click', () => {
-                // Close other dropdowns
+            // Click handler
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Close all other dropdowns first
                 dropdowns.forEach(other => {
                     if (other !== dropdown) {
                         other.classList.remove('active');
@@ -287,11 +258,30 @@
                 // Toggle current dropdown
                 dropdown.classList.toggle('active');
             });
+
+            // Keyboard accessibility
+            toggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                } else if (e.key === 'Escape' && dropdown.classList.contains('active')) {
+                    dropdown.classList.remove('active');
+                }
+            });
         });
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown')) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // Close dropdowns on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
                 dropdowns.forEach(dropdown => {
                     dropdown.classList.remove('active');
                 });
@@ -329,4 +319,5 @@
         });
     </script>
 </body>
+
 </html>

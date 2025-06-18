@@ -21,13 +21,79 @@
             }
         }
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-container {
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8fafc;
+            padding-left: 1.25rem;
+        }
+
+        /* Mobile Menu */
+        .nav-items {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .nav-items.active {
+            max-height: 500px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-items {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-50">
     <!-- Navbar -->
-    <nav class="sticky top-0 z-40 bg-white shadow-sm">
+    <nav class="navbar sticky top-0 z-40">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Logo Section -->
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 logo-container">
                 <div class="bg-blue-100 p-2 rounded-lg">
                     <i class="fas fa-trophy text-blue-600 text-xl"></i>
                 </div>
@@ -40,52 +106,63 @@
             </button>
 
             <!-- Navigation Items -->
-            <div id="navItems" class="hidden md:flex items-center space-x-6">
-                <a href="#" class="text-gray-700 hover:text-primary font-medium transition-colors">Beranda</a>
+            <div id="navItems" class="nav-items md:flex md:items-center md:space-x-6">
+                <a href="#" class="block py-2 md:py-0 text-gray-700 hover:text-primary font-medium transition-colors">Beranda</a>
 
                 <!-- Dropdown Kategori -->
-                <div class="relative group">
-                    <button class="flex items-center text-gray-700 hover:text-primary font-medium transition-colors">
-                        Kategori <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                <div class="dropdown relative my-2 md:my-0">
+                    <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-primary font-medium transition-colors group">
+                        <span>Kategori</span>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
                     </button>
-                    <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 py-2 w-48 z-10">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Akademik</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Seni & Desain</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Teknologi</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Olahraga</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Bisnis</a>
+                    <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Akademik</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Seni & Desain</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Teknologi</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Olahraga</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Bisnis</a>
                     </div>
                 </div>
 
                 <!-- Dropdown Kegiatan Saya -->
-                <div class="relative group">
-                    <button class="flex items-center text-gray-700 hover:text-primary font-medium transition-colors">
-                        Kegiatan Saya <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                <div class="dropdown relative my-2 md:my-0">
+                    <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-primary font-medium transition-colors group">
+                        <span>Kegiatan Saya</span>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
                     </button>
-                    <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 py-2 w-48 z-10">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Lomba Diikuti</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Lomba Diselenggarakan</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Favorit</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Riwayat</a>
+                    <div class="dropdown-menu absolute left-0 mt-2 w-56 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Diikuti</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Diselenggarakan</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Favorit</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Riwayat</a>
                     </div>
                 </div>
-                
-                <!-- Login/User Section -->
-                @if (Auth::check())
-                <div class="flex items-center space-x-4">
-                    <span class="text-gray-700">Welcome, {{ Auth::user()->nama }} ({{ Auth::user()->role }})</span>
-                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
+
+                <!-- Bagian login/logout -->
+                @auth
+                <div class="dropdown relative my-2 md:my-0">
+                    <button class="dropdown-toggle flex items-center space-x-2 text-gray-700 hover:text-primary font-medium transition-colors group">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                            {{ substr(Auth::user()->nama, 0, 1) }}
+                        </div>
+                        <span>{{ Auth::user()->nama }}</span>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                    </button>
+                    <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
+                        <a href="{{ route('profile') }}" class="dropdown-item block px-4 py-2 text-gray-700">Profile</a>
+                        <form action="{{ route('logout') }}" method="POST" id="logout-form">
+                            @csrf
+                            <button type="button" onclick="if(confirm('Apakah Anda yakin ingin keluar?')){this.form.submit()}" class="dropdown-item block w-full text-left px-4 py-2 text-gray-700">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 @else
-                <a class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-md transition-colors" href="{{ route('login') }}">
-                    <i class="fas fa-sign-in-alt mr-1"></i>Login
+                <a href="{{ route('login') }}" class="mt-2 md:mt-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-md hover:shadow-lg">
+                    Masuk
                 </a>
-                @endif
+                @endauth
             </div>
         </div>
     </nav>
@@ -99,8 +176,8 @@
                     <div class="bg-blue-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold mb-4">
                         JS
                     </div>
-                    <h2 class="text-xl font-bold text-gray-800">John Smith</h2>
-                    <p class="text-gray-500">Mahasiswa</p>
+                    <h2 class="text-xl font-bold text-gray-800">{{ Auth::user()->username }}</h2>
+                    <p class="text-gray-500">{{ Auth::user()->role }}</p>
                 </div>
                 
                 <div class="space-y-2">
@@ -136,11 +213,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="space-y-1">
                         <label class="text-gray-500 text-sm">Nama Lengkap</label>
-                        <div class="font-medium text-gray-800">John Smith</div>
+                        <div class="font-medium text-gray-800">{{ Auth::user()->nama }}</div>
                     </div>
                     <div class="space-y-1">
                         <label class="text-gray-500 text-sm">NIM</label>
-                        <div class="font-medium text-gray-800">2023110001</div>
+                        <div class="font-medium text-gray-800">{{ Auth::user()->nim_atau_nip }}</div>
                     </div>
                     <div class="space-y-1">
                         <label class="text-gray-500 text-sm">Email</label>
@@ -195,20 +272,62 @@
 
     <!-- JavaScript -->
     <script>
-        // Toggle mobile menu
-        document.getElementById('hamburger').addEventListener('click', function() {
-            const navItems = document.getElementById('navItems');
-            navItems.classList.toggle('hidden');
-            navItems.classList.toggle('flex');
-            navItems.classList.toggle('flex-col');
-            navItems.classList.toggle('absolute');
-            navItems.classList.toggle('bg-white');
-            navItems.classList.toggle('w-full');
-            navItems.classList.toggle('left-0');
-            navItems.classList.toggle('top-16');
-            navItems.classList.toggle('p-4');
-            navItems.classList.toggle('space-y-4');
-            navItems.classList.toggle('shadow-lg');
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navItems = document.getElementById('navItems');
+
+        hamburger.addEventListener('click', () => {
+            navItems.classList.toggle('active');
+        });
+
+        // Dropdown toggle - Improved version
+        const dropdowns = document.querySelectorAll('.dropdown');
+
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+
+            // Click handler
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Close all other dropdowns first
+                dropdowns.forEach(other => {
+                    if (other !== dropdown) {
+                        other.classList.remove('active');
+                    }
+                });
+
+                // Toggle current dropdown
+                dropdown.classList.toggle('active');
+            });
+
+            // Keyboard accessibility
+            toggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                } else if (e.key === 'Escape' && dropdown.classList.contains('active')) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // Close dropdowns on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
         });
 
         // Admin button functionality
