@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
             // [1] Role: kemahasiswaan
             [
                 'id_user' => 1,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'kemahasiswaan',
                 'password' => Hash::make('password'),
                 'nama' => 'Bapak Kemahasiswaan',
@@ -62,6 +63,7 @@ class DatabaseSeeder extends Seeder
             // [2] Role: admin_prodi
             [
                 'id_user' => 2,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'admin.if',
                 'password' => Hash::make('password'),
                 'nama' => 'Admin Prodi Informatika',
@@ -73,6 +75,7 @@ class DatabaseSeeder extends Seeder
             // [3] Role: admin_lomba
             [
                 'id_user' => 3,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'lombapedia',
                 'password' => Hash::make('password'),
                 'nama' => 'Admin Lombapedia',
@@ -84,6 +87,7 @@ class DatabaseSeeder extends Seeder
             // [4] Role: dosen
             [
                 'id_user' => 4,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'dosen.budi',
                 'password' => Hash::make('password'),
                 'nama' => 'Budi Santoso, M.Kom.',
@@ -95,6 +99,7 @@ class DatabaseSeeder extends Seeder
             // [5] Role: dosen
             [
                 'id_user' => 5,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'dosen.ana',
                 'password' => Hash::make('password'),
                 'nama' => 'Ana Lestari, M.Ds.',
@@ -106,6 +111,7 @@ class DatabaseSeeder extends Seeder
             // [6] Role: mahasiswa
             [
                 'id_user' => 6,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'mahasiswa.andi',
                 'password' => Hash::make('password'),
                 'nama' => 'Andi Hermawan',
@@ -117,6 +123,7 @@ class DatabaseSeeder extends Seeder
             // [7] Role: mahasiswa
             [
                 'id_user' => 7,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'mahasiswa.siti',
                 'password' => Hash::make('password'),
                 'nama' => 'Siti Aminah',
@@ -128,6 +135,7 @@ class DatabaseSeeder extends Seeder
             // [8] Role: mahasiswa
             [
                 'id_user' => 8,
+                'foto_profile' => 'images/profile/default-profile.png',
                 'username' => 'mahasiswa.rina',
                 'password' => Hash::make('password'),
                 'nama' => 'Rina Wijayanti',
@@ -170,7 +178,7 @@ class DatabaseSeeder extends Seeder
             // [1] Lomba yang sedang berlangsung
             [
                 'id_lomba' => 1,
-                'foto_lomba' => 'lomba/hackathon.jpg',
+                'foto_lomba' => 'images/lomba/image-lomba.jpg',
                 'nama_lomba' => 'National Hackathon 2024',
                 'deskripsi' => 'Kompetisi membuat aplikasi inovatif dalam 24 jam.',
                 'lokasi' => 'online',
@@ -186,7 +194,7 @@ class DatabaseSeeder extends Seeder
             // [2] Lomba yang sudah selesai
             [
                 'id_lomba' => 2,
-                'foto_lomba' => 'lomba/uiux.jpg',
+                'foto_lomba' => 'images/lomba/image-lomba.jpg',
                 'nama_lomba' => 'UI/UX Challenge 2023',
                 'deskripsi' => 'Rancang antarmuka aplikasi mobile yang ramah pengguna.',
                 'lokasi' => 'online',
@@ -202,7 +210,7 @@ class DatabaseSeeder extends Seeder
             // [3] Lomba yang akan datang dan belum disetujui
             [
                 'id_lomba' => 3,
-                'foto_lomba' => 'lomba/business.jpg',
+                'foto_lomba' => 'images/lomba/image-lomba.jpg',
                 'nama_lomba' => 'International Business Case Competition',
                 'deskripsi' => 'Selesaikan studi kasus bisnis dari perusahaan multinasional.',
                 'lokasi' => 'online',

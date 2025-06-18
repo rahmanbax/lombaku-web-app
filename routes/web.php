@@ -74,6 +74,14 @@ Route::get('/dashboard/kemahasiswaan/lomba', function () {
     return view('dashboard.kemahasiswaan.lomba.index');
 });
 
+Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
+    return view('dashboard.kemahasiswaan.lomba.buat');
+});
+
+Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
+    return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
+});
+
 Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
     return view('dashboard.kemahasiswaan.mahasiswa.index');
 });
@@ -86,7 +94,4 @@ Route::get('/project/{id}', function ($id) {
     return view('project.detail', ['id' => $id]);
 });
 
-Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
-    return view('dashboard.kemahasiswaan.lomba.buat');
-});
 

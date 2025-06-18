@@ -35,6 +35,7 @@ class LombaController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_lomba'    => 'required|string|max:255',
             'deskripsi'     => 'required|string',
+            'lokasi'     => 'required|in:online,offline',
             'tingkat'       => 'required|in:nasional,internasional,internal',
             'tanggal_akhir_registrasi' => 'required|date',
             'tanggal_mulai_lomba' => 'required|date|after_or_equal:tanggal_akhir_registrasi',
@@ -55,17 +56,32 @@ class LombaController extends Controller
 
         // Upload gambar
         $image = $request->file('foto_lomba');
-        $image_path = $image->store('assets/lomba', 'public');
+
+        // 1. Buat nama file yang unik untuk menghindari penimpaan file dengan nama yang sama.
+        //    Contoh: 1678886400.jpg
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+        // 2. Tentukan folder tujuan di dalam direktori 'public'.
+        //    helper public_path() akan memberikan path absolut ke folder public Anda.
+        $destinationPath = public_path('/images/lomba');
+
+        // 3. Pindahkan file yang di-upload ke folder tujuan dengan nama baru.
+        $image->move($destinationPath, $imageName);
+
+        // 4. Simpan path relatif dari folder public untuk disimpan ke database.
+        //    Hasilnya akan menjadi string seperti: 'images/lomba/1678886400.jpg'
+        $image_path = 'images/lomba/' . $imageName;
 
         // Dapatkan ID user yang sedang login (sebagai pembuat)
         // Pastikan route ini dilindungi oleh middleware 'auth:api' atau 'auth:sanctum'
         // $id_pembuat = auth()->id(); 
-        $id_pembuat = 1; 
-        
+        $id_pembuat = 1;
+
         // Buat lomba
         $lomba = Lomba::create([
             'nama_lomba'    => $request->nama_lomba,
             'deskripsi'     => $request->deskripsi,
+            'lokasi'        => $request->lokasi,
             'tingkat'       => $request->tingkat,
             'status'        => 'belum disetujui', // Status default saat dibuat
             'tanggal_akhir_registrasi' => $request->tanggal_akhir_registrasi,
@@ -75,7 +91,7 @@ class LombaController extends Controller
             'foto_lomba'    => $image_path,
             'id_pembuat'    => $id_pembuat,
         ]);
-        
+
         // Lampirkan tags ke lomba yang baru dibuat
         $lomba->tags()->attach($request->tags);
 
@@ -119,7 +135,7 @@ class LombaController extends Controller
         if (!$lomba) {
             return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
         }
-        
+
         // Opsi: Tambahkan otorisasi untuk memastikan hanya pembuat yang bisa mengedit
         // if ($lomba->id_pembuat !== auth()->id()) {
         //     return response()->json(['success' => false, 'message' => 'Tidak diizinkan'], 403);
@@ -128,6 +144,7 @@ class LombaController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_lomba'    => 'sometimes|required|string|max:255',
             'deskripsi'     => 'sometimes|required|string',
+            'lokasi'        => 'sometimes|in:online,offline',
             'tingkat'       => 'sometimes|required|in:nasional,internasional,internal',
             'status'        => 'sometimes|required|in:belum disetujui,disetujui,berlangsung,selesai',
             'tanggal_akhir_registrasi' => 'sometimes|required|date',
@@ -142,14 +159,14 @@ class LombaController extends Controller
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => 'Validasi Gagal', 'errors' => $validator->errors()], 422);
         }
-        
+
         // Mengambil data yang tervalidasi
         $validatedData = $validator->validated();
 
         if ($request->hasFile('foto_lomba')) {
             // Hapus gambar lama
             Storage::disk('public')->delete($lomba->foto_lomba);
-            
+
             // Upload gambar baru
             $image = $request->file('foto_lomba');
             $validatedData['foto_lomba'] = $image->store('assets/lomba', 'public');
@@ -189,7 +206,7 @@ class LombaController extends Controller
 
         // Hapus file gambar dari storage
         Storage::disk('public')->delete($lomba->foto_lomba);
-        
+
         // Hapus relasi di tabel pivot terlebih dahulu
         $lomba->tags()->detach();
 
