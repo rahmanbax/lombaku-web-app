@@ -20,10 +20,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->enum('role', ['mahasiswa', 'dosen', 'admin_lomba', 'admin_prodi', 'kemahasiswaan'])->default('mahasiswa');
 
-            // foreign key ke tabel program_studi
-            $table->unsignedBigInteger('id_program_studi')->nullable();
-            $table->foreign('id_program_studi')->references('id_program_studi')->on('program_studi');
-            
             $table->rememberToken();
 
             $table->timestamps();
