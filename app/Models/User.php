@@ -20,10 +20,7 @@ class User extends Authenticatable
         'nama',
         'email',
         'notelp',
-        'nim_atau_nip',
-        'instansi',
         'role',
-        'id_program_studi'
     ];
 
     protected $hidden = [
