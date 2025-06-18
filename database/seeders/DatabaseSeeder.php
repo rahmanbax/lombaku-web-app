@@ -58,7 +58,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '081100000001',
                 'email' => 'kemahasiswaan@kampus.ac.id',
                 'role' => 'kemahasiswaan',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [2] Role: admin_prodi
             [
@@ -70,7 +71,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '081100000002',
                 'email' => 'admin.if@kampus.ac.id',
                 'role' => 'admin_prodi',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [3] Role: admin_lomba
             [
@@ -82,7 +84,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '081100000003',
                 'email' => 'contact@lombapedia.com',
                 'role' => 'admin_lomba',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [4] Role: dosen
             [
@@ -94,7 +97,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '081211112222',
                 'email' => 'budi.s@kampus.ac.id',
                 'role' => 'dosen',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [5] Role: dosen
             [
@@ -106,7 +110,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '081233334444',
                 'email' => 'ana.l@kampus.ac.id',
                 'role' => 'dosen',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [6] Role: mahasiswa
             [
@@ -118,7 +123,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '085711112222',
                 'email' => 'andi.h@student.kampus.ac.id',
                 'role' => 'mahasiswa',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [7] Role: mahasiswa
             [
@@ -130,7 +136,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '085733334444',
                 'email' => 'siti.a@student.kampus.ac.id',
                 'role' => 'mahasiswa',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [8] Role: mahasiswa
             [
@@ -142,7 +149,8 @@ class DatabaseSeeder extends Seeder
                 'notelp' => '085755556666',
                 'email' => 'rina.w@student.kampus.ac.id',
                 'role' => 'mahasiswa',
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
         ]);
 
@@ -150,24 +158,45 @@ class DatabaseSeeder extends Seeder
         // 3. PROFILES (profil_mahasiswa, profil_dosen, profil_admin_lomba)
         // =================================================================
         DB::table('profil_mahasiswa')->insert([
-            ['id_user' => 6, 'nim' => 11223301, 'id_program_studi' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 7, 'nim' => 11223302, 'id_program_studi' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 8, 'nim' => 33221101, 'id_program_studi' => 3, 'created_at' => now(), 'updated_at' => now()],
+            // Profil untuk Andi
+            [
+                'id_user' => 6, // <-- PENTING: ID ini HARUS SAMA dengan id_user Andi
+                'nim' => 11223301,
+                'id_program_studi' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            // Profil untuk Siti
+            [
+                'id_user' => 7, // <-- PENTING: ID ini HARUS SAMA dengan id_user Siti
+                'nim' => 11223302,
+                'id_program_studi' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            // Profil untuk Rina
+            [
+                'id_user' => 8, // <-- PENTING: ID ini HARUS SAMA dengan id_user Rina
+                'nim' => 33221101,
+                'id_program_studi' => 3,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
         ]);
-        
+
         DB::table('profil_dosen')->insert([
             ['id_user' => 4, 'nip' => 99887701, 'id_program_studi' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['id_user' => 5, 'nip' => 99887702, 'id_program_studi' => 3, 'created_at' => now(), 'updated_at' => now()],
         ]);
-        
+
         // Asumsi: profil_admin_lomba memiliki relasi one-to-one dengan user ber-role admin_lomba
         DB::table('profil_admin_lomba')->insert([
             // Menambahkan foreign key 'id_user' untuk relasi yang logis
             // 'id_user' => 3, // Jika Anda menambahkan kolom id_user di migrasi profil_admin_lomba
-            'foto_profil' => 'profiles/default_org.png',
             'alamat' => 'Jl. Teknologi No. 1, Jakarta',
             'jenis_organisasi' => 'Perusahaan',
-            'created_at' => now(), 'updated_at' => now()
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
 
 
@@ -189,7 +218,8 @@ class DatabaseSeeder extends Seeder
                 'tanggal_selesai_lomba' => Carbon::now()->addDays(10),
                 'penyelenggara' => 'Tech Indonesia',
                 'id_pembuat' => 3, // Dibuat oleh admin_lomba
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [2] Lomba yang sudah selesai
             [
@@ -205,7 +235,8 @@ class DatabaseSeeder extends Seeder
                 'tanggal_selesai_lomba' => Carbon::now()->subMonths(2)->endOfMonth(),
                 'penyelenggara' => 'Creative Hub',
                 'id_pembuat' => 3, // Dibuat oleh admin_lomba
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // [3] Lomba yang akan datang dan belum disetujui
             [
@@ -221,7 +252,8 @@ class DatabaseSeeder extends Seeder
                 'tanggal_selesai_lomba' => Carbon::now()->addMonths(2),
                 'penyelenggara' => 'Global Business Association',
                 'id_pembuat' => 3, // Dibuat oleh admin_lomba
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
         ]);
 
@@ -246,7 +278,7 @@ class DatabaseSeeder extends Seeder
             ['id_tim' => 1, 'nama_tim' => 'Tim Koding Keren', 'created_at' => now(), 'updated_at' => now()],
             ['id_tim' => 2, 'nama_tim' => 'Tim Desain Ciamik', 'created_at' => now(), 'updated_at' => now()],
         ]);
-        
+
         DB::table('member_tim')->insert([
             // Tim 1: Andi dan Siti
             ['id_tim' => 1, 'id_mahasiswa' => 6, 'created_at' => now(), 'updated_at' => now()],
@@ -268,27 +300,30 @@ class DatabaseSeeder extends Seeder
                 'id_lomba' => 1,
                 'id_tim' => 1, // Daftar sebagai tim
                 'id_dosen' => 4, // Dibimbing Dosen Budi
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // Tim Desain Ciamik (diwakili Rina) mendaftar ke Lomba 2, dibimbing Dosen Ana
-             [
+            [
                 'link_pengumpulan' => 'https://figma.com/tim-desain-ciamik/uiux2023',
                 'status_verifikasi' => 'diterima',
                 'id_mahasiswa' => 8, // Pendaftar/Ketua Tim
                 'id_lomba' => 2,
                 'id_tim' => 2, // Daftar sebagai tim
                 'id_dosen' => 5, // Dibimbing Dosen Ana
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             // Mahasiswa Siti mendaftar Lomba 1 secara individu, tanpa pembimbing
-             [
+            [
                 'link_pengumpulan' => 'https://github.com/siti-aminah/hackathon-solo',
                 'status_verifikasi' => 'menunggu',
                 'id_mahasiswa' => 7, // Pendaftar
                 'id_lomba' => 1,
                 'id_tim' => null, // Daftar individu
                 'id_dosen' => null, // Tanpa pembimbing
-                'created_at' => now(), 'updated_at' => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ],
         ]);
     }

@@ -34,4 +34,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function profilMahasiswa()
+    {
+        return $this->hasOne(ProfilMahasiswa::class, 'id_user', 'id_user');
+    }
 }
