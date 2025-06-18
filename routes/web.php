@@ -5,11 +5,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Route utama
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
-Route::get('1', function () {
+Route::get('simpanlomba', function () {
+    return view('mahasiswa.simpanlomba');
+})->name('simpanlomba');
+Route::get('status', function () {
+    return view('mahasiswa.statuslomba');
+})->name('status');
+// Logout route
+Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+// Route::post('register', [AuthController::class, 'register'])->name('register.post');
+
+Route::get('login', function () {
     // Pastikan user sudah login
     if (!Auth::check()) {
         return redirect('/login');
@@ -27,8 +40,8 @@ Route::get('1', function () {
         'instansi' => session('instansi'),
     ];
     
-    return view('1', ['user' => $user]);
-})->name('dashboard');
+    return view('welcome', ['user' => $user]);
+})->name('welcome');
 
 // Rute untuk menampilkan form login (GET)
 Route::get('login', function () {
@@ -40,11 +53,18 @@ Route::post('login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('register', function () {
     return view('auth.register');
-});
+})->name('register'); 
 
-Route::get('/mahasiswa/profile', function () {
+Route::post('register', [AuthController::class, 'register'])->name('register.post');
+
+Route::get('profile', function () {
     return view('mahasiswa.profile');
-});
+})->name('profile'); 
+
+Route::get('detail', function () {
+    return view('mahasiswa.detaillomba');
+})->name('detail'); 
+
 
 Route::get('/dashboard/kemahasiswaan', function () {
     return view('dashboard.kemahasiswaan.index');
@@ -58,6 +78,3 @@ Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
     return view('dashboard.kemahasiswaan.lomba.buat');
 });
 
-// Logout route
-Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-Route::post('register', [AuthController::class, 'register'])->name('register.post');
