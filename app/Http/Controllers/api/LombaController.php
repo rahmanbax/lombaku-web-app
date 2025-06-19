@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lomba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Models\Lomba;
+use App\Models\RegistrasiLomba;
 
 class LombaController extends Controller
 {
@@ -229,6 +231,66 @@ class LombaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lomba Berhasil Dihapus'
+        ], 200);
+    }
+
+    public function getPendaftar($id)
+    {
+        // Cek apakah lomba ada
+        if (!Lomba::find($id)) {
+            return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
+        }
+
+        // Ambil semua data registrasi untuk lomba ini
+        // Eager load semua relasi yang dibutuhkan untuk ditampilkan di tabel
+        $registrations = RegistrasiLomba::where('id_lomba', $id)
+            ->with([
+                'mahasiswa.profilMahasiswa.programStudi', // Mahasiswa -> Profil -> Prodi
+                'tim',
+                'dosenPembimbing'
+            ])
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar pendaftar berhasil diambil',
+            'data' => $registrations
+        ], 200);
+    }
+
+    public function getStats()
+    {
+        // 1. Hitung total semua lomba
+        $totalLomba = Lomba::count();
+
+        // 2. Hitung total semua pendaftar
+        $totalPendaftar = RegistrasiLomba::count();
+
+        // 3. Hitung jumlah lomba berdasarkan status menggunakan satu query efisien
+        $statusCounts = DB::table('lomba')
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status'); // keyBy('status') mengubah koleksi menjadi array asosiatif
+
+        // 4. Siapkan data dengan nilai default 0 untuk semua status
+        $statusData = [
+            'belum_disetujui' => $statusCounts->get('belum disetujui')->total ?? 0,
+            // Status 'disetujui' kita anggap sebagai 'Belum dimulai' di frontend
+            'disetujui' => $statusCounts->get('disetujui')->total ?? 0,
+            'berlangsung' => $statusCounts->get('berlangsung')->total ?? 0,
+            'selesai' => $statusCounts->get('selesai')->total ?? 0,
+        ];
+
+        // 5. Gabungkan semua data ke dalam satu respons
+        return response()->json([
+            'success' => true,
+            'message' => 'Statistik berhasil diambil',
+            'data' => [
+                'total_lomba' => $totalLomba,
+                'total_pendaftar' => $totalPendaftar,
+                'status_counts' => $statusData,
+            ]
         ], 200);
     }
 }

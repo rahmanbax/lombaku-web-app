@@ -88,6 +88,9 @@ Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
 Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
     return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
 });
+Route::get('/dashboard/kemahasiswaan/lomba/edit/{id}', function ($id) {
+    return view('dashboard.kemahasiswaan.lomba.edit', ['id' => $id]);
+});
 
 Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
     return view('dashboard.kemahasiswaan.mahasiswa.index');

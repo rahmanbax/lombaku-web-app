@@ -73,9 +73,159 @@
             </div>
         </template>
 
-        <!-- Script dipanggil setelah semua HTML dimuat -->
-        <script src="/lombaDetail.js"></script>
+        <section class="lg:w-[1038px] mx-auto p-4 lg:px-0 mt-10">
+            <h2 class="text-2xl font-bold mb-4">Daftar Peserta</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nama Mahasiswa</th>
+                            <th scope="col" class="px-6 py-3">NIM</th>
+                            <th scope="col" class="px-6 py-3">Program Studi</th>
+                            <th scope="col" class="px-6 py-3">Nama Tim</th>
+                            <th scope="col" class="px-6 py-3">Status Verifikasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="peserta-table-body">
+                        <!-- Loading state -->
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                Memuat data peserta...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
     </main>
+
+    <!-- Script dipanggil setelah semua HTML dimuat -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Helper function untuk memformat tanggal
+            function formatDate(dateString) {
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                return new Date(dateString).toLocaleDateString('id-ID', options);
+            }
+
+            function capitalize(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            // --- Fungsi untuk merender detail lomba ---
+            function renderLombaDetails(lomba) {
+                const container = document.getElementById('lomba-detail-container');
+                const template = document.getElementById('lomba-detail-template');
+                const clone = template.content.cloneNode(true);
+
+                clone.getElementById('lomba-image').src = `/${lomba.foto_lomba}`;
+                clone.getElementById('lomba-nama').textContent = lomba.nama_lomba;
+                clone.getElementById('lomba-tingkat').textContent = lomba.tingkat;
+                clone.getElementById('lomba-lokasi').textContent = lomba.lokasi;
+                clone.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
+                clone.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
+                clone.getElementById('lomba-tanggal-mulai').textContent = formatDate(lomba.tanggal_mulai_lomba);
+                clone.getElementById('lomba-tanggal-selesai').textContent = formatDate(lomba.tanggal_selesai_lomba);
+                clone.getElementById('penyelenggara-nama').textContent = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui');
+                if (lomba.pembuat.foto_profile) {
+                    clone.getElementById('penyelenggara-foto').src = `/${lomba.pembuat.foto_profile}`;
+                }
+                clone.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
+
+                const tagsContainer = clone.getElementById('lomba-tags');
+                if (lomba.tags && lomba.tags.length > 0) {
+                    lomba.tags.forEach(tag => {
+                        const tagElement = document.createElement('span');
+                        tagElement.className = 'bg-blue-100 text-blue-500 py-1 px-2 rounded-md font-semibold text-sm';
+                        tagElement.textContent = tag.nama_tag;
+                        tagsContainer.appendChild(tagElement);
+                    });
+                } else {
+                    tagsContainer.innerHTML = '<p class="text-sm text-gray-500">Tidak ada tag.</p>';
+                }
+
+                container.innerHTML = '';
+                container.appendChild(clone);
+            }
+
+            // --- Fungsi untuk merender tabel peserta ---
+            function renderPesertaTable(registrations) {
+                const tableBody = document.getElementById('peserta-table-body');
+                tableBody.innerHTML = ''; // Hapus loading state
+
+                if (!registrations || registrations.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
+                    return;
+                }
+
+                registrations.forEach(reg => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-gray-50';
+
+                    const mahasiswa = reg.mahasiswa;
+                    const profil = mahasiswa.profil_mahasiswa;
+                    const prodi = profil ? profil.program_studi : null;
+
+                    const namaMahasiswa = mahasiswa ? mahasiswa.nama : 'Data tidak lengkap';
+                    const nim = profil ? profil.nim : '-';
+                    const namaProdi = prodi ? prodi.nama_program_studi : '-';
+                    const namaTim = reg.tim ? reg.tim.nama_tim : 'Individu';
+                    const statusVerifikasi = capitalize(reg.status_verifikasi);
+
+                    row.innerHTML = `
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${namaMahasiswa}</th>
+                    <td class="px-6 py-4">${nim}</td>
+                    <td class="px-6 py-4">${namaProdi}</td>
+                    <td class="px-6 py-4">${namaTim}</td>
+                    <td class="px-6 py-4">${statusVerifikasi}</td>
+                `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // --- Fungsi utama untuk mengambil semua data halaman ---
+            async function loadPageData() {
+                const pathParts = window.location.pathname.split('/');
+                const lombaId = pathParts[pathParts.length - 1];
+
+                if (!lombaId || isNaN(lombaId)) {
+                    document.getElementById('lomba-detail-container').innerHTML = `<p class="text-red-500">ID Lomba tidak valid.</p>`;
+                    return;
+                }
+
+                try {
+                    // Panggil kedua API secara bersamaan
+                    const [lombaResponse, pesertaResponse] = await Promise.all([
+                        axios.get(`/api/lomba/${lombaId}`),
+                        axios.get(`/api/lomba/${lombaId}/pendaftar`)
+                    ]);
+
+                    // Render setiap bagian dengan datanya masing-masing
+                    if (lombaResponse.data.success) {
+                        renderLombaDetails(lombaResponse.data.data);
+                    }
+                    if (pesertaResponse.data.success) {
+                        renderPesertaTable(pesertaResponse.data.data);
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching page data:', error);
+                    document.getElementById('lomba-detail-container').innerHTML = `<p class="text-red-500">Gagal memuat data halaman. Silakan coba lagi.</p>`;
+                    document.getElementById('peserta-table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Gagal memuat data peserta.</td></tr>`;
+                }
+            }
+
+            // Panggil fungsi utama saat halaman dimuat
+            loadPageData();
+        });
+    </script>
 </body>
 
 </html>

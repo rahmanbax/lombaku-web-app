@@ -18,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
+Route::get('/lomba/stats', [LombaController::class, 'getStats']);
+
 Route::apiResource('lomba', LombaController::class);
 Route::apiResource('tags', TagController::class)->only(['index']);
 Route::apiResource('mahasiswa', MahasiswaController::class);
