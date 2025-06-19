@@ -326,5 +326,117 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now()
             ],
         ]);
+
+        // =================================================================
+        // 8. TAHAP_LOMBA (BARU)
+        // =================================================================
+        DB::table('tahap_lomba')->insert([
+            // Tahapan untuk Lomba 1 (Hackathon)
+            ['id_tahap' => 1, 'id_lomba' => 1, 'nama_tahap' => 'Penyisihan', 'urutan' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['id_tahap' => 2, 'id_lomba' => 1, 'nama_tahap' => 'Final', 'urutan' => 2, 'created_at' => now(), 'updated_at' => now()],
+
+            // Tahapan untuk Lomba 2 (UI/UX) - cuma 1 tahap
+            ['id_tahap' => 3, 'id_lomba' => 2, 'nama_tahap' => 'Penilaian Karya', 'urutan' => 1, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+
+        // =================================================================
+        // 9. PENILAIAN_PESERTA (BARU)
+        // =================================================================
+        DB::table('penilaian_peserta')->insert([
+            // Penilaian untuk Lomba 1 (Hackathon), dinilai oleh admin_lomba (id_user=3)
+
+            // Tahap Penyisihan (id_tahap=1)
+            // - Peserta: Tim Koding Keren (id_registrasi_lomba=1)
+            ['id_registrasi_lomba' => 1, 'id_tahap' => 1, 'id_penilai' => 3, 'nilai' => 85, 'catatan' => 'Ide bagus, eksekusi perlu ditingkatkan.', 'created_at' => now(), 'updated_at' => now()],
+            // - Peserta: Siti Aminah (id_registrasi_lomba=3)
+            ['id_registrasi_lomba' => 3, 'id_tahap' => 1, 'id_penilai' => 3, 'nilai' => 90, 'catatan' => 'Konsep sangat matang dan inovatif.', 'created_at' => now(), 'updated_at' => now()],
+
+            // Tahap Final (id_tahap=2)
+            // - Peserta: Siti Aminah (id_registrasi_lomba=3) - Anggap saja dia lolos
+            ['id_registrasi_lomba' => 3, 'id_tahap' => 2, 'id_penilai' => 3, 'nilai' => 95, 'catatan' => 'Presentasi sangat meyakinkan dan produk berfungsi baik.', 'created_at' => now(), 'updated_at' => now()],
+
+            // Penilaian untuk Lomba 2 (UI/UX), dinilai oleh admin_lomba (id_user=3)
+            // Tahap Penilaian Karya (id_tahap=3)
+            // - Peserta: Tim Desain Ciamik (id_registrasi_lomba=2)
+            ['id_registrasi_lomba' => 2, 'id_tahap' => 3, 'id_penilai' => 3, 'nilai' => 88, 'catatan' => 'Desain visual menarik, namun ada beberapa isu UX pada alur pengguna.', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        // =================================================================
+        // 10. PRESTASI (BARU)
+        // =================================================================
+        DB::table('prestasi')->insert([
+
+            // --- Contoh Prestasi INTERNAL (dari Lomba di sistem) ---
+            // Dicatat oleh admin_lomba setelah Lomba 1 selesai, status langsung disetujui.
+            [
+                'id_user' => 7, // Mahasiswa Siti Aminah
+                'lomba_dari' => 'internal',
+                'id_lomba' => 1, // Berasal dari National Hackathon 2024
+                'nama_lomba_eksternal' => null,
+                'penyelenggara_eksternal' => null,
+                'tingkat' => 'nasional', // Diambil dari data lomba
+                'peringkat' => 'Juara 1',
+                'tanggal_diraih' => '2024-07-20', // Contoh tanggal pengumuman
+                'sertifikat_path' => 'sertifikat/internal/lomba-1-juara-1.pdf',
+                'status_verifikasi' => 'disetujui',
+                'id_verifikator' => 3, // Langsung diverifikasi oleh admin_lomba
+                'catatan_verifikasi' => 'Prestasi dicatat otomatis dari sistem.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_user' => 6, // Mahasiswa Andi Hermawan
+                'lomba_dari' => 'internal',
+                'id_lomba' => 1, // Berasal dari National Hackathon 2024
+                'nama_lomba_eksternal' => null,
+                'penyelenggara_eksternal' => null,
+                'tingkat' => 'nasional',
+                'peringkat' => 'Juara 2',
+                'tanggal_diraih' => '2024-07-20',
+                'sertifikat_path' => 'sertifikat/internal/lomba-1-juara-2.pdf',
+                'status_verifikasi' => 'disetujui',
+                'id_verifikator' => 3,
+                'catatan_verifikasi' => 'Prestasi dicatat otomatis dari sistem.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // --- Contoh Prestasi EKSTERNAL (di-upload oleh mahasiswa) ---
+            // Diunggah oleh Mahasiswa Rina (id_user=8), status menunggu verifikasi.
+            [
+                'id_user' => 8, // Mahasiswa Rina Wijayanti
+                'lomba_dari' => 'eksternal',
+                'id_lomba' => null, // Tidak ada ID lomba dari sistem
+                'nama_lomba_eksternal' => 'Gemastik XV - Cabang Desain Pengalaman Pengguna',
+                'penyelenggara_eksternal' => 'Pusat Prestasi Nasional (Puspresnas)',
+                'tingkat' => 'nasional',
+                'peringkat' => 'Medali Perunggu',
+                'tanggal_diraih' => '2023-11-15',
+                'sertifikat_path' => 'sertifikat/eksternal/rina-gemastik-xv.pdf',
+                'status_verifikasi' => 'menunggu',
+                'id_verifikator' => null, // Belum ada yang verifikasi
+                'catatan_verifikasi' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            // Contoh lain, diunggah oleh Mahasiswa Andi, sudah disetujui.
+            [
+                'id_user' => 6, // Mahasiswa Andi Hermawan
+                'lomba_dari' => 'eksternal',
+                'id_lomba' => null,
+                'nama_lomba_eksternal' => 'Imagine Cup 2023 Southeast Asia',
+                'penyelenggara_eksternal' => 'Microsoft',
+                'tingkat' => 'internasional',
+                'peringkat' => 'Finalis',
+                'tanggal_diraih' => '2023-05-22',
+                'sertifikat_path' => 'sertifikat/eksternal/andi-imagine-cup.pdf',
+                'status_verifikasi' => 'disetujui',
+                'id_verifikator' => 1, // Diverifikasi oleh Kemahasiswaan (id_user=1)
+                'catatan_verifikasi' => 'Sertifikat valid.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }

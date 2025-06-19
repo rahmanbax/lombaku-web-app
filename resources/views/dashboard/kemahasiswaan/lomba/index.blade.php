@@ -21,31 +21,30 @@
                 <h1 class="font-semibold">Lomba</h1>
                 <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
                     <h2 class="text-sm font-medium text-black/60">Terdaftar</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                    <p id="stats-total-lomba" class="text-2xl font-semibold mt-1">...</p>
                 </div>
                 <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
                     <h2 class="text-sm font-medium text-black/60">Mahasiswa Terdaftar</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
-
+                    <p id="stats-total-pendaftar" class="text-2xl font-semibold mt-1">...</p>
                 </div>
             </div>
             <div class="col-span-4 w-full flex flex-col gap-4">
                 <h1 class="font-semibold">Status</h1>
                 <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
                     <h2 class="text-sm font-medium text-black/60">Butuh Persetujuan</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                    <p id="stats-butuh-persetujuan" class="text-2xl font-semibold mt-1">...</p>
                 </div>
                 <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
                     <h2 class="text-sm font-medium text-black/60">Belum dimulai</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                    <p id="stats-belum-dimulai" class="text-2xl font-semibold mt-1">...</p>
                 </div>
                 <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
                     <h2 class="text-sm font-medium text-black/60">Sedang Berlangsung</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                    <p id="stats-berlangsung" class="text-2xl font-semibold mt-1">...</p>
                 </div>
                 <div class="bg-gray-100 w-full rounded-lg overflow-hidden p-3">
                     <h2 class="text-sm font-medium text-black/60">Selesai</h2>
-                    <p class="text-2xl font-semibold mt-1">10</p>
+                    <p id="stats-selesai" class="text-2xl font-semibold mt-1">...</p>
                 </div>
             </div>
             <div class="col-span-4 w-full flex flex-col gap-4">
@@ -73,7 +72,7 @@
 
             <div class="mt-4 overflow-x-auto">
                 <table class="lg:w-full rounded-lg overflow-hidden table-auto">
-                    <thead class="bg-gray-100">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-100">
                         <tr class="">
                             <th class="p-3 text-left font-medium">Nama Lomba</th>
                             <th class="p-3 text-left font-medium">Tingkat</th>
@@ -155,11 +154,11 @@
                     <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
                     <td class="p-3">${penyelenggaraNama}</td>
                     <td class="p-3">
-                        <div class="flex gap-2">
-                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Lihat</a>
+                        <div class="flex gap-2 justify-end">
+                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
                             <a href="/dashboard/kemahasiswaan/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>
                             ${lomba.status === 'belum disetujui' ? `
-                                <button data-id="${lomba.id_lomba}" class="delete-btn block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Hapus</button>
+                                <button data-id="${lomba.id_lomba}" class="delete-btn w-fit px-2 py-1 text-sm rounded-sm text-red-500 hover:bg-red-100 border border-red-500 cursor-pointer">Hapus</button>
                             ` : ''}
                         </div>
                     </td>
@@ -169,6 +168,39 @@
                 } catch (error) {
                     console.error("Error fetching data:", error);
                     tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-red-500">Gagal memuat data.</td></tr>`;
+                }
+            }
+
+            // Fungsi baru untuk mengambil dan menampilkan statistik
+            async function fetchDashboardStats() {
+                try {
+                    // LANGSUNG panggil endpoint statistik, tanpa ID
+                    const response = await axios.get('/api/lomba/stats');
+
+                    if (response.data.success) {
+                        const stats = response.data.data;
+
+                        // Isi data statistik
+                        document.getElementById('stats-total-lomba').textContent = stats.total_lomba;
+                        document.getElementById('stats-total-pendaftar').textContent = stats.total_pendaftar;
+
+                        // Isi data status
+                        document.getElementById('stats-butuh-persetujuan').textContent = stats.status_counts.belum_disetujui;
+                        document.getElementById('stats-belum-dimulai').textContent = stats.status_counts.disetujui;
+                        document.getElementById('stats-berlangsung').textContent = stats.status_counts.berlangsung;
+                        document.getElementById('stats-selesai').textContent = stats.status_counts.selesai;
+                    } else {
+                        // Jika API mengembalikan success: false
+                        throw new Error(response.data.message || 'Gagal mengambil statistik');
+                    }
+                } catch (error) {
+                    console.error('Error fetching dashboard stats:', error);
+                    // Tampilkan tanda strip jika gagal total
+                    const ids = ['stats-total-lomba', 'stats-total-pendaftar', 'stats-butuh-persetujuan', 'stats-belum-dimulai', 'stats-berlangsung', 'stats-selesai'];
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.textContent = '-';
+                    });
                 }
             }
 
@@ -232,6 +264,7 @@
 
             // Panggil fungsi utama saat halaman dimuat
             fetchAllLomba();
+            fetchDashboardStats();
         });
     </script>
 </body>
