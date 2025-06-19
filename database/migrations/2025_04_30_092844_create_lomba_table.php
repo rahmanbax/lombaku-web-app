@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('lomba', function (Blueprint $table) {
             $table->id('id_lomba');
+            $table->string('foto_lomba');
             $table->string('nama_lomba');
             $table->string('deskripsi');
-            $table->string('jenis');
-            $table->string('tingkat');
+            $table->enum('lokasi', ['online', 'offline'])->default('online');
+            $table->enum('tingkat', ['nasional', 'internasional', 'internal'])->default('nasional');
+            $table->enum('status', ['belum disetujui', 'disetujui', 'berlangsung', 'selesai'])->default('belum disetujui');
             $table->date('tanggal_akhir_registrasi');
             $table->date('tanggal_mulai_lomba');
             $table->date('tanggal_selesai_lomba');
+            $table->string('penyelenggara')->nullable();
+            
 
             // foreign key ke id_pembuat
             $table->unsignedBigInteger('id_pembuat');

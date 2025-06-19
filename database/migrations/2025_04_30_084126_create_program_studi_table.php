@@ -15,10 +15,6 @@ return new class extends Migration
             $table->id('id_program_studi');
             $table->string('nama_program_studi');
 
-            // foreign key ke tabel user
-            $table->unsignedBigInteger('id_fakultas');
-            $table->foreign('id_fakultas')->references('id_fakultas')->on('fakultas');
-
             $table->timestamps();
         });
     }

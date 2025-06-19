@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('registrasi_lomba', function (Blueprint $table) {
             $table->id('id_registrasi_lomba');
             $table->string('link_pengumpulan');
+            //status verifikasi
+            $table->enum('status_verifikasi', ['menunggu', 'diterima', 'ditolak'])->default('menunggu');
 
             // foreign key ke id mahasiswa
             $table->unsignedBigInteger('id_mahasiswa');
@@ -30,9 +32,7 @@ return new class extends Migration
             // foreign key ke id dosen untuk bimbingan
             $table->unsignedBigInteger('id_dosen')->nullable();
             $table->foreign('id_dosen')->references('id_user')->on('users');
-
-            
-
+          
             $table->timestamps();
         });
     }

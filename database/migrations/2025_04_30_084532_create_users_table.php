@@ -13,18 +13,15 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id('id_user');
+            $table->string('foto_profile')->nullable();
             $table->string('username')->unique();
             $table->string('password');
             $table->string('nama');
+            $table->string('notelp')->nullable();
             $table->string('email')->unique();
-            $table->integer('nim_atau_nip')->nullable();
-            $table->string('instansi')->nullable();
             $table->enum('role', ['mahasiswa', 'dosen', 'admin_lomba', 'admin_prodi', 'kemahasiswaan'])->default('mahasiswa');
-            $table->rememberToken();
 
-            // foreign key ke tabel program_studi
-            $table->unsignedBigInteger('id_program_studi')->nullable();
-            $table->foreign('id_program_studi')->references('id_program_studi')->on('program_studi');
+            $table->rememberToken();
 
             $table->timestamps();
         });

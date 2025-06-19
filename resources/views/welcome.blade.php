@@ -1,597 +1,323 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navbar Minimalis dengan Search Bar</title>
+    <title>Lombaku - Platform Lomba Terbaik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-     <x-public-header-nav />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        dark: '#1F2937',
+                    }
+                }
+            }
         }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
         body {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb;
         }
 
-        /* Navbar Minimalis */
-        .minimal-navbar {
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 1.2rem 2rem;
+        /* Navbar Styles */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background-color: #000;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-icon i {
-            color: white;
-            font-size: 18px;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #000;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-items {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .nav-link {
-            color: #333;
-            font-size: 1rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            position: relative;
-            padding: 0.5rem 0;
-        }
-
-        .nav-link:hover {
-            color: #000;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #000;
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #333;
-            font-size: 1rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 0.5rem 0;
-        }
-
-        .dropdown-icon {
-            font-size: 0.8rem;
+        .logo-container {
             transition: transform 0.3s ease;
         }
 
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+
+        /* Dropdown Styles */
         .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            min-width: 200px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border-radius: 8px;
-            padding: 0.5rem 0;
-            margin-top: 0.5rem;
             opacity: 0;
             visibility: hidden;
             transform: translateY(10px);
             transition: all 0.3s ease;
-            z-index: 100;
+            display: block;
+            /* Always show but control with opacity/visibility */
         }
 
-        .dropdown:hover .dropdown-menu {
+        .dropdown.active .dropdown-menu {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
 
-        .dropdown:hover .dropdown-icon {
-            transform: rotate(180deg);
-        }
-
         .dropdown-item {
-            display: block;
-            padding: 0.7rem 1.5rem;
-            color: #333;
-            text-decoration: none;
-            font-weight: 500;
             transition: all 0.2s ease;
         }
 
         .dropdown-item:hover {
-            background-color: #f5f5f5;
-            color: #000;
+            background-color: #f8fafc;
+            padding-left: 1.25rem;
         }
 
-        .login-btn {
-            background-color: #000;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 0.7rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        /* Mobile Menu */
+        .nav-items {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
         }
 
-        .login-btn:hover {
-            background-color: #333;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        .nav-items.active {
+            max-height: 500px;
         }
 
-        .hamburger {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #000;
-        }
-
-        /* Hero Section */
-        .hero {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem 1rem;
-            text-align: center;
-            background-color: white;
-            margin: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
-        }
-
-        .hero h1 {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: #000;
-            margin-bottom: 1.5rem;
-            max-width: 700px;
-            line-height: 1.2;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            color: #555;
-            max-width: 600px;
-            line-height: 1.7;
-            margin-bottom: 2rem;
-        }
-
-        .divider {
-            height: 1px;
-            background: linear-gradient(to right, transparent, #ddd, transparent);
-            margin: 3rem auto;
-            width: 80%;
-            max-width: 500px;
-        }
-
-        /* Search Bar Styles */
-        .search-container {
-            position: relative;
-            max-width: 650px;
-            width: 100%;
-            margin: 0 auto 2rem;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 16px 25px;
-            font-size: 1.1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 60px;
-            outline: none;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            padding-right: 70px;
-        }
-
-        .search-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
-        }
-
-        .search-button {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 45px;
-            height: 45px;
-            background: #2c3e50;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-button:hover {
-            background: #3498db;
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .search-button i {
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .feature-list {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: 500px;
-            margin: 0 auto;
-            gap: 12px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #555;
-            font-size: 1.05rem;
-        }
-
-        .feature-item i {
-            color: #000;
-            font-size: 1.1rem;
-        }
-
-        /* Footer Styles */
-        .footer {
-            background-color: #000;
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto 2rem;
-            padding: 0 1rem;
-        }
-
-        .footer-text {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            line-height: 1.5;
-        }
-
-        .admin-btn {
-            background-color: white;
-            color: #000;
-            border: none;
-            border-radius: 6px;
-            padding: 1rem 2.5rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-        }
-
-        .admin-btn:hover {
-            background-color: #f0f0f0;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.25);
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1.5rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .copyright {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
+        @media (min-width: 768px) {
+            .nav-items {
+                max-height: none;
+                overflow: visible;
+            }
         }
 
         /* Card Styles */
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
         .card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-image {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-        .card-date {
-            padding: 0.5rem 1.5rem;
-            color: #777;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .card-content {
-            padding: 1rem 1.5rem 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: #000;
-        }
-
-        .card-description {
-            color: #555;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 1.25rem;
-        }
-
-        .card-button {
-            display: inline-block;
-            background-color: #000;
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
-
-        .card-button:hover {
-            background-color: #333;
-        }
-
-        /* Responsive Cards */
-        @media (max-width: 768px) {
-            .card-container {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-            }
-
-            .card-image {
-                height: 200px;
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hamburger {
-                display: block;
-            }
-
-            .nav-items {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 280px;
-                height: 100vh;
-                background: white;
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 2rem;
-                gap: 1.5rem;
-                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
-                transition: right 0.4s ease;
-                z-index: 1000;
-            }
-
-            .nav-items.active {
-                right: 0;
-            }
-
-            .dropdown-menu {
-                position: static;
-                box-shadow: none;
-                margin: 0.5rem 0 0 1rem;
-                display: none;
-            }
-
-            .dropdown.active .dropdown-menu {
-                display: block;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-            }
-
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-
-            .search-input {
-                padding: 14px 20px;
-                padding-right: 60px;
-            }
-
-            .search-button {
-                width: 40px;
-                height: 40px;
-            }
-
-            .footer {
-                padding: 2rem 1rem;
-            }
-
-            .footer-text {
-                font-size: 1.2rem;
-            }
-
-            .admin-btn {
-                padding: 0.9rem 2rem;
-                font-size: 1rem;
-            }
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
     </style>
 </head>
 
-<body>
-
+<body class="bg-gray-50">
+    <x-public-header-nav />
 
     <!-- Hero Section -->
-    <div class="hero">
-        <h1>Cari Lomba di Lombaku!</h1>
-        <p>Update terus info terkini, dari kampus sampai internasional semuanya ada disini</p>
-
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Cari lomba, kategori, atau penyelenggara...">
-            <button class="search-button">
-                <i class="fas fa-search"></i>
-            </button>
+    <div class="container mx-auto px-4 py-8 md:py-16">
+        <div class="max-w-3xl mx-auto text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Cari Lomba di Lombaku!</h1>
+            <p class="text-gray-600 text-lg">Update terus info terkini, dari kampus sampai internasional semuanya ada disini</p>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="card-container">
-            <div class="card">
-                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Desain Minimalis" class="card-image">
-                <div class="card-date">15 Juni 2025</div>
-                <div class="card-content">
-                    <h3 class="card-title">Desain Minimalis</h3>
-                    <p class="card-description">Tampilan elegan dengan palet warna hitam-putih yang modern dan profesional.</p>
-                    <a href="#" class="card-button">Lihat Detail</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="UI Modern" class="card-image">
-                <div class="card-date">10 Juni 2025</div>
-                <div class="card-content">
-                    <h3 class="card-title">UI Modern</h3>
-                    <p class="card-description">Dropdown yang disederhanakan untuk pengalaman pengguna yang lebih baik.</p>
-                    <a href="#" class="card-button">Lihat Detail</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Efek Interaktif" class="card-image">
-                <div class="card-date">5 Juni 2025</div>
-                <div class="card-content">
-                    <h3 class="card-title">Efek Interaktif</h3>
-                    <p class="card-description">Transisi halus dan efek hover yang elegan untuk interaksi yang menyenangkan.</p>
-                    <a href="#" class="card-button">Lihat Detail</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Responsive Design" class="card-image">
-                <div class="card-date">1 Juni 2025</div>
-                <div class="card-content">
-                    <h3 class="card-title">Responsive Design</h3>
-                    <p class="card-description">Tampilan optimal di semua perangkat, dari desktop hingga mobile.</p>
-                    <a href="#" class="card-button">Lihat Detail</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="{{ Storage::url('images/Lomba_Storytelling.png') }}" alt="Search Terintegrasi" class="card-image">
-                <div class="card-date">25 Mei 2025</div>
-                <div class="card-content">
-                    <h3 class="card-title">Search Terintegrasi</h3>
-                    <p class="card-description">Fitur pencarian yang terintegrasi dengan baik untuk kemudahan navigasi.</p>
-                    <a href="#" class="card-button">Lihat Detail</a>
-                </div>
+        <div class="max-w-2xl mx-auto mb-16">
+            <div class="flex bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden">
+                <input
+                    type="text"
+                    class="search-input flex-grow px-6 py-4 focus:outline-none"
+                    placeholder="Cari lomba, kategori, atau penyelenggara...">
+                <button class="search-button bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 transition-colors">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
         </div>
 
+        <div class="border-b border-gray-200 my-12"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Card 1 -->
+            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="relative">
+                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
+                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
+                        15 Juni 2025
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Desain Minimalis</h3>
+                    <p class="text-gray-600 mb-4">Tampilan elegan dengan palet warna hitam-putih yang modern dan profesional.</p>
+                    <a href="{{ route('detail') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="relative">
+                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
+                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
+                        10 Juni 2025
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">UI Modern</h3>
+                    <p class="text-gray-600 mb-4">Dropdown yang disederhanakan untuk pengalaman pengguna yang lebih baik.</p>
+                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="relative">
+                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
+                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
+                        5 Juni 2025
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Efek Interaktif</h3>
+                    <p class="text-gray-600 mb-4">Transisi halus dan efek hover yang elegan untuk interaksi yang menyenangkan.</p>
+                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="relative">
+                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
+                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
+                        1 Juni 2025
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Responsive Design</h3>
+                    <p class="text-gray-600 mb-4">Tampilan optimal di semua perangkat, dari desktop hingga mobile.</p>
+                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="relative">
+                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
+                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
+                        25 Mei 2025
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Search Terintegrasi</h3>
+                    <p class="text-gray-600 mb-4">Fitur pencarian yang terintegrasi dengan baik untuk kemudahan navigasi.</p>
+                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-      <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p class="footer-text">Butuh mahasiswa untuk mahasiswa potensial untuk mengikuti lomba anda?</p>
-            <button class="admin-btn">Daftar sebagai Admin Lomba</button>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+                <button class="admin-btn bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                    Daftar sebagai Admin Lomba
+                </button>
+            </div>
         </div>
-        <div class="footer-bottom">
-            <p class="copyright">lombaku@2025</p>
+        <div class="bg-gray-900 py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navItems = document.getElementById('navItems');
+
+        hamburger.addEventListener('click', () => {
+            navItems.classList.toggle('active');
+        });
+
+        // Dropdown toggle - Improved version
+        const dropdowns = document.querySelectorAll('.dropdown');
+
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+
+            // Click handler
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Close all other dropdowns first
+                dropdowns.forEach(other => {
+                    if (other !== dropdown) {
+                        other.classList.remove('active');
+                    }
+                });
+
+                // Toggle current dropdown
+                dropdown.classList.toggle('active');
+            });
+
+            // Keyboard accessibility
+            toggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                } else if (e.key === 'Escape' && dropdown.classList.contains('active')) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // Close dropdowns on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // Search functionality
+        const searchButton = document.querySelector('.search-button');
+        const searchInput = document.querySelector('.search-input');
+
+        searchButton.addEventListener('click', function() {
+            if (searchInput.value.trim() !== '') {
+                alert(`Anda mencari: "${searchInput.value}"`);
+                // Di aplikasi nyata, ini akan mengirimkan permintaan pencarian
+            } else {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (searchInput.value.trim() !== '') {
+                    alert(`Anda mencari: "${searchInput.value}"`);
+                } else {
+                    searchInput.focus();
+                }
+            }
+        });
+
+        // Admin button functionality
+        const adminButton = document.querySelector('.admin-btn');
+        adminButton.addEventListener('click', function() {
+            alert('Fitur pendaftaran admin lomba akan segera tersedia!');
+            // Di aplikasi nyata, ini akan mengarahkan ke halaman pendaftaran admin
+        });
+    </script>
 </body>
 
 </html>
