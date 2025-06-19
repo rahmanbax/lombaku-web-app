@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Lomba;
 use App\Models\RegistrasiLomba;
 
@@ -16,31 +17,35 @@ class LombaController extends Controller
      * Menampilkan semua data lomba.
      * GET /api/lomba
      */
-    public function index(Request $request)
+  public function index(Request $request)
     {
-        // Mulai query builder
-        $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
+        // Mulai query builder dengan eager loading
+        $query = Lomba::with(['tags'])->latest();
 
-        // Cek jika ada parameter 'search' di URL
+        // 1. Fungsionalitas Pencarian (Search)
         if ($request->has('search')) {
-            $searchTerm = $request->query('search');
-
-            // Tambahkan kondisi WHERE untuk memfilter berdasarkan kata kunci
-            $query->where(function ($subQuery) use ($searchTerm) {
-                $subQuery->where('nama_lomba', 'like', '%' . $searchTerm . '%');
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('nama_lomba', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
             });
         }
+        
+        // 2. Fungsionalitas Filter
+        if ($request->has('tingkat')) {
+            $query->where('tingkat', $request->tingkat);
+        }
+        if ($request->has('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+        
+        // 3. Paginasi
+        // Ambil data dengan paginasi (misalnya, 9 item per halaman)
+        $lombas = $query->paginate(9)->withQueryString();
 
-        // Eksekusi query dengan urutan terbaru
-        $lombas = $query->latest()->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Daftar Lomba Berhasil Diambil',
-            'data' => $lombas
-        ], 200);
+        return response()->json($lombas, 200);
     }
-
     /**
      * Menyimpan lomba baru ke database.
      * POST /api/lomba
@@ -121,7 +126,7 @@ class LombaController extends Controller
      * Menampilkan satu data lomba spesifik.
      * GET /api/lomba/{id}
      */
-    public function show($id)
+   public function show($id)
     {
         $lomba = Lomba::with(['tags', 'pembuat'])->find($id);
 
@@ -132,6 +137,19 @@ class LombaController extends Controller
             ], 404);
         }
 
+        // --- INI BAGIAN YANG DIPERBAIKI ---
+        $isBookmarked = false;
+        // Sekarang kita gunakan Auth::guard('sanctum')->check() untuk secara eksplisit
+        // memeriksa apakah request API ini membawa token otentikasi yang valid.
+        if (Auth::guard('sanctum')->check()) {
+            // Kode ini hanya akan berjalan jika user login DAN request API-nya terotentikasi.
+            $user = Auth::guard('sanctum')->user();
+            $isBookmarked = $user->bookmarkedLombas()->where('lomba.id_lomba', $id)->exists();
+        }
+
+        // Tambahkan properti baru ke objek lomba
+        $lomba->is_bookmarked = $isBookmarked;
+        
         return response()->json([
             'success' => true,
             'message' => 'Detail Lomba Ditemukan',

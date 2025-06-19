@@ -93,81 +93,91 @@
 
  <body class="bg-gray-50">
      <!-- Navbar -->
-     <nav class="navbar py-3 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
-         <div class="container mx-auto flex justify-between items-center">
-             <div class="flex items-center space-x-2 logo-container">
-                 <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-lg shadow-md">
-                     <i class="fas fa-trophy text-lg"></i>
-                 </div>
-                 <span class="text-xl font-bold text-gray-800">Lombaku</span>
-             </div>
+   <!-- Navbar -->
+    <nav class="navbar py-3 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ route('home') }}" class="flex items-center space-x-2 logo-container">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-lg shadow-md">
+                    <i class="fas fa-trophy text-lg"></i>
+                </div>
+                <span class="text-xl font-bold text-gray-800">Lombaku</span>
+            </a>
 
-             <button class="md:hidden text-gray-600 focus:outline-none" id="hamburger">
-                 <i class="fas fa-bars text-xl"></i>
-             </button>
+            <button class="md:hidden text-gray-600 focus:outline-none" id="hamburger">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
 
-             <div class="nav-items md:flex md:items-center md:space-x-8" id="navItems">
-                 <a href="{{ route('home') }}" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent hover:border-blue-600">
-                     Beranda
-                 </a>
-                 <a href="{{ route('lombaterkini') }}" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent hover:border-blue-600">
-                     Lomba Terkini
-                 </a>
-                 <!-- Dropdown Kategori -->
-                 <div class="dropdown relative my-2 md:my-0">
-                     <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
-                         <span>Kategori</span>
-                         <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
-                     </button>
-                     <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
-                         <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Akademik</a>
-                         <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Seni & Desain</a>
-                         <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Teknologi</a>
-                         <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Olahraga</a>
-                         <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Bisnis</a>
-                     </div>
-                 </div>
+            <div class="nav-items md:flex md:items-center md:space-x-8" id="navItems">
+                <a href="{{ route('home') }}" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent hover:border-blue-600">
+                    Beranda
+                </a>
+                <a href="{{ route('lombaterkini') }}" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent hover:border-blue-600">
+                    Lomba Terkini
+                </a>
+                <div class="dropdown relative my-2 md:my-0">
+                    <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
+                        <span>Kategori</span>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                    </button>
+                    <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
+                        {{-- Loop melalui variabel $categories yang dikirim oleh View Composer --}}
+                        @forelse ($categories as $category)
+                            {{-- Arahkan link ke halaman lombaterkini dengan parameter query tag --}}
+                            <a href="{{ route('lombaterkini') }}?tag={{ urlencode($category->nama_tag) }}" class="dropdown-item block px-4 py-2 text-gray-700">
+                                {{ $category->nama_tag }}
+                            </a>
+                        @empty
+                            {{-- Tampilkan ini jika tidak ada tag di database --}}
+                            <span class="dropdown-item block px-4 py-2 text-gray-400">Tidak ada kategori</span>
+                        @endforelse
+                    </div>
+                </div>
+               
+                @auth
+                <!-- Dropdown Kegiatan Saya -->
+                <div class="dropdown relative my-2 md:my-0">
+                    <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
+                        <span>Kegiatan Saya</span>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                    </button>
+                    <div class="dropdown-menu absolute left-0 mt-2 w-56 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
+                        <a href="{{ route('status')}}" class="dropdown-item block px-4 py-2 text-gray-700">Riwayat Kegiatan</a>
+                        <a href="{{ route('simpanlomba') }}" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Disimpan</a>
+                        <a href="{{ route('rekognisi.create') }}" class="dropdown-item block px-4 py-2 text-gray-700">Ajukan Rekognisi Prestasi</a>
+                    </div>
+                </div>
 
-                 <!-- Dropdown Kegiatan Saya -->
-                 <div class="dropdown relative my-2 md:my-0">
-                     <button class="dropdown-toggle flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
-                         <span>Kegiatan Saya</span>
-                         <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
-                     </button>
-                     <div class="dropdown-menu absolute left-0 mt-2 w-56 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
-                         <a href="{{ route('status') }}" class="dropdown-item block px-4 py-2 text-gray-700">Status Lomba yang Diikuti</a>
-                         <a href="{{ route('simpanlomba') }}" class="dropdown-item block px-4 py-2 text-gray-700">Favorit</a>
-                     </div>
-                 </div>
-
-                 <!-- Bagian login/logout -->
-                 @auth
-                 <div class="dropdown relative my-2 md:my-0">
-                     <button class="dropdown-toggle flex items-center space-x-2 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
-                         <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-                             {{ substr(Auth::user()->nama, 0, 1) }}
-                         </div>
-                         <span>{{ Auth::user()->nama }}</span>
-                         <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
-                     </button>
-                     <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
-                         <a href="{{ route('profile') }}" class="dropdown-item block px-4 py-2 text-gray-700">Profile</a>
-                         <form action="{{ route('logout') }}" method="POST" id="logout-form">
-                             @csrf
-                             <button type="button" onclick="if(confirm('Apakah Anda yakin ingin keluar?')){this.form.submit()}" class="dropdown-item block w-full text-left px-4 py-2 text-gray-700">
-                                 <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                             </button>
-                         </form>
-                     </div>
-                 </div>
-                 @else
-                 <a href="{{ route('login') }}" class="mt-2 md:mt-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg">
-                     Masuk
-                 </a>
-                 @endauth
-             </div>
-         </div>
-     </nav>
+                <!-- Dropdown User Profile -->
+                <div class="dropdown relative my-2 md:my-0">
+                    <button class="dropdown-toggle flex items-center space-x-2 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                            {{ substr(Auth::user()->nama, 0, 1) }}
+                        </div>
+                        <span class="hidden lg:block">{{ Str::limit(Auth::user()->nama, 10) }}</span>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                    </button>
+                    <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl py-2 z-50 border border-gray-100">
+                        <div class="px-4 py-2 border-b">
+                            <p class="font-semibold text-gray-800">{{ Auth::user()->nama }}</p>
+                            <p class="text-sm text-gray-500">{{ Auth::user()->email }}</p>
+                        </div>
+                        <a href="{{ route('profile') }}" class="dropdown-item block px-4 py-2 text-gray-700 mt-1">Profil Saya</a>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item block w-full text-left px-4 py-2 text-red-600">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @else
+                <a href="{{ route('login') }}" class="mt-2 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-all shadow-md hover:shadow-lg">
+                    Masuk
+                </a>
+                @endauth
+            </div>
+        </div>
+    </nav>
 
      <script>
          // Mobile menu toggle

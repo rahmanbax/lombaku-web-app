@@ -21,11 +21,17 @@
             }
         }
     </script>
+    <style>
+        .card-lomba:hover .lomba-image {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 font-sans">
-   
- <x-public-header-nav />
+
+    <x-public-header-nav />
+
     <!-- Hero Section -->
     <div class="container mx-auto px-4 py-8 md:py-16">
         <div class="max-w-3xl mx-auto text-center mb-10">
@@ -47,55 +53,54 @@
 
         <div class="border-b border-gray-200 my-12"></div>
 
-        <!-- Lomba Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($lombas as $lomba)
-            <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <img class="w-full h-48 object-cover" src="{{ asset($lomba->foto_lomba) }}" alt="Foto Lomba">
-                
-                <div class="p-6">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                                {{ $lomba->tingkat }}
-                            </span>
-                            <span class="inline-block ml-2 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                                {{ $lomba->lokasi }}
-                            </span>
+        <section id="lomba-terbaru" class="container mx-auto px-4 py-8">
+            <h2 class="text-3xl font-bold text-center text-dark mb-10">Lomba Terbaru Untukmu</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                @forelse ($lombas as $lomba)
+                    <div class="card-lomba bg-white rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:-translate-y-2">
+                        <div class="relative overflow-hidden">
+                            <img src="{{ asset($lomba->foto_lomba) }}" alt="{{ $lomba->nama_lomba }}" class="lomba-image w-full h-48 object-cover transition-transform duration-300">
+                            <div class="absolute top-2 left-2 flex flex-wrap gap-1">
+                                @foreach ($lomba->tags->take(2) as $tag)
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">{{ $tag->nama_tag }}</span>
+                                @endforeach
+                            </div>
                         </div>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
-                            {{ $lomba->status }}
-                        </span>
-                    </div>
-                    
-                    <h2 class="mt-4 text-xl font-bold text-gray-900">{{ $lomba->nama_lomba }}</h2>
-                    
-                    <p class="mt-2 text-gray-600 line-clamp-2">
-                        {{ $lomba->deskripsi }}
-                    </p>
-                    
-                    <div class="mt-4 grid grid-cols-2 gap-2">
-                        <div class="flex items-center text-sm text-gray-500">
-                            <i class="far fa-calendar-alt mr-2"></i>
-                            <span>Akhir: {{ $lomba->tanggal_akhir_registrasi }}</span>
-                        </div>
-                        <div class="flex items-center text-sm text-gray-500">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            <span>{{ $lomba->penyelenggara }}</span>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-dark truncate" title="{{ $lomba->nama_lomba }}">
+                                {{ Str::limit($lomba->nama_lomba, 45) }}
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1 capitalize">{{ $lomba->penyelenggara ?: 'Penyelenggara tidak diketahui' }}</p>
+                            
+                            <div class="flex items-center text-gray-500 text-sm mt-4">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                <span>Pendaftaran s/d {{ \Carbon\Carbon::parse($lomba->tanggal_akhir_registrasi)->translatedFormat('d F Y') }}</span>
+                            </div>
+
+                            <a href="{{ route('lomba.show', ['id' => $lomba->id_lomba]) }}" class="mt-5 block w-full bg-blue-600 text-white text-center font-semibold py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Lihat Detail
+                            </a>
                         </div>
                     </div>
-                    
-                    <div class="mt-6 flex justify-between items-center">               
-                        <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                            Lihat Detail <i class="fas fa-arrow-right ml-1 text-sm"></i>
-                        </a>
+                @empty
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                        <p class="text-gray-500 text-lg">Saat ini belum ada lomba yang tersedia.</p>
                     </div>
-                </div>
+                @endforelse
+
             </div>
-            @endforeach
-        </div>
+            
+            <!-- == BAGIAN BARU UNTUK LINK HALAMAN == -->
+            <div class="mt-12">
+                {{ $lombas->links() }}
+            </div>
+            <!-- ==================================== -->
+        </section>
     </div>
 
+    
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
@@ -112,78 +117,5 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Mobile menu toggle
-        const hamburger = document.getElementById('hamburger');
-        const navItems = document.getElementById('navItems');
-
-        hamburger.addEventListener('click', () => {
-            navItems.classList.toggle('hidden');
-            navItems.classList.toggle('flex');
-            navItems.classList.toggle('flex-col');
-            navItems.classList.toggle('absolute');
-            navItems.classList.toggle('top-16');
-            navItems.classList.toggle('left-0');
-            navItems.classList.toggle('w-full');
-            navItems.classList.toggle('bg-white');
-            navItems.classList.toggle('p-4');
-            navItems.classList.toggle('space-y-4');
-            navItems.classList.toggle('shadow-md');
-        });
-
-        // Dropdown toggle
-        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-            toggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dropdown = toggle.closest('.dropdown');
-                const menu = dropdown.querySelector('.dropdown-menu');
-                
-                menu.classList.toggle('opacity-0');
-                menu.classList.toggle('invisible');
-                menu.classList.toggle('translate-y-2');
-            });
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                if (!menu.classList.contains('opacity-0')) {
-                    menu.classList.add('opacity-0', 'invisible', 'translate-y-2');
-                }
-            });
-        });
-
-        // Search functionality
-        const searchButton = document.querySelector('.search-button');
-        const searchInput = document.querySelector('.search-input');
-
-        searchButton.addEventListener('click', function() {
-            if (searchInput.value.trim() !== '') {
-                alert(`Anda mencari: "${searchInput.value}"`);
-            } else {
-                searchInput.focus();
-            }
-        });
-
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                if (searchInput.value.trim() !== '') {
-                    alert(`Anda mencari: "${searchInput.value}"`);
-                } else {
-                    searchInput.focus();
-                }
-            }
-        });
-
-        // Admin button functionality
-        const adminButton = document.querySelector('.admin-btn');
-        if (adminButton) {
-            adminButton.addEventListener('click', function() {
-                alert('Fitur pendaftaran admin lomba akan segera tersedia!');
-            });
-        }
-    </script>
 </body>
-
 </html>
