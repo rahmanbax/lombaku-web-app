@@ -3,18 +3,26 @@
 use App\Http\Controllers\api\AuthController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Models\Lomba;
 
-// Route utama
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+    // Fetch the data from the Lomba model
+    $lombas = Lomba::all();  // Fetching all lombas
 
+    return view('welcome', ['lombas' => $lombas]);  // Passing the lombas to the view
+})->name('home');
+Route::get('lombaterkini', function () {
+    // Fetch the data from the Lomba model
+    $lombas = Lomba::all();  // Fetching all lombas
+
+    return view('mahasiswa.lombaterkini', ['lombas' => $lombas]);  // Passing the lombas to the view
+})->name('lombaterkini');
 Route::get('simpanlomba', function () {
     return view('mahasiswa.simpanlomba');
 })->name('simpanlomba');
+// Route::get('lombaterkini', function () {
+//     return view('mahasiswa.lombaterkini');
+// })->name('lombaterkini');
 Route::get('status', function () {
     return view('mahasiswa.statuslomba');
 })->name('status');
@@ -27,7 +35,6 @@ Route::get('login', function () {
     if (!Auth::check()) {
         return redirect('/login');
     }
-
     // Ambil data user dari session
     $user = [
         'id' => session('user_id'),
