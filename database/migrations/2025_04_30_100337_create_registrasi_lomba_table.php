@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('registrasi_lomba', function (Blueprint $table) {
             $table->id('id_registrasi_lomba');
+            $table->string('deskripsi_pengumpulan');
             $table->string('link_pengumpulan');
             //status verifikasi
             $table->enum('status_verifikasi', ['menunggu', 'diterima', 'ditolak'])->default('menunggu');

@@ -18,12 +18,13 @@ return new class extends Migration
             $table->string('deskripsi');
             $table->enum('lokasi', ['online', 'offline'])->default('online');
             $table->enum('tingkat', ['nasional', 'internasional', 'internal'])->default('nasional');
-            $table->enum('status', ['belum disetujui', 'disetujui', 'berlangsung', 'selesai'])->default('belum disetujui');
+            $table->enum('status', ['belum disetujui', 'ditolak', 'disetujui', 'berlangsung', 'selesai'])->default('belum disetujui');
+            $table->string('alasan_penolakan')->nullable();
             $table->date('tanggal_akhir_registrasi');
             $table->date('tanggal_mulai_lomba');
             $table->date('tanggal_selesai_lomba');
             $table->string('penyelenggara')->nullable();
-            
+
 
             // foreign key ke id_pembuat
             $table->unsignedBigInteger('id_pembuat');

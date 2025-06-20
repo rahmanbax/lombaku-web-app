@@ -60,6 +60,12 @@
                     </select>
                 </div>
 
+                <!-- penyelenggara -->
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="penyelenggara" class="text-black/60 font-semibold">Penyelenggara</label>
+                    <input type="text" name="penyelenggara" id="penyelenggara" placeholder="Masukkan Nama Penyelenggara" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+
                 <!-- DIUBAH: name dari 'tingkatan' menjadi 'tingkat' -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="tingkat" class="text-black/60 font-semibold">Tingkat</label>
@@ -153,10 +159,6 @@
 
                     try {
                         const response = await axios.post("/api/lomba", formData, {
-                            // headers: {
-                            //     // 'Content-Type': 'multipart/form-data' akan diatur otomatis oleh Axios saat menggunakan FormData
-                            //     Authorization: `Bearer ${token}`,
-                            // },
                         });
 
                         if (response.data.success) {
