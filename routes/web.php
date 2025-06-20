@@ -91,3 +91,14 @@ Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
 Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
     return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
 });
+
+// route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
+Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
+    $path = storage_path('app/public/sertifikat_prestasi/' . $filename);
+    
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+})->name('sertifikat.prestasi');

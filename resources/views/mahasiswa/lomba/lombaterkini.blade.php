@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lomba Terkini - Lombaku</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body class="bg-gray-50 font-sans">
@@ -151,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        lombas.forEach(lomba => {
+        lombas.data.forEach(lomba => {
             const card = template.content.cloneNode(true);
             card.querySelector('.lomba-image').src = `{{ asset('') }}${lomba.foto_lomba}`;
             card.querySelector('.lomba-image').alt = lomba.nama_lomba;

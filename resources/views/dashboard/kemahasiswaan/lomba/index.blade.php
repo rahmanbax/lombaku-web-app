@@ -136,7 +136,7 @@
                         return;
                     }
 
-                    lombas.forEach((lomba) => {
+                    lombas.data.forEach((lomba) => {
                         const row = document.createElement("tr");
                         row.className = "bg-gray-50 hover:bg-gray-100";
 

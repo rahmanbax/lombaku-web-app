@@ -17,21 +17,20 @@ class LombaController extends Controller
      * Menampilkan semua data lomba.
      * GET /api/lomba
      */
-  public function index(Request $request)
+    public function index(Request $request)
     {
         // Mulai query builder dengan eager loading
-        $query = Lomba::with(['tags'])->latest();
+        $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
 
         // 1. Fungsionalitas Pencarian (Search)
         if ($request->has('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_lomba', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
             });
         }
-        
+
         // 2. Fungsionalitas Filter
         if ($request->has('tingkat')) {
             $query->where('tingkat', $request->tingkat);
@@ -39,12 +38,24 @@ class LombaController extends Controller
         if ($request->has('lokasi')) {
             $query->where('lokasi', $request->lokasi);
         }
-        
-        // 3. Paginasi
-        // Ambil data dengan paginasi (misalnya, 9 item per halaman)
-        $lombas = $query->paginate(9)->withQueryString();
 
-        return response()->json($lombas, 200);
+        // ==========================================================
+        // === PERUBAHAN UTAMA ADA DI SINI ===
+        // ==========================================================
+        // 3. Paginasi Kustom
+        // Ambil nilai 'limit' dari request. Jika tidak ada, gunakan 10 sebagai default.
+        $perPage = $request->input('limit', 10);
+
+        // Ganti get() dengan paginate()
+        // Metode latest() tetap digunakan untuk mengurutkan
+        $lombas = $query->latest()->paginate($perPage);
+        // ==========================================================
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar Lomba Berhasil Diambil ',
+            'data' => $lombas
+        ], 200);
     }
     /**
      * Menyimpan lomba baru ke database.
@@ -126,7 +137,7 @@ class LombaController extends Controller
      * Menampilkan satu data lomba spesifik.
      * GET /api/lomba/{id}
      */
-   public function show($id)
+    public function show($id)
     {
         $lomba = Lomba::with(['tags', 'pembuat'])->find($id);
 
@@ -149,7 +160,7 @@ class LombaController extends Controller
 
         // Tambahkan properti baru ke objek lomba
         $lomba->is_bookmarked = $isBookmarked;
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Detail Lomba Ditemukan',
