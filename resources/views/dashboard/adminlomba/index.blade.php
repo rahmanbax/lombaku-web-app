@@ -117,7 +117,7 @@
                 tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Mencari...</td></tr>`;
 
                 try {
-                    const url = searchTerm ? `/api/lomba?search=${searchTerm}` : "/api/lomba";
+                    const url = '/api/lomba/saya';
                     const response = await axios.get(url); // Auth token di-handle oleh middleware di sisi server
                     const lombas = response.data.data;
 
@@ -218,10 +218,6 @@
                     <div class="flex-1">
                         <h2 class="text-base font-medium">${lomba.nama_lomba}</h2>
                         <p class="text-xs text-black/50">${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A")}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="py-1 px-3 text-blue-500 border border-blue-500 rounded-lg text-sm font-semibold hover:bg-blue-100">Lihat</a>
-                        <button class="py-1 px-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600" onclick="setujuiLomba(${lomba.id_lomba})">Setujui</button>
                     </div>
                 `;
                             butuhPersetujuanSection.appendChild(lombaElement);

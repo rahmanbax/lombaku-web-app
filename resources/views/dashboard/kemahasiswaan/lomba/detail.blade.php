@@ -70,6 +70,11 @@
 
                 <h2 class="font-bold mt-6 text-xl">Deskripsi</h2>
                 <p id="lomba-deskripsi" class="mt-2 text-gray-700 leading-relaxed"></p>
+
+                <div id="lomba-aksi" class="flex gap-2 mt-6">
+                    <button class="w-full py-2 px-2 text-red-500 border border-red-500 rounded-lg font-semibold hover:bg-red-100 tolak-lomba-btn cursor-pointer">Tolak</button>
+                    <button class="w-full py-2 px-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 setujui-lomba-btn cursor-pointer">Setujui</button>
+                </div>
             </div>
         </template>
 
@@ -102,9 +107,54 @@
 
     </main>
 
+    <!-- Modal untuk Konfirmasi Persetujuan -->
+    <div id="setujui-lomba-modal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-md bg-white p-4 mx-5 lg:mx-auto">
+            <h3 class="text-lg font-medium text-gray-900">Konfirmasi Persetujuan</h3>
+            <form id="setujui-lomba-form" class="">
+                <input type="hidden" id="setujui-lomba-id">
+                <p class="mt-2 text-gray-600">Apakah Anda yakin ingin menyetujui lomba ini? Tindakan ini akan mengubah status lomba menjadi "Disetujui".</p>
+                <div class="items-center flex justify-end gap-2 mt-4">
+                    <button id="batal-setujui-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
+                    <button id="kirim-persetujuan-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Ya, Setujui</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal untuk Alasan Penolakan -->
+    <div id="tolak-lomba-modal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-md bg-white p-4 mx-5 lg:mx-auto">
+            <h3 class="text-lg font-medium text-gray-900">Alasan Penolakan</h3>
+            <form id="tolak-lomba-form" class="">
+                <input type="hidden" id="tolak-lomba-id">
+                <textarea id="alasan-penolakan-textarea" class="mt-2 w-full p-2 h-20 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alasan penolakkan lomba" required></textarea>
+                <div class="items-center flex justify-end gap-2 mt-2">
+                    <button id="batal-tolak-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
+                    <button id="kirim-penolakan-btn" type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Tolak</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Script dipanggil setelah semua HTML dimuat -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Variabel dan Elemen DOM ---
+            const lombaDetailContainer = document.getElementById('lomba-detail-container');
+
+            // Modal Persetujuan
+            const setujuiLombaModal = document.getElementById('setujui-lomba-modal');
+            const setujuiLombaForm = document.getElementById('setujui-lomba-form');
+            const setujuiLombaIdInput = document.getElementById('setujui-lomba-id');
+            const batalSetujuiBtn = document.getElementById('batal-setujui-btn');
+
+            // Modal Penolakan
+            const tolakLombaModal = document.getElementById('tolak-lomba-modal');
+            const tolakLombaForm = document.getElementById('tolak-lomba-form');
+            const tolakLombaIdInput = document.getElementById('tolak-lomba-id');
+            const alasanTextarea = document.getElementById('alasan-penolakan-textarea');
+            const batalTolakBtn = document.getElementById('batal-tolak-btn');
 
             // Helper function untuk memformat tanggal
             function formatDate(dateString) {
@@ -152,8 +202,63 @@
                     tagsContainer.innerHTML = '<p class="text-sm text-gray-500">Tidak ada tag.</p>';
                 }
 
+                const aksiContainer = clone.getElementById('lomba-aksi');
+                if (lomba.status === 'belum disetujui') {
+                    // Beri atribut data-id pada tombol agar bisa diambil oleh event listener
+                    clone.querySelector('.setujui-lomba-btn').dataset.id = lomba.id_lomba;
+                    clone.querySelector('.tolak-lomba-btn').dataset.id = lomba.id_lomba;
+                    aksiContainer.style.display = 'flex'; // Tampilkan tombol
+                } else {
+                    aksiContainer.style.display = 'none'; // Sembunyikan tombol jika status bukan 'belum disetujui'
+                }
+
                 container.innerHTML = '';
                 container.appendChild(clone);
+            }
+
+            // --- Fungsi API Call ---
+            async function submitPersetujuan(lombaId) {
+                try {
+                    await axios.patch(`/api/lomba/${lombaId}/setujui`);
+                    alert('Lomba berhasil disetujui!');
+                    location.reload();
+                } catch (error) {
+                    const msg = error.response?.data?.message || 'Terjadi kesalahan.';
+                    alert(msg);
+                }
+            }
+
+            async function submitPenolakan(lombaId, alasan) {
+                try {
+                    await axios.patch(`/api/lomba/${lombaId}/tolak`, {
+                        alasan_penolakan: alasan
+                    });
+                    alert('Lomba berhasil ditolak.');
+                    location.reload();
+                } catch (error) {
+                    const msg = error.response?.data?.message || 'Terjadi kesalahan.';
+                    alert(msg);
+                }
+            }
+
+            // --- Fungsi Kontrol Modal ---
+            function showSetujuiModal(lombaId) {
+                setujuiLombaIdInput.value = lombaId;
+                setujuiLombaModal.classList.remove('hidden');
+            }
+
+            function hideSetujuiModal() {
+                setujuiLombaModal.classList.add('hidden');
+            }
+
+            function showTolakModal(lombaId) {
+                tolakLombaIdInput.value = lombaId;
+                tolakLombaModal.classList.remove('hidden');
+            }
+
+            function hideTolakModal() {
+                tolakLombaForm.reset();
+                tolakLombaModal.classList.add('hidden');
             }
 
             // --- Fungsi untuk merender tabel peserta ---
@@ -224,6 +329,32 @@
                     document.getElementById('peserta-table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Gagal memuat data peserta.</td></tr>`;
                 }
             }
+
+            // --- Event Listeners ---
+            // Event Delegation pada kontainer utama untuk tombol aksi
+            lombaDetailContainer.addEventListener('click', function(event) {
+                const setujuiButton = event.target.closest('.setujui-lomba-btn');
+                const tolakButton = event.target.closest('.tolak-lomba-btn');
+
+                if (setujuiButton) {
+                    showSetujuiModal(setujuiButton.dataset.id);
+                } else if (tolakButton) {
+                    showTolakModal(tolakButton.dataset.id);
+                }
+            });
+
+            // Listeners untuk modal
+            setujuiLombaForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitPersetujuan(setujuiLombaIdInput.value);
+            });
+            batalSetujuiBtn.addEventListener('click', hideSetujuiModal);
+
+            tolakLombaForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitPenolakan(tolakLombaIdInput.value, alasanTextarea.value.trim());
+            });
+            batalTolakBtn.addEventListener('click', hideTolakModal);
 
             // Panggil fungsi utama saat halaman dimuat
             loadPageData();

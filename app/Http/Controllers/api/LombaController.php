@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lomba;
 use App\Models\RegistrasiLomba;
+use Illuminate\Support\Facades\Log;
 
 class LombaController extends Controller
 {
@@ -63,6 +64,8 @@ class LombaController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $validator = Validator::make($request->all(), [
             'nama_lomba'    => 'required|string|max:255',
             'deskripsi'     => 'required|string',
@@ -113,13 +116,26 @@ class LombaController extends Controller
             'deskripsi'     => $request->deskripsi,
             'lokasi'        => $request->lokasi,
             'tingkat'       => $request->tingkat,
-            'status'        => 'belum disetujui', // Status default saat dibuat
+            'status'        => 'belum disetujui',
+            'penyelenggara' => $request->penyelenggara, // Bisa diisi atau dibiarkan kosong
             'tanggal_akhir_registrasi' => $request->tanggal_akhir_registrasi,
             'tanggal_mulai_lomba' => $request->tanggal_mulai_lomba,
             'tanggal_selesai_lomba' => $request->tanggal_selesai_lomba,
-            'penyelenggara' => $request->penyelenggara,
             'foto_lomba'    => $image_path,
             'id_pembuat'    => $id_pembuat,
+        ]);
+
+        if ($request->filled('penyelenggara')) { // filled() lebih baik dari has() karena juga mengecek string kosong
+            $lomba['penyelenggara'] = $request->penyelenggara;
+        } else {
+            // Pastikan kolom 'nama' ada di model User Anda
+            $lomba['penyelenggara'] = $user->nama;
+        }
+
+        Log::info('Lomba created by user ID: ' . $id_pembuat, [
+            'lomba_id' => $lomba->id_lomba,
+            'nama_lomba' => $lomba->nama_lomba,
+            'penyelenggara' => $lomba['penyelenggara'],
         ]);
 
         // Lampirkan tags ke lomba yang baru dibuat
@@ -388,6 +404,107 @@ class LombaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lomba berhasil disetujui.',
+            'data' => $lomba
+        ], 200);
+    }
+
+    /**
+     * Mengambil daftar lomba yang dibuat oleh user (admin lomba) yang sedang login.
+     * GET /api/lomba/saya
+     */
+    public function getMyLombas(Request $request)
+    {
+        // 1. Dapatkan user yang sedang terautentikasi
+        $user = Auth::user();
+
+        // Jika tidak ada user yang login, kembalikan error.
+        // Sebaiknya, route ini dilindungi oleh middleware 'auth:sanctum'.
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak terautentikasi. Silakan login terlebih dahulu.'
+            ], 401);
+        }
+
+        // 2. Mulai query untuk lomba yang dibuat oleh user ini
+        $query = Lomba::where('id_pembuat', $user->id_user)
+            ->with(['tags']) // Eager load tags
+            ->withCount('registrasi'); // Hitung jumlah pendaftar
+
+        // 3. Tambahkan fungsionalitas pencarian (opsional, tapi berguna)
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $query->where('nama_lomba', 'like', '%' . $searchTerm . '%');
+        }
+
+        // 4. Tambahkan fungsionalitas filter status (opsional, tapi berguna)
+        if ($request->has('status') && in_array($request->status, ['belum disetujui', 'disetujui', 'berlangsung', 'selesai'])) {
+            $query->where('status', $request->status);
+        }
+
+        // 5. Eksekusi query dengan paginasi
+        $perPage = $request->input('limit', 10);
+        $lombas = $query->latest()->paginate($perPage);
+
+        // 6. Kembalikan respons
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar lomba Anda berhasil diambil',
+            'data' => $lombas
+        ], 200);
+    }
+
+    /**
+     * Menolak sebuah lomba dan memberikan alasan.
+     * PATCH /api/lomba/{id}/tolak
+     */
+    public function tolakLomba(Request $request, $id)
+    {
+        // 1. Validasi input: alasan penolakan wajib diisi
+        $validator = Validator::make($request->all(), [
+            'alasan_penolakan' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // 2. Otorisasi: Pastikan hanya peran tertentu yang bisa menolak
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['kemahasiswaan', 'admin_prodi'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
+            ], 403);
+        }
+
+        // 3. Cari lomba
+        $lomba = Lomba::find($id);
+        if (!$lomba) {
+            return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
+        }
+
+        // 4. Pastikan statusnya masih 'belum disetujui'
+        if ($lomba->status !== 'belum disetujui') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lomba ini tidak dapat ditolak karena sudah diproses.'
+            ], 422);
+        }
+
+        // 5. Update status dan alasan penolakan
+        $lomba->status = 'ditolak';
+        $lomba->alasan_penolakan = $request->alasan_penolakan;
+        $lomba->save();
+
+        // 6. Kembalikan respons sukses
+        return response()->json([
+            'success' => true,
+            'message' => 'Lomba berhasil ditolak.',
             'data' => $lomba
         ], 200);
     }

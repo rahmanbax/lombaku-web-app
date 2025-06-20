@@ -61,6 +61,12 @@
                     </select>
                 </div>
 
+                <!-- penyelenggara -->
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="penyelenggara" class="text-black/60 font-semibold">Penyelenggara</label>
+                    <input type="text" name="penyelenggara" id="penyelenggara" required placeholder="Masukkan Nama Penyelenggara" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+
                 <!-- Tingkat -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="tingkat" class="text-black/60 font-semibold">Tingkat</label>
@@ -133,6 +139,7 @@
                     document.getElementById('lokasi').value = lomba.lokasi;
                     document.getElementById('tingkat').value = lomba.tingkat;
                     document.getElementById('status').value = lomba.status;
+                    document.getElementById('penyelenggara').value = lomba.penyelenggara;
                     document.getElementById('tanggal_akhir_registrasi').value = lomba.tanggal_akhir_registrasi;
                     document.getElementById('tanggal_mulai_lomba').value = lomba.tanggal_mulai_lomba;
                     document.getElementById('tanggal_selesai_lomba').value = lomba.tanggal_selesai_lomba;

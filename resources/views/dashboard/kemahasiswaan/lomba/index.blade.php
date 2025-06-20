@@ -90,8 +90,57 @@
         </section>
     </main>
 
+    <!-- Modal untuk Alasan Penolakan -->
+    <div id="tolak-lomba-modal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-md bg-white p-4 mx-5 lg:mx-auto">
+            <h3 class="text-lg font-medium text-gray-900">Alasan Penolakan</h3>
+            <form id="tolak-lomba-form" class="">
+                <input type="hidden" id="tolak-lomba-id">
+                <textarea id="alasan-penolakan-textarea" class="mt-2 w-full p-2 h-20 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alasan penolakkan lomba" required></textarea>
+                <div class="items-center flex justify-end gap-2 mt-2">
+                    <button id="batal-tolak-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
+                    <button id="kirim-penolakan-btn" type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Tolak</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal untuk Konfirmasi Persetujuan -->
+    <div id="setujui-lomba-modal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-md bg-white p-4 mx-5 lg:mx-auto">
+            <h3 class="text-lg font-medium text-gray-900">Konfirmasi Persetujuan</h3>
+            <form id="setujui-lomba-form" class="">
+                <input type="hidden" id="setujui-lomba-id">
+                <p class="mt-2 text-gray-600">Apakah Anda yakin ingin menyetujui lomba ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="items-center flex justify-end gap-2 mt-4">
+                    <button id="batal-setujui-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
+                    <button id="kirim-persetujuan-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Ya, Setujui</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // --- Variabel dan Elemen DOM ---
+            const butuhPersetujuanSection = document.getElementById('butuh-persetujuan');
+            const tableBody = document.getElementById("lomba-table-body");
+            const searchInput = document.getElementById("search-lomba-input");
+            let debounceTimer;
+
+            // Modal Penolakan
+            const tolakLombaModal = document.getElementById('tolak-lomba-modal');
+            const tolakLombaForm = document.getElementById('tolak-lomba-form');
+            const tolakLombaIdInput = document.getElementById('tolak-lomba-id');
+            const alasanTextarea = document.getElementById('alasan-penolakan-textarea');
+            const batalTolakBtn = document.getElementById('batal-tolak-btn');
+
+            // --- PERUBAHAN: Variabel untuk Modal Persetujuan ---
+            const setujuiLombaModal = document.getElementById('setujui-lomba-modal');
+            const setujuiLombaForm = document.getElementById('setujui-lomba-form');
+            const setujuiLombaIdInput = document.getElementById('setujui-lomba-id');
+            const batalSetujuiBtn = document.getElementById('batal-setujui-btn');
+
             // Helper functions (tetap sama)
             function formatDate(dateString) {
                 if (!dateString) return "-";
@@ -106,11 +155,6 @@
             function capitalizeFirstLetter(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
             }
-
-            // === Variabel dan Elemen DOM ===
-            const tableBody = document.getElementById("lomba-table-body");
-            const searchInput = document.getElementById("search-lomba-input");
-            let debounceTimer;
 
             // === Fungsi Utama untuk Fetch dan Render Data ===
             async function fetchAllLomba(searchTerm = "") {
@@ -148,7 +192,6 @@
                     <td class="p-3">
                         <div class="flex gap-2 justify-end">
                             <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
-                            <a href="/dashboard/kemahasiswaan/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>
                         </div>
                     </td>
                 `;
@@ -193,27 +236,6 @@
                 }
             }
 
-            // Target elemen utama di luar fungsi
-            const butuhPersetujuanSection = document.getElementById('butuh-persetujuan');
-
-            // ==========================================================
-            // === SOLUSI: Menggunakan Event Delegation ===
-            // ==========================================================
-            // Pasang SATU event listener pada elemen induk
-            butuhPersetujuanSection.addEventListener('click', function(event) {
-                // Cek apakah elemen yang diklik (atau elemen induknya) adalah tombol 'setujui'
-                const setujuiButton = event.target.closest('.setujui-lomba-btn');
-
-                if (setujuiButton) {
-                    // Dapatkan ID lomba dari atribut data-*
-                    const lombaId = setujuiButton.dataset.id;
-                    // Panggil fungsi handler
-                    handleSetujuiLomba(lombaId);
-                }
-            });
-            // ==========================================================
-
-
             async function fetchLombaButuhPersetujuan() {
                 const loadingState = document.getElementById('butuh-persetujuan-loading-state');
 
@@ -232,11 +254,11 @@
                             // Hapus onclick dan tambahkan class + atribut data-*
                             lombaElement.innerHTML = `
                         <div class="flex-1">
-                            <h2 class="text-base font-medium">${lomba.nama_lomba}</h2>
+                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="text-base font-medium hover:underline">${lomba.nama_lomba}</a>
                             <p class="text-xs text-black/50">${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A")}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="py-1 px-3 text-blue-500 border border-blue-500 rounded-lg text-sm font-semibold hover:bg-blue-100">Lihat</a>
+                            <button class="py-1 px-3 text-red-500 border border-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 tolak-lomba-btn" data-id="${lomba.id_lomba}">Tolak</button>
                             <button class="py-1 px-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 setujui-lomba-btn" data-id="${lomba.id_lomba}">Setujui</button>
                         </div>
                     `;
@@ -253,32 +275,91 @@
                 }
             }
 
-            async function handleSetujuiLomba(lombaId) {
-                // Tampilkan konfirmasi kepada pengguna
-                if (!confirm('Apakah Anda yakin ingin menyetujui lomba ini?')) {
-                    return;
-                }
-
+            async function submitPersetujuan(lombaId) {
                 try {
-                    // Buat request PATCH menggunakan Axios
-                    const response = await axios.patch(`/api/lomba/${lombaId}/setujui`, {}, // Body bisa kosong karena data yang dibutuhkan hanya ID di URL
-                    );
-
-                    if (response.data.success) {
-                        alert('Lomba berhasil disetujui!');
-                        // Refresh halaman atau hapus elemen lomba dari daftar "Butuh Persetujuan"
-                        location.reload();
-                    }
-
+                    await axios.patch(`/api/lomba/${lombaId}/setujui`);
+                    alert('Lomba berhasil disetujui!');
+                    location.reload();
                 } catch (error) {
-                    console.error('Gagal menyetujui lomba:', error.response);
-                    // Tampilkan pesan error dari API jika ada, jika tidak, tampilkan pesan umum
                     const errorMessage = error.response?.data?.message || 'Terjadi kesalahan saat menyetujui lomba.';
                     alert(errorMessage);
                 }
             }
 
+            // Fungsi baru untuk menangani penolakan lomba
+            async function submitPenolakan(lombaId, alasan) {
+                try {
+                    await axios.patch(
+                        `/api/lomba/${lombaId}/tolak`, {
+                            alasan_penolakan: alasan
+                        }
+                    );
+
+                    alert('Lomba berhasil ditolak.');
+                    location.reload();
+
+                } catch (error) {
+                    const errorMessage = error.response?.data?.message || 'Terjadi kesalahan.';
+                    alert(errorMessage);
+                }
+            }
+
+            // --- Fungsi Kontrol Modal ---
+            function showTolakModal(lombaId) {
+                tolakLombaIdInput.value = lombaId;
+                tolakLombaModal.classList.remove('hidden');
+            }
+
+            function hideTolakModal() {
+                tolakLombaForm.reset();
+                tolakLombaModal.classList.add('hidden');
+            }
+
+            function showSetujuiModal(lombaId) {
+                setujuiLombaIdInput.value = lombaId;
+                setujuiLombaModal.classList.remove('hidden');
+            }
+
+            function hideSetujuiModal() {
+                setujuiLombaModal.classList.add('hidden');
+            }
+
             // === Event Listeners ===
+
+            butuhPersetujuanSection.addEventListener('click', function(event) {
+                const setujuiButton = event.target.closest('.setujui-lomba-btn');
+                const tolakButton = event.target.closest('.tolak-lomba-btn');
+
+                if (setujuiButton) {
+                    const lombaId = setujuiButton.dataset.id;
+                    showSetujuiModal(lombaId); // <-- PERUBAHAN: Tampilkan modal, bukan langsung API call
+                } else if (tolakButton) {
+                    const lombaId = tolakButton.dataset.id;
+                    showTolakModal(lombaId);
+                }
+            });
+
+            // Event listener untuk form penolakan
+            tolakLombaForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const lombaId = tolakLombaIdInput.value;
+                const alasan = alasanTextarea.value.trim();
+                if (alasan) {
+                    submitPenolakan(lombaId, alasan);
+                } else {
+                    alert('Alasan penolakan tidak boleh kosong.');
+                }
+            });
+
+            setujuiLombaForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const lombaId = setujuiLombaIdInput.value;
+                submitPersetujuan(lombaId);
+            });
+            batalSetujuiBtn.addEventListener('click', hideSetujuiModal);
+
+            // Event listener untuk tombol batal di modal
+            batalTolakBtn.addEventListener('click', hideTolakModal);
 
             // Listener untuk pencarian dengan debounce
             searchInput.addEventListener("input", (event) => {
@@ -287,60 +368,6 @@
                     fetchAllLomba(event.target.value);
                 }, 500);
             });
-
-            // Listener untuk tombol aksi dropdown (menggunakan event delegation)
-            tableBody.addEventListener('click', (event) => {
-                const actionButton = event.target.closest('.action-button');
-                if (actionButton) {
-                    const dropdown = actionButton.nextElementSibling;
-
-                    // Tutup semua dropdown lain sebelum membuka yang ini
-                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                        if (menu !== dropdown) {
-                            menu.classList.add('hidden');
-                        }
-                    });
-
-                    // Toggle dropdown yang diklik
-                    dropdown.classList.toggle('hidden');
-                }
-
-                // Listener untuk tombol hapus
-                if (event.target.classList.contains('delete-btn')) {
-                    const lombaId = event.target.dataset.id;
-                    if (confirm(`
-                                                Apakah Anda yakin ingin menghapus lomba ini(ID: $ {
-                                                    lombaId
-                                                }) ? `)) {
-                        // Panggil fungsi untuk menghapus (didefinisikan di bawah)
-                        deleteLomba(lombaId);
-                    }
-                }
-            });
-
-            // Listener untuk menutup dropdown jika klik di luar
-            window.addEventListener('click', (event) => {
-                if (!event.target.closest('.action-button')) {
-                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                        menu.classList.add('hidden');
-                    });
-                }
-            });
-
-            // === Fungsi Tambahan (Contoh: Delete) ===
-            async function deleteLomba(id) {
-                try {
-                    await axios.delete(` / api / lomba / $ {
-                                                    id
-                                                }
-                                                `);
-                    alert('Lomba berhasil dihapus!');
-                    fetchAllLomba(searchInput.value); // Muat ulang tabel
-                } catch (error) {
-                    console.error('Error deleting lomba:', error);
-                    alert('Gagal menghapus lomba.');
-                }
-            }
 
             // Panggil fungsi utama saat halaman dimuat
             fetchAllLomba();
