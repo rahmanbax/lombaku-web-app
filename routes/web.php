@@ -64,7 +64,18 @@ Route::get('/lomba/{id}', function ($id) {
     return view('mahasiswa.lomba.detaillomba');
 })->name('lomba.show');
 
-// Dashboard Routes...
+// route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
+Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
+    $path = storage_path('app/public/sertifikat_prestasi/' . $filename);
+    
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+})->name('sertifikat.prestasi');
+
+// Dashboard Route Kemahasiswaan
 Route::get('/dashboard/kemahasiswaan', function () {
     return view('dashboard.kemahasiswaan.index');
 });
@@ -92,13 +103,7 @@ Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
     return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
 });
 
-// route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
-Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
-    $path = storage_path('app/public/sertifikat_prestasi/' . $filename);
-    
-    if (!file_exists($path)) {
-        abort(404);
-    }
-
-    return response()->file($path);
-})->name('sertifikat.prestasi');
+// Dashboard Route Admin Lomba
+Route::get('/dashboard/adminlomba', function () {
+    return view('dashboard.adminlomba.index');
+});

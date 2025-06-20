@@ -47,18 +47,10 @@
                     <p id="stats-selesai" class="text-2xl font-semibold mt-1">...</p>
                 </div>
             </div>
-            <div class="col-span-4 w-full flex flex-col gap-4">
+            <div id="butuh-persetujuan" class="col-span-4 w-full flex flex-col gap-4">
                 <h1 class="font-semibold">Butuh Persetujuan</h1>
-                <div class="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                    <div class="flex-1">
-                        <h2 class="text-base font-medium ">Lorem Ipsum Dolor Sit Aemt Colosseum</h2>
-                        <p class="text-xs text-black/50">Himpunan Mahasiswa Islam</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button class="py-1 px-3 text-blue-500 border border-blue-500 rounded-lg text-sm font-semibold hover:bg-blue-100">Lihat</button>
-                        <button class="py-1 px-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600">Setujui</button>
-                    </div>
-                </div>
+                <!-- Loading state -->
+                <p id="butuh-persetujuan-loading-state" class="text-gray-500">Memuat lomba yang membutuhkan persetujuan...</p>
             </div>
         </section>
 
@@ -157,9 +149,6 @@
                         <div class="flex gap-2 justify-end">
                             <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
                             <a href="/dashboard/kemahasiswaan/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>
-                            ${lomba.status === 'belum disetujui' ? `
-                                <button data-id="${lomba.id_lomba}" class="delete-btn w-fit px-2 py-1 text-sm rounded-sm text-red-500 hover:bg-red-100 border border-red-500 cursor-pointer">Hapus</button>
-                            ` : ''}
                         </div>
                     </td>
                 `;
@@ -204,6 +193,91 @@
                 }
             }
 
+            // Target elemen utama di luar fungsi
+            const butuhPersetujuanSection = document.getElementById('butuh-persetujuan');
+
+            // ==========================================================
+            // === SOLUSI: Menggunakan Event Delegation ===
+            // ==========================================================
+            // Pasang SATU event listener pada elemen induk
+            butuhPersetujuanSection.addEventListener('click', function(event) {
+                // Cek apakah elemen yang diklik (atau elemen induknya) adalah tombol 'setujui'
+                const setujuiButton = event.target.closest('.setujui-lomba-btn');
+
+                if (setujuiButton) {
+                    // Dapatkan ID lomba dari atribut data-*
+                    const lombaId = setujuiButton.dataset.id;
+                    // Panggil fungsi handler
+                    handleSetujuiLomba(lombaId);
+                }
+            });
+            // ==========================================================
+
+
+            async function fetchLombaButuhPersetujuan() {
+                const loadingState = document.getElementById('butuh-persetujuan-loading-state');
+
+                try {
+                    const response = await axios.get('/api/lomba/butuh-persetujuan');
+
+                    if (response.data.success) {
+                        const lombaButuhPersetujuan = response.data.data;
+                        if (loadingState) loadingState.remove();
+
+                        lombaButuhPersetujuan.forEach((lomba) => {
+                            const lombaElement = document.createElement('div');
+                            lombaElement.className = 'flex items-center gap-2 p-3 bg-gray-100 rounded-lg mb-2';
+
+                            // --- PERUBAHAN DI SINI ---
+                            // Hapus onclick dan tambahkan class + atribut data-*
+                            lombaElement.innerHTML = `
+                        <div class="flex-1">
+                            <h2 class="text-base font-medium">${lomba.nama_lomba}</h2>
+                            <p class="text-xs text-black/50">${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A")}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="py-1 px-3 text-blue-500 border border-blue-500 rounded-lg text-sm font-semibold hover:bg-blue-100">Lihat</a>
+                            <button class="py-1 px-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 setujui-lomba-btn" data-id="${lomba.id_lomba}">Setujui</button>
+                        </div>
+                    `;
+                            // --- AKHIR PERUBAHAN ---
+                            butuhPersetujuanSection.appendChild(lombaElement);
+                        });
+                    }
+                } catch (error) {
+                    if (error.response && error.response.status === 404) {
+                        loadingState.textContent = error.response.data.message || 'Tidak ada lomba yang butuh persetujuan.';
+                    } else {
+                        loadingState.textContent = 'Gagal memuat data. Silakan coba lagi.';
+                    }
+                }
+            }
+
+            async function handleSetujuiLomba(lombaId) {
+                // Tampilkan konfirmasi kepada pengguna
+                if (!confirm('Apakah Anda yakin ingin menyetujui lomba ini?')) {
+                    return;
+                }
+
+                try {
+                    // Buat request PATCH menggunakan Axios
+                    const response = await axios.patch(`/api/lomba/${lombaId}/setujui`, {}, // Body bisa kosong karena data yang dibutuhkan hanya ID di URL
+                    );
+
+                    if (response.data.success) {
+                        alert('Lomba berhasil disetujui!');
+                        // Refresh halaman atau hapus elemen lomba dari daftar "Butuh Persetujuan"
+                        location.reload();
+                    }
+
+                } catch (error) {
+                    console.error('Gagal menyetujui lomba:', error.response);
+                    // Tampilkan pesan error dari API jika ada, jika tidak, tampilkan pesan umum
+                    const errorMessage = error.response?.data?.message || 'Terjadi kesalahan saat menyetujui lomba.';
+                    alert(errorMessage);
+                }
+            }
+
             // === Event Listeners ===
 
             // Listener untuk pencarian dengan debounce
@@ -234,7 +308,10 @@
                 // Listener untuk tombol hapus
                 if (event.target.classList.contains('delete-btn')) {
                     const lombaId = event.target.dataset.id;
-                    if (confirm(`Apakah Anda yakin ingin menghapus lomba ini (ID: ${lombaId})?`)) {
+                    if (confirm(`
+                                                Apakah Anda yakin ingin menghapus lomba ini(ID: $ {
+                                                    lombaId
+                                                }) ? `)) {
                         // Panggil fungsi untuk menghapus (didefinisikan di bawah)
                         deleteLomba(lombaId);
                     }
@@ -253,7 +330,10 @@
             // === Fungsi Tambahan (Contoh: Delete) ===
             async function deleteLomba(id) {
                 try {
-                    await axios.delete(`/api/lomba/${id}`);
+                    await axios.delete(` / api / lomba / $ {
+                                                    id
+                                                }
+                                                `);
                     alert('Lomba berhasil dihapus!');
                     fetchAllLomba(searchInput.value); // Muat ulang tabel
                 } catch (error) {
@@ -265,6 +345,7 @@
             // Panggil fungsi utama saat halaman dimuat
             fetchAllLomba();
             fetchDashboardStats();
+            fetchLombaButuhPersetujuan();
         });
     </script>
 </body>

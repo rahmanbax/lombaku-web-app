@@ -105,8 +105,7 @@ class LombaController extends Controller
 
         // Dapatkan ID user yang sedang login (sebagai pembuat)
         // Pastikan route ini dilindungi oleh middleware 'auth:api' atau 'auth:sanctum'
-        // $id_pembuat = auth()->id(); 
-        $id_pembuat = 1;
+        $id_pembuat = Auth::id();
 
         // Buat lomba
         $lomba = Lomba::create([
@@ -320,6 +319,76 @@ class LombaController extends Controller
                 'total_pendaftar' => $totalPendaftar,
                 'status_counts' => $statusData,
             ]
+        ], 200);
+    }
+
+    // fungsi getlomba yang butuh persetujuan
+    public function getLombaButuhPersetujuan()
+    {
+        // Ambil semua lomba yang statusnya 'belum disetujui'
+        $lomba = Lomba::where('status', 'belum disetujui')
+            ->with(['tags', 'pembuat'])
+            ->get();
+
+        // jika lomba kosong
+        if ($lomba->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada lomba yang butuh persetujuan',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar Lomba Butuh Persetujuan Berhasil Diambil',
+            'data' => $lomba
+        ], 200);
+    }
+
+    /**
+     * Mengambil daftar lomba yang dibuat oleh user (admin lomba) yang sedang login.
+     * GET /api/lomba/saya
+     */
+    public function setujuiLomba($id)
+    {
+        // 1. Dapatkan user yang sedang terautentikasi
+        $user = Auth::user();
+
+        // 2. Otorisasi: Pastikan hanya peran tertentu yang bisa menyetujui
+        // Anda bisa menyesuaikan array ini sesuai kebutuhan
+        if (!$user || !in_array($user->role, ['kemahasiswaan', 'admin_prodi'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
+            ], 403); // 403 Forbidden
+        }
+
+        // 3. Cari lomba yang akan disetujui
+        $lomba = Lomba::find($id);
+        if (!$lomba) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lomba tidak ditemukan'
+            ], 404); // 404 Not Found
+        }
+
+        // 4. Validasi Status: Pastikan hanya lomba yang 'belum disetujui' yang bisa diproses
+        if ($lomba->status !== 'belum disetujui') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lomba ini tidak dapat disetujui karena statusnya bukan "Belum Disetujui". Status saat ini: ' . $lomba->status
+            ], 422); // 422 Unprocessable Entity
+        }
+
+        // 5. Update status dan simpan
+        $lomba->status = 'disetujui';
+        $lomba->save();
+
+        // 6. Kembalikan respons sukses dengan data lomba yang sudah diupdate
+        return response()->json([
+            'success' => true,
+            'message' => 'Lomba berhasil disetujui.',
+            'data' => $lomba
         ], 200);
     }
 }

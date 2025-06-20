@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -68,14 +69,28 @@ class AuthController extends Controller
 
             // Menyimpan data pengguna dalam session
             session([
-                'user_id' => $user->id,
+                'user_id' => $user->id_user,
                 'username' => $user->username,
                 'nama' => $user->nama,
                 'email' => $user->email,
                 'role' => $user->role,
-                'nim_atau_nip' => $user->nim_atau_nip,
-                'instansi' => $user->instansi,
             ]);
+
+            Log::info('User logged in', [
+                'user_id' => $user->id_user,
+                'username' => $user->username,
+                'role' => $user->role
+            ]);
+
+            // jika role kemahasiswaan, redirect ke dashboard kemahasiswaan
+            if ($user->role === 'kemahasiswaan') {
+                return redirect()->intended('/dashboard/kemahasiswaan');
+            }
+
+            // jika role admin_lomba, redirect ke dashboard admin lomba
+            if ($user->role === 'admin_lomba') {
+                return redirect()->intended('/dashboard/adminlomba');
+            }
 
             return redirect()->intended('/');
         }
