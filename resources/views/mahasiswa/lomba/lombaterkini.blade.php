@@ -6,49 +6,68 @@
     <title>Lomba Terkini - Lombaku</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .filter-btn.active {
+            background-color: #3b82f6 !important; /* blue-600 */
+            color: white !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .pagination-link {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 font-sans">
     <x-public-header-nav />
 
-    <!-- Hero, Search, dan Filter Section (tidak berubah) -->
+    <!-- Hero, Search, dan Filter Section -->
     <div class="bg-gradient-to-r from-blue-500 to-indigo-600 py-12">
         <div class="container mx-auto px-4 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Lomba Terkini di Lombaku</h1>
-            <p class="text-blue-100 text-lg">Temukan lomba terbaru yang bisa Anda ikuti!</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Temukan Peluang Juaramu</h1>
+            <p class="text-blue-100 text-lg">Jelajahi berbagai kompetisi dan raih prestasimu!</p>
         </div>
     </div>
     <div class="container mx-auto px-4 py-8 -mt-8 relative z-10">
         <div class="max-w-2xl mx-auto">
             <div class="flex bg-white rounded-full shadow-xl overflow-hidden">
                 <input id="search-input" type="text" class="flex-grow px-6 py-4 focus:outline-none w-full" placeholder="Cari lomba, kategori, atau penyelenggara...">
-                <button id="search-button" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4">
+                <button id="search-button" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 transition-colors">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
         </div>
     </div>
-    <div class="container mx-auto px-4 py-4">
-        <div id="filter-buttons" class="flex flex-wrap justify-center gap-3">
+    
+    <!-- Bagian Filter Baru -->
+    <div class="container mx-auto px-4 py-4 space-y-6">
+        <!-- Filter Cepat (Single-select) -->
+        <div id="quick-filters" class="flex flex-wrap justify-center gap-3">
             <button data-filter-type="all" class="filter-btn active px-4 py-2 rounded-full border border-blue-500 bg-blue-500 text-white font-medium">Semua</button>
             <button data-filter-type="tingkat" data-filter-value="nasional" class="filter-btn px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">Nasional</button>
             <button data-filter-type="tingkat" data-filter-value="internasional" class="filter-btn px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">Internasional</button>
             <button data-filter-type="lokasi" data-filter-value="online" class="filter-btn px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">Online</button>
             <button data-filter-type="lokasi" data-filter-value="offline" class="filter-btn px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">Offline</button>
         </div>
+        <!-- Filter Kategori (Multi-select) -->
+        <div class="border-t pt-6">
+             <h3 class="text-center font-semibold text-gray-700 mb-4">Filter Berdasarkan Kategori</h3>
+             <div id="category-filter-container" class="flex flex-wrap justify-center gap-3 min-h-[3rem] items-center">
+                 <!-- Loading state untuk kategori -->
+                 <i id="category-loading" class="fas fa-spinner fa-spin text-blue-500"></i>
+             </div>
+        </div>
     </div>
 
     <!-- Lomba Grid -->
     <div class="container mx-auto px-4 py-8">
-        <!-- Cangkang untuk diisi oleh JavaScript -->
         <div id="lomba-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
-            <!-- Loading state -->
             <div id="loading-state" class="col-span-full flex justify-center items-center">
                  <i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i>
             </div>
         </div>
-        <!-- Kontainer untuk link Paginasi -->
-        <div id="pagination-links" class="mt-12 flex justify-center"></div>
+        <div id="pagination-container" class="mt-12"></div>
     </div>
 
     <!-- Template untuk satu kartu lomba -->
@@ -100,95 +119,131 @@
         </div>
         <div class="bg-gray-900 py-6">
             <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
             </div>
         </div>
     </footer>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const lombaGrid = document.getElementById('lomba-grid');
     const loadingState = document.getElementById('loading-state');
-    const paginationLinks = document.getElementById('pagination-links');
+    const paginationContainer = document.getElementById('pagination-container');
     const template = document.getElementById('lomba-card-template');
-
     const searchInput = document.getElementById('search-input');
     const searchButton = document.getElementById('search-button');
-    const filterButtonsContainer = document.getElementById('filter-buttons');
+    const quickFiltersContainer = document.getElementById('quick-filters');
+    const categoryFilterContainer = document.getElementById('category-filter-container');
+    const categoryLoading = document.getElementById('category-loading');
+    const baseUrl = window.location.origin;
 
-    let currentFilters = {};
+    let currentQuickFilter = {};
     let currentSearch = '';
+    let selectedTagIds = new Set();
 
     const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
+    async function fetchAndRenderCategories() {
+        try {
+            const response = await axios.get('/api/tags');
+            categoryLoading.style.display = 'none';
+            categoryFilterContainer.innerHTML = '';
+            response.data.data.forEach(tag => {
+                const button = document.createElement('button');
+                button.className = 'filter-btn px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 transition-colors';
+                button.dataset.tagId = tag.id_tag;
+                button.textContent = tag.nama_tag;
+                categoryFilterContainer.appendChild(button);
+            });
+        } catch (error) {
+            console.error('Gagal mengambil kategori:', error);
+            categoryLoading.style.display = 'none';
+            categoryFilterContainer.innerHTML = `<p class="text-red-500">Gagal memuat kategori.</p>`;
+        }
+    }
+
     async function fetchLombas(page = 1) {
         loadingState.style.display = 'flex';
-        lombaGrid.innerHTML = ''; // Kosongkan grid sebelum fetch
+        lombaGrid.innerHTML = '';
         lombaGrid.appendChild(loadingState);
 
-        const params = new URLSearchParams({
-            page,
-            search: currentSearch,
-            ...currentFilters
-        });
+        const params = new URLSearchParams({ page, search: currentSearch, ...currentQuickFilter });
+        selectedTagIds.forEach(tagId => params.append('tags[]', tagId));
 
         try {
             const response = await axios.get(`/api/lomba?${params.toString()}`);
-            renderLombas(response.data.data);
-            renderPagination(response.data);
+            // --- PERBAIKAN: Akses objek paginasi yang ada di dalam properti 'data' ---
+            const paginationObject = response.data.data;
+            renderLombas(paginationObject);
+            renderPagination(paginationObject);
         } catch (error) {
             console.error('Gagal mengambil data lomba:', error);
-            lombaGrid.innerHTML = `<div class="col-span-full text-center text-red-500">Gagal memuat data. Silakan coba lagi.</div>`;
+            lombaGrid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">Gagal memuat data. Silakan coba lagi.</div>`;
         } finally {
             loadingState.style.display = 'none';
         }
     }
 
-    function renderLombas(lombas) {
-        lombaGrid.innerHTML = ''; // Kosongkan total
+    function renderLombas(paginationObject) {
+        lombaGrid.innerHTML = '';
+        // --- PERBAIKAN: Sekarang kita akses array lomba dari properti 'data' di dalam objek paginasi ---
+        const lombas = paginationObject.data;
+
         if (lombas.length === 0) {
-            lombaGrid.innerHTML = `<div class="col-span-full text-center text-gray-500">Tidak ada lomba yang ditemukan dengan kriteria ini.</div>`;
+            lombaGrid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-10">Tidak ada lomba yang ditemukan dengan kriteria ini.</div>`;
             return;
         }
-
-        lombas.data.forEach(lomba => {
+        
+        lombas.forEach(lomba => {
             const card = template.content.cloneNode(true);
-            card.querySelector('.lomba-image').src = `{{ asset('') }}${lomba.foto_lomba}`;
+            card.querySelector('.lomba-image').src = `${baseUrl}/${lomba.foto_lomba}`;
             card.querySelector('.lomba-image').alt = lomba.nama_lomba;
             card.querySelector('.lomba-tingkat').textContent = lomba.tingkat;
             card.querySelector('.lomba-lokasi').textContent = lomba.lokasi;
-            card.querySelector('.lomba-status').textContent = lomba.status.replace('_', ' ');
+            card.querySelector('.lomba-status').textContent = lomba.status.replace(/_/g, ' ');
             card.querySelector('.lomba-nama').textContent = lomba.nama_lomba;
             card.querySelector('.lomba-tanggal').textContent = 's/d ' + formatDate(lomba.tanggal_akhir_registrasi);
             card.querySelector('.lomba-penyelenggara').textContent = lomba.penyelenggara || 'N/A';
-            card.querySelector('.lomba-link').href = `{{ url('/lomba') }}/${lomba.id_lomba}`;
+            card.querySelector('.lomba-link').href = `${baseUrl}/lomba/${lomba.id_lomba}`;
             
             const tagsContainer = card.querySelector('.lomba-tags');
-            lomba.tags.slice(0, 1).forEach(tag => { // Tampilkan maks 1 tag
+            tagsContainer.innerHTML = '';
+            lomba.tags.slice(0, 1).forEach(tag => {
                 const tagEl = document.createElement('span');
                 tagEl.className = 'bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded-full';
                 tagEl.textContent = tag.nama_tag;
                 tagsContainer.appendChild(tagEl);
             });
-
             lombaGrid.appendChild(card);
         });
     }
 
     function renderPagination(data) {
-        paginationLinks.innerHTML = '';
-        if (!data.links || data.links.length <= 3) return; // Sembunyikan jika hanya ada prev/next
+        paginationContainer.innerHTML = '';
+        if (!data.links || data.links.length <= 3) return;
+        
+        const nav = document.createElement('nav');
+        nav.className = 'flex items-center justify-center space-x-1';
         
         data.links.forEach(link => {
+            if (!link.url && (link.label.includes('...') || !link.label)) {
+                const dots = document.createElement('span');
+                dots.className = 'px-4 py-2 text-gray-500';
+                dots.innerHTML = '...';
+                nav.appendChild(dots);
+                return;
+            }
+
             const pageButton = document.createElement('a');
-            pageButton.href = '#'; // Cegah navigasi
-            pageButton.innerHTML = link.label;
-            pageButton.className = 'px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+            pageButton.href = '#';
+            pageButton.innerHTML = link.label.replace(/«/g, '<i class="fas fa-chevron-left"></i>').replace(/»/g, '<i class="fas fa-chevron-right"></i>');
+            pageButton.className = 'pagination-link px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 rounded-md';
 
             if (link.active) {
-                pageButton.className = 'px-4 py-2 border border-blue-600 bg-blue-600 text-white font-medium';
+                pageButton.className = 'pagination-link px-4 py-2 border border-blue-600 bg-blue-600 text-white font-medium rounded-md z-10';
             }
             if (!link.url) {
-                pageButton.className += ' cursor-not-allowed text-gray-400';
+                pageButton.className += ' cursor-not-allowed text-gray-400 bg-gray-100';
             } else {
                  pageButton.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -196,44 +251,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     fetchLombas(url.searchParams.get('page'));
                 });
             }
-            paginationLinks.appendChild(pageButton);
+            nav.appendChild(pageButton);
         });
+        paginationContainer.appendChild(nav);
     }
     
-    // Event Listeners
-    searchButton.addEventListener('click', () => {
-        currentSearch = searchInput.value;
-        fetchLombas(1);
-    });
+    searchButton.addEventListener('click', () => { currentSearch = searchInput.value; fetchLombas(1); });
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { currentSearch = searchInput.value; fetchLombas(1); }});
 
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            currentSearch = searchInput.value;
-            fetchLombas(1);
-        }
-    });
-
-    filterButtonsContainer.addEventListener('click', (e) => {
+    quickFiltersContainer.addEventListener('click', (e) => {
         if (e.target.tagName !== 'BUTTON') return;
-        
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-blue-500', 'text-white', 'border-blue-500'));
-        e.target.classList.add('active', 'bg-blue-500', 'text-white', 'border-blue-500');
-
+        document.querySelectorAll('#quick-filters .filter-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
         const type = e.target.dataset.filterType;
-        const value = e.target.dataset.filterValue;
-
-        if (type === 'all') {
-            currentFilters = {};
-        } else {
-            currentFilters = { [type]: value };
-        }
+        currentQuickFilter = (type === 'all') ? {} : { [type]: e.target.dataset.filterValue };
         fetchLombas(1);
     });
 
-    // Initial Load
+    categoryFilterContainer.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON') return;
+        const button = e.target;
+        const tagId = button.dataset.tagId;
+        button.classList.toggle('active');
+        if (button.classList.contains('active')) selectedTagIds.add(tagId);
+        else selectedTagIds.delete(tagId);
+        fetchLombas(1);
+    });
+
+    fetchAndRenderCategories();
     fetchLombas();
 });
 </script>
-
 </body>
 </html>

@@ -4,12 +4,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\API\BookmarkController;
+use App\Http\Controllers\API\HasilLombaController;
 use App\Http\Controllers\api\LombaController;
 use App\Http\Controllers\api\TagController;
 use App\Http\Controllers\api\MahasiswaController;
+use App\Http\Controllers\API\PenilaianController;
 use App\Http\Controllers\API\ProfilMahasiswaController;
 use App\Http\Controllers\api\ProgramStudiController;
 use App\Http\Controllers\API\PrestasiController;
+use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\API\RiwayatController;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -29,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 });
+
+
 
 Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
 Route::get('/lomba/stats', [LombaController::class, 'getStats']);

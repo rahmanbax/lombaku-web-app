@@ -59,11 +59,17 @@
 <template id="history-item-template">
     <div class="history-card grid grid-cols-1 md:grid-cols-12 gap-4 p-6 border-b border-gray-200 hover:bg-gray-50/50 transition-colors duration-200">
         <div class="md:col-span-5 flex items-start space-x-4">
-            <div class="item-icon w-16 h-16 rounded-lg flex items-center justify-center text-xl"></div>
-            <div>
+            <div class="item-icon w-16 h-16 rounded-lg flex items-center justify-center text-xl shrink-0"></div>
+            <div class="flex-grow">
                 <p class="item-type text-xs font-semibold uppercase tracking-wider"></p>
                 <h3 class="item-name font-bold text-gray-800"></h3>
                 <p class="item-kategori text-gray-500 text-sm mt-1"></p>
+
+                <!-- Placeholder untuk info tambahan (Dosen & Tim) -->
+                <div class="item-extra-info mt-3 space-y-2 text-xs">
+                    <div class="item-dosen-info hidden"></div>
+                    <div class="item-tim-info hidden"></div>
+                </div>
             </div>
         </div>
         <div class="md:col-span-2 flex flex-col justify-center">
@@ -77,28 +83,31 @@
         <div class="item-actions md:col-span-3 flex items-center space-x-4"></div>
     </div>
 </template>
+
  <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-20">
-        <div class="container mx-auto px-4 py-12">
-            <div class="max-w-3xl mx-auto text-center mb-8">
-                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
-                    Daftar sebagai Admin Lomba
-                </button>
-            </div>
+<footer class="bg-gray-800 text-white mt-20">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto text-center mb-8">
+            <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+            <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                Daftar sebagai Admin Lomba
+            </button>
         </div>
-        <div class="bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
-            </div>
+    </div>
+    <div class="bg-gray-900 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
         </div>
-    </footer>
+    </div>
+</footer>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('history-list-container');
     const loadingState = document.getElementById('loading-state');
     const paginationContainer = document.getElementById('pagination-container');
     const template = document.getElementById('history-item-template');
+    const baseUrl = window.location.origin;
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -109,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingState.style.display = 'block';
         container.innerHTML = ''; 
         container.appendChild(loadingState);
-
         try {
             const response = await axios.get(url, { headers: { 'Accept': 'application/json' } });
             renderItems(response.data.data);
@@ -139,64 +147,89 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const statusBadge = card.querySelector('.item-status-badge');
             statusBadge.textContent = item.status_text;
-
+            if (item.status_class) {
+                statusBadge.classList.add(item.status_class);
+            }
+            
             const itemIcon = card.querySelector('.item-icon');
             const actionsContainer = card.querySelector('.item-actions');
-
-            // --- PERBAIKAN: Logika rendering yang lebih jelas ---
+            const dosenInfoContainer = card.querySelector('.item-dosen-info');
+            const timInfoContainer = card.querySelector('.item-tim-info');
+            
             if (item.type.includes('Prestasi')) {
                 itemIcon.innerHTML = `<i class="fas fa-medal text-yellow-500"></i>`;
                 itemIcon.className += ' bg-yellow-100';
-                
-                if (item.status_raw === 'disetujui') statusBadge.classList.add('status-prestasi');
-                else if (item.status_raw === 'menunggu') statusBadge.classList.add('status-menunggu');
-                else if (item.status_raw === 'ditolak') statusBadge.classList.add('status-ditolak');
-
                 if (item.sertifikat_path) {
-                    actionsContainer.innerHTML = `<a href="{{ asset('storage') }}/${item.sertifikat_path}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-certificate mr-1"></i> Lihat Sertifikat</a>`;
+                    const sertifikatUrl = `${baseUrl}/storage/${item.sertifikat_path}`;
+                    actionsContainer.innerHTML = `<a href="${sertifikatUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-certificate mr-1"></i> Lihat Sertifikat</a>`;
                 }
             } else { // Partisipasi Lomba
                 itemIcon.innerHTML = `<i class="fas fa-flag-checkered text-indigo-500"></i>`;
                 itemIcon.className += ' bg-indigo-100';
-                
-                if (item.status_raw === 'menunggu') statusBadge.classList.add('status-menunggu');
-                else if (item.status_raw === 'diterima') statusBadge.classList.add('status-diterima');
-                else if (item.status_raw === 'ditolak') statusBadge.classList.add('status-ditolak');
 
                 if (item.lomba_id) {
-                     actionsContainer.innerHTML = `<a href="{{ url('/lomba') }}/${item.lomba_id}" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-eye mr-1"></i> Detail Lomba</a>`;
+                     const lombaUrl = `${baseUrl}/lomba/${item.lomba_id}`;
+                     actionsContainer.innerHTML = `<a href="${lombaUrl}" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-eye mr-1"></i> Detail Lomba</a>`;
                 } else {
                     actionsContainer.innerHTML = `<span class="text-gray-400 text-sm">Lomba tidak tersedia</span>`;
                 }
-            }
 
+                // Tampilkan Dosen Pembimbing jika ada
+                if (item.nama_dosen) {
+                    dosenInfoContainer.innerHTML = `
+                        <p class="flex items-center text-gray-600">
+                            <i class="fas fa-user-tie fa-fw mr-2 text-gray-400"></i>
+                            Dosen: <strong>${item.nama_dosen}</strong>
+                        </p>`;
+                    dosenInfoContainer.classList.remove('hidden');
+                }
+
+                // Tampilkan Info Tim jika ada
+                if (item.nama_tim && item.members && item.members.length > 0) {
+                    const membersHtml = item.members.map(nama => 
+                        `<span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md">${nama}</span>`
+                    ).join(' ');
+
+                    timInfoContainer.innerHTML = `
+                        <div class="flex items-start text-gray-600">
+                            <i class="fas fa-users fa-fw mr-2 mt-0.5 text-gray-400"></i>
+                            <div>
+                                <p>Tim: <strong>${item.nama_tim}</strong></p>
+                                <div class="pl-0 mt-1 flex flex-wrap gap-1.5">
+                                    ${membersHtml}
+                                </div>
+                            </div>
+                        </div>`;
+                    timInfoContainer.classList.remove('hidden');
+                }
+            }
             container.appendChild(card);
         });
     };
 
     const renderPagination = (data) => {
         paginationContainer.innerHTML = '';
-        if (data.total <= data.per_page) return;
+        if (!data || data.total <= data.per_page) return;
 
         const linksHtml = data.links.map(link => {
             const isActive = link.active;
             const isDisabled = !link.url;
-            let classes = 'px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm rounded-md';
+            let classes = 'px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm rounded-md transition-colors';
             if (isActive) classes = 'px-4 py-2 border border-blue-500 bg-blue-500 text-white text-sm rounded-md';
             if (isDisabled) classes += ' opacity-50 cursor-not-allowed';
             
-            return `<button data-url="${link.url}" class="${classes}" ${isDisabled ? 'disabled' : ''}>${link.label.replace('« Previous', '<i class="fas fa-chevron-left"></i>').replace('Next »', '<i class="fas fa-chevron-right"></i>')}</button>`;
+            return `<button data-url="${link.url}" class="${classes}" ${isDisabled ? 'disabled' : ''}>${link.label.replace(/«/g, '<i class="fas fa-chevron-left"></i>').replace(/»/g, '<i class="fas fa-chevron-right"></i>').replace(' Previous', '').replace('Next ', '')}</button>`;
         }).join('');
 
         paginationContainer.innerHTML = `
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center flex-wrap gap-4">
                 <div class="text-sm text-gray-600">Menampilkan ${data.from} - ${data.to} dari ${data.total} hasil</div>
                 <div class="flex space-x-1">${linksHtml}</div>
             </div>
         `;
         
         paginationContainer.querySelectorAll('button[data-url]').forEach(button => {
-            if (button.dataset.url !== 'null') {
+            if (button.dataset.url && button.dataset.url !== 'null') {
                 button.addEventListener('click', () => fetchRiwayat(button.dataset.url));
             }
         });
