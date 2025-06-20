@@ -5,9 +5,8 @@
             <span class="material-symbols-outlined">menu</span>
         </button>
         <ul class="hidden lg:flex gap-11 font-semibold">
-            <li><a href="/dashboard/kemahasiswaan">Dashboard</a></li>
-            <li><a href="/dashboard/kemahasiswaan/lomba">Lomba</a></li>
-            <li><a href="/dashboard/kemahasiswaan/mahasiswa">Mahasiswa</a></li>
+            <li><a href="/dashboard/adminlomba">Dashboard</a></li>
+            <li><a href="/dashboard/adminlomba/lomba">Lomba</a></li>
         </ul>
         <div class="relative">
             <!-- Button Kemahasiswaan FIT -->
@@ -39,7 +38,6 @@
     </button>
     <a href="/dashboard/kemahasiswaan" class="block">Dashboard</a>
     <a href="/dashboard/kemahasiswaan/lomba" class="block">Lomba</a>
-    <a href="/dashboard/kemahasiswaan/mahasiswa" class="block">Mahasiswa</a>
 </div>
 
 <!-- Script -->

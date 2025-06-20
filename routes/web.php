@@ -91,9 +91,6 @@ Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
 Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
     return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
 });
-Route::get('/dashboard/kemahasiswaan/lomba/edit/{id}', function ($id) {
-    return view('dashboard.kemahasiswaan.lomba.edit', ['id' => $id]);
-});
 
 Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
     return view('dashboard.kemahasiswaan.mahasiswa.index');
@@ -104,6 +101,15 @@ Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
 });
 
 // Dashboard Route Admin Lomba
-Route::get('/dashboard/adminlomba', function () {
-    return view('dashboard.adminlomba.index');
+Route::get('/dashboard/adminlomba/lomba', function () {
+    return view('dashboard.adminlomba.lomba.index');
+});
+
+Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
+    return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
+});
+
+
+Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
+    return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
 });

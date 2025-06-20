@@ -428,7 +428,7 @@ class LombaController extends Controller
 
         // 2. Mulai query untuk lomba yang dibuat oleh user ini
         $query = Lomba::where('id_pembuat', $user->id_user)
-            ->with(['tags']) // Eager load tags
+            ->with(['tags', 'pembuat']) // Eager load tags
             ->withCount('registrasi'); // Hitung jumlah pendaftar
 
         // 3. Tambahkan fungsionalitas pencarian (opsional, tapi berguna)

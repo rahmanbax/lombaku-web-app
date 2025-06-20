@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama_lomba');
             $table->string('deskripsi');
             $table->enum('lokasi', ['online', 'offline'])->default('online');
+            $table->string('lokasi_offline')->nullable();
             $table->enum('tingkat', ['nasional', 'internasional', 'internal'])->default('nasional');
             $table->enum('status', ['belum disetujui', 'ditolak', 'disetujui', 'berlangsung', 'selesai'])->default('belum disetujui');
             $table->string('alasan_penolakan')->nullable();

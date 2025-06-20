@@ -136,22 +136,36 @@
                         const statusText = lomba.status.replace(/_/g, " ").split(" ").map(capitalizeFirstLetter).join(" ");
 
                         // --- INI ADALAH PERUBAHAN UTAMA UNTUK KOLOM AKSI ---
+                        let actionButtonsHTML = "";
+
+                        // cek status
+                        if (lomba.status === 'belum disetujui' || lomba.status === 'ditolak' || lomba.status === 'disetujui') {
+                            // 3. Jika kondisi terpenuhi, tambahkan tombol Edit
+                            actionButtonsHTML += `
+                                <a href="/dashboard/adminlomba/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>
+                            `;
+                        }
+
+                        // Tombol lihat detail
+                        actionButtonsHTML += `
+                            <a href="/dashboard/adminlomba/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
+                        `;
+
                         row.innerHTML = `
-                    <td class="p-3 font-semibold">
-                        <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="hover:underline">${lomba.nama_lomba}</a>
-                    </td>
-                    <td class="p-3 capitalize">${lomba.tingkat}</td>
-                    <td class="p-3">${statusText}</td>
-                    <td class="p-3 text-center">${lomba.registrasi_count}</td>
-                    <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
-                    <td class="p-3">${penyelenggaraNama}</td>
-                    <td class="p-3">
-                        <div class="flex gap-2 justify-end">
-                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
-                            <a href="/dashboard/kemahasiswaan/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>
-                        </div>
-                    </td>
-                `;
+                            <td class="p-3 font-semibold">
+                                <a href="/dashboard/admin-lomba/lomba/${lomba.id_lomba}" class="hover:underline">${lomba.nama_lomba}</a>
+                            </td>
+                            <td class="p-3 capitalize">${lomba.tingkat}</td>
+                            <td class="p-3">${statusText}</td>
+                            <td class="p-3 text-center">${lomba.registrasi_count}</td>
+                            <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
+                            <td class="p-3">${penyelenggaraNama}</td>
+                            <td class="p-3">
+                                <div class="flex gap-2 justify-end">
+                                    ${actionButtonsHTML}
+                                </div>
+                            </td>
+                        `;
                         tableBody.appendChild(row);
                     });
                 } catch (error) {
@@ -215,8 +229,8 @@
                             const lombaElement = document.createElement('div');
                             lombaElement.className = 'flex items-center gap-2 p-3 bg-gray-100 rounded-lg mb-2';
                             lombaElement.innerHTML = `
-                    <div class="flex-1">
-                        <h2 class="text-base font-medium">${lomba.nama_lomba}</h2>
+                    <div class="flex-1"><p class="text-xs text-black/50">
+                        <a href="/dashboard/adminlomba/lomba/${lomba.id_lomba}" class="text-base font-medium hover:underline text-black">${lomba.nama_lomba}</a>
                         <p class="text-xs text-black/50">${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A")}</p>
                     </div>
                 `;

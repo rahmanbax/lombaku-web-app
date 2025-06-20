@@ -9,7 +9,8 @@
 </head>
 
 <body>
-    <x-kemahasiswaan-header-nav />
+    <x-adminlomba-header-nav />
+
 
     <main class=" lg:w-[1038px] mx-auto p-4 lg:py-10 lg:px-0">
         <h1 class="text-2xl font-bold mb-4">Edit Lomba</h1>
@@ -61,12 +62,6 @@
                     </select>
                 </div>
 
-                <!-- penyelenggara -->
-                <div class="col-span-4 lg:col-span-12 w-full">
-                    <label for="penyelenggara" class="text-black/60 font-semibold">Penyelenggara</label>
-                    <input type="text" name="penyelenggara" id="penyelenggara" required placeholder="Masukkan Nama Penyelenggara" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-
                 <!-- Tingkat -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="tingkat" class="text-black/60 font-semibold">Tingkat</label>
@@ -74,17 +69,6 @@
                         <option value="nasional">Nasional</option>
                         <option value="internasional">Internasional</option>
                         <option value="internal">Internal</option>
-                    </select>
-                </div>
-
-                <!-- Status (khusus untuk edit) -->
-                <div class="col-span-4 lg:col-span-12 w-full">
-                    <label for="status" class="text-black/60 font-semibold">Status</label>
-                    <select name="status" id="status" required class="w-full border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="belum disetujui">Belum Disetujui</option>
-                        <option value="disetujui">Disetujui</option>
-                        <option value="berlangsung">Berlangsung</option>
-                        <option value="selesai">Selesai</option>
                     </select>
                 </div>
 
@@ -138,8 +122,6 @@
                     document.getElementById('deskripsi').value = lomba.deskripsi;
                     document.getElementById('lokasi').value = lomba.lokasi;
                     document.getElementById('tingkat').value = lomba.tingkat;
-                    document.getElementById('status').value = lomba.status;
-                    document.getElementById('penyelenggara').value = lomba.penyelenggara;
                     document.getElementById('tanggal_akhir_registrasi').value = lomba.tanggal_akhir_registrasi;
                     document.getElementById('tanggal_mulai_lomba').value = lomba.tanggal_mulai_lomba;
                     document.getElementById('tanggal_selesai_lomba').value = lomba.tanggal_selesai_lomba;
