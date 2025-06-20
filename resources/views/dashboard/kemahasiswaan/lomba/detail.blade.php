@@ -83,6 +83,7 @@
                             <th scope="col" class="px-6 py-3">NIM</th>
                             <th scope="col" class="px-6 py-3">Program Studi</th>
                             <th scope="col" class="px-6 py-3">Nama Tim</th>
+                            <th scope="col" class="px-6 py-3">Pembimbing</th>
                             <th scope="col" class="px-6 py-3">Status Verifikasi</th>
                         </tr>
                     </thead>
@@ -177,6 +178,7 @@
                     const nim = profil ? profil.nim : '-';
                     const namaProdi = prodi ? prodi.nama_program_studi : '-';
                     const namaTim = reg.tim ? reg.tim.nama_tim : 'Individu';
+                    const namaPembimbing = reg.dosen_pembimbing ? reg.dosen_pembimbing.nama : 'Tidak ada pembimbing';
                     const statusVerifikasi = capitalize(reg.status_verifikasi);
 
                     row.innerHTML = `
@@ -184,6 +186,7 @@
                     <td class="px-6 py-4">${nim}</td>
                     <td class="px-6 py-4">${namaProdi}</td>
                     <td class="px-6 py-4">${namaTim}</td>
+                    <td class="px-6 py-4">${namaPembimbing}</td>
                     <td class="px-6 py-4">${statusVerifikasi}</td>
                 `;
                     tableBody.appendChild(row);
