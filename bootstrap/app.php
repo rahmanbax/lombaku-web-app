@@ -3,8 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use App\Http\Middleware\Authenticate;
+// use-statement ini tidak diperlukan jika Anda tidak menggunakannya di tempat lain
+// use App\Http\Middleware\Authenticate; 
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,15 +13,22 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-   ->withMiddleware(function (Middleware $middleware) {
-    $middleware->api([
-        EnsureFrontendRequestsAreStateful::class,
-    ]);
+    ->withMiddleware(function (Middleware $middleware) {
+        
+        // <<< PERUBAHAN UTAMA DI SINI >>>
+        // Gunakan 'prepend' untuk MENAMBAHKAN middleware ke awal grup 'api',
+        // bukan menggantinya secara keseluruhan.
+        $middleware->api(prepend: [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        ]);
 
-    $middleware->alias([
-        'auth' => Authenticate::class,
-    ]);
-})
+        // Kode alias Anda tetap dipertahankan, ini sudah benar.
+        // Laravel 11+ sudah otomatis melakukan ini, tapi tidak masalah jika ada di sini.
+        $middleware->alias([
+            'auth' => \App\Http\Middleware\Authenticate::class,
+        ]);
+
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

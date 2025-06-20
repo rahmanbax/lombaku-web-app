@@ -3,45 +3,41 @@
 use App\Http\Controllers\api\AuthController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Models\Lomba;
+use App\Http\Controllers\API\PrestasiController;
 
-// Route utama
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+
 Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+    // Menghapus filter ->whereIn() agar semua lomba diambil
+    $lombas = Lomba::with(['tags'])
+        ->latest('created_at') // Urutkan dari yang terbaru
+        ->paginate(9);         // Gunakan paginate untuk manajemen halaman yang baik
 
-Route::get('simpanlomba', function () {
-    return view('mahasiswa.simpanlomba');
-})->name('simpanlomba');
+    return view('welcome', ['lombas' => $lombas]);
+})->name('home');
+Route::get('/ajukan-rekognisi', function () {
+    return view('mahasiswa.lomba.ajukanrekognisi');
+})->name('rekognisi.create')->middleware('auth');
+
 Route::get('status', function () {
-    return view('mahasiswa.statuslomba');
-})->name('status');
+    return view('mahasiswa.lomba.statuslomba');
+})->name('status')->middleware('auth');
+
+Route::get('lombaterkini', function () {
+    // Hanya kembalikan view-nya saja. JavaScript akan mengurus pengambilan data.
+    return view('mahasiswa.lomba.lombaterkini');
+})->name('lombaterkini');
+
+Route::get('/simpanlomba', function () {
+    return view('mahasiswa.lomba.simpanlomba');
+})->name('simpanlomba')->middleware('auth');
+
+// Route::get('status', function () {
+//     return view('mahasiswa.lomba.statuslomba');
+// })->name('status');
+
 // Logout route
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-// Route::post('register', [AuthController::class, 'register'])->name('register.post');
-
-Route::get('login', function () {
-    // Pastikan user sudah login
-    if (!Auth::check()) {
-        return redirect('/login');
-    }
-
-    // Ambil data user dari session
-    $user = [
-        'id' => session('user_id'),
-        'username' => session('username'),
-        'nama' => session('nama'),
-        'email' => session('email'),
-        'notelp' => session('notelp'),
-        'role' => session('role'),
-        'nim_atau_nip' => session('nim_atau_nip'),
-        'instansi' => session('instansi'),
-    ];
-    
-    return view('welcome', ['user' => $user]);
-})->name('welcome');
 
 // Rute untuk menampilkan form login (GET)
 Route::get('login', function () {
@@ -58,14 +54,17 @@ Route::get('register', function () {
 Route::post('register', [AuthController::class, 'register'])->name('register.post');
 
 Route::get('profile', function () {
-    return view('mahasiswa.profile');
-})->name('profile'); 
+    return view('mahasiswa.profile.profile');
+})->name('profile');
+  Route::get('profile/edit', function () {
+        return view('mahasiswa.profile.edit-profile');
+    })->name('profile.edit');
 
-Route::get('detail', function () {
-    return view('mahasiswa.detaillomba');
-})->name('detail'); 
+Route::get('/lomba/{id}', function ($id) {
+    return view('mahasiswa.lomba.detaillomba');
+})->name('lomba.show');
 
-
+// Dashboard Routes...
 Route::get('/dashboard/kemahasiswaan', function () {
     return view('dashboard.kemahasiswaan.index');
 });
@@ -92,9 +91,3 @@ Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
 Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
     return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
 });
-
-Route::get('/project/{id}', function ($id) {
-    return view('project.detail', ['id' => $id]);
-});
-
-

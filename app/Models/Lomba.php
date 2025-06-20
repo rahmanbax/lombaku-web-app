@@ -69,4 +69,9 @@ class Lomba extends Model
     {
         return $this->hasMany(RegistrasiLomba::class, 'id_lomba', 'id_lomba');
     }
+    public function bookmarkedLombas()
+    {
+        return $this->belongsToMany(Lomba::class, 'lomba_bookmarks', 'user_id', 'id_lomba')
+                    ->withTimestamps();
+    }
 }

@@ -22,85 +22,14 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f9fafb;
-        }
-
-        /* Navbar Styles */
-        .navbar {
-            backdrop-filter: blur(10px);
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .logo-container {
-            transition: transform 0.3s ease;
-        }
-
-        .logo-container:hover {
+        .card-lomba:hover .lomba-image {
             transform: scale(1.05);
-        }
-
-        /* Dropdown Styles */
-        .dropdown-menu {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            display: block;
-            /* Always show but control with opacity/visibility */
-        }
-
-        .dropdown.active .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-item {
-            transition: all 0.2s ease;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f8fafc;
-            padding-left: 1.25rem;
-        }
-
-        /* Mobile Menu */
-        .nav-items {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-        }
-
-        .nav-items.active {
-            max-height: 500px;
-        }
-
-        @media (min-width: 768px) {
-            .nav-items {
-                max-height: none;
-                overflow: visible;
-            }
-        }
-
-        /* Card Styles */
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-gray-50 font-sans">
+
     <x-public-header-nav />
 
     <!-- Hero Section -->
@@ -114,9 +43,9 @@
             <div class="flex bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden">
                 <input
                     type="text"
-                    class="search-input flex-grow px-6 py-4 focus:outline-none"
+                    class="flex-grow px-6 py-4 focus:outline-none w-full"
                     placeholder="Cari lomba, kategori, atau penyelenggara...">
-                <button class="search-button bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 transition-colors">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 transition-colors">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -124,100 +53,60 @@
 
         <div class="border-b border-gray-200 my-12"></div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Card 1 -->
-            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div class="relative">
-                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
-                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
-                        15 Juni 2025
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Desain Minimalis</h3>
-                    <p class="text-gray-600 mb-4">Tampilan elegan dengan palet warna hitam-putih yang modern dan profesional.</p>
-                    <a href="{{ route('detail') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        Lihat Detail
-                    </a>
-                </div>
-            </div>
+        <section id="lomba-terbaru" class="container mx-auto px-4 py-8">
+            <h2 class="text-3xl font-bold text-center text-dark mb-10">Lomba Terbaru Untukmu</h2>
 
-            <!-- Card 2 -->
-            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div class="relative">
-                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
-                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
-                        10 Juni 2025
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">UI Modern</h3>
-                    <p class="text-gray-600 mb-4">Dropdown yang disederhanakan untuk pengalaman pengguna yang lebih baik.</p>
-                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        Lihat Detail
-                    </a>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <!-- Card 3 -->
-            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div class="relative">
-                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
-                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
-                        5 Juni 2025
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Efek Interaktif</h3>
-                    <p class="text-gray-600 mb-4">Transisi halus dan efek hover yang elegan untuk interaksi yang menyenangkan.</p>
-                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        Lihat Detail
-                    </a>
-                </div>
-            </div>
+                @forelse ($lombas as $lomba)
+                    <div class="card-lomba bg-white rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:-translate-y-2">
+                        <div class="relative overflow-hidden">
+                            <img src="{{ asset($lomba->foto_lomba) }}" alt="{{ $lomba->nama_lomba }}" class="lomba-image w-full h-48 object-cover transition-transform duration-300">
+                            <div class="absolute top-2 left-2 flex flex-wrap gap-1">
+                                @foreach ($lomba->tags->take(2) as $tag)
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">{{ $tag->nama_tag }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-dark truncate" title="{{ $lomba->nama_lomba }}">
+                                {{ Str::limit($lomba->nama_lomba, 45) }}
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1 capitalize">{{ $lomba->penyelenggara ?: 'Penyelenggara tidak diketahui' }}</p>
+                            
+                            <div class="flex items-center text-gray-500 text-sm mt-4">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                <span>Pendaftaran s/d {{ \Carbon\Carbon::parse($lomba->tanggal_akhir_registrasi)->translatedFormat('d F Y') }}</span>
+                            </div>
 
-            <!-- Card 4 -->
-            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div class="relative">
-                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
-                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
-                        1 Juni 2025
+                            <a href="{{ route('lomba.show', ['id' => $lomba->id_lomba]) }}" class="mt-5 block w-full bg-blue-600 text-white text-center font-semibold py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Lihat Detail
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Responsive Design</h3>
-                    <p class="text-gray-600 mb-4">Tampilan optimal di semua perangkat, dari desktop hingga mobile.</p>
-                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        Lihat Detail
-                    </a>
-                </div>
-            </div>
+                @empty
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                        <p class="text-gray-500 text-lg">Saat ini belum ada lomba yang tersedia.</p>
+                    </div>
+                @endforelse
 
-            <!-- Card 5 -->
-            <div class="card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div class="relative">
-                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48"></div>
-                    <div class="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded-full">
-                        25 Mei 2025
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Search Terintegrasi</h3>
-                    <p class="text-gray-600 mb-4">Fitur pencarian yang terintegrasi dengan baik untuk kemudahan navigasi.</p>
-                    <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        Lihat Detail
-                    </a>
-                </div>
             </div>
-        </div>
+            
+            <!-- == BAGIAN BARU UNTUK LINK HALAMAN == -->
+            <div class="mt-12">
+                {{ $lombas->links() }}
+            </div>
+            <!-- ==================================== -->
+        </section>
     </div>
 
+    
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
                 <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-                <button class="admin-btn bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
                     Daftar sebagai Admin Lomba
                 </button>
             </div>
@@ -228,96 +117,5 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Mobile menu toggle
-        const hamburger = document.getElementById('hamburger');
-        const navItems = document.getElementById('navItems');
-
-        hamburger.addEventListener('click', () => {
-            navItems.classList.toggle('active');
-        });
-
-        // Dropdown toggle - Improved version
-        const dropdowns = document.querySelectorAll('.dropdown');
-
-        dropdowns.forEach(dropdown => {
-            const toggle = dropdown.querySelector('.dropdown-toggle');
-
-            // Click handler
-            toggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-
-                // Close all other dropdowns first
-                dropdowns.forEach(other => {
-                    if (other !== dropdown) {
-                        other.classList.remove('active');
-                    }
-                });
-
-                // Toggle current dropdown
-                dropdown.classList.toggle('active');
-            });
-
-            // Keyboard accessibility
-            toggle.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    dropdown.classList.toggle('active');
-                } else if (e.key === 'Escape' && dropdown.classList.contains('active')) {
-                    dropdown.classList.remove('active');
-                }
-            });
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown')) {
-                dropdowns.forEach(dropdown => {
-                    dropdown.classList.remove('active');
-                });
-            }
-        });
-
-        // Close dropdowns on ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                dropdowns.forEach(dropdown => {
-                    dropdown.classList.remove('active');
-                });
-            }
-        });
-
-        // Search functionality
-        const searchButton = document.querySelector('.search-button');
-        const searchInput = document.querySelector('.search-input');
-
-        searchButton.addEventListener('click', function() {
-            if (searchInput.value.trim() !== '') {
-                alert(`Anda mencari: "${searchInput.value}"`);
-                // Di aplikasi nyata, ini akan mengirimkan permintaan pencarian
-            } else {
-                searchInput.focus();
-            }
-        });
-
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                if (searchInput.value.trim() !== '') {
-                    alert(`Anda mencari: "${searchInput.value}"`);
-                } else {
-                    searchInput.focus();
-                }
-            }
-        });
-
-        // Admin button functionality
-        const adminButton = document.querySelector('.admin-btn');
-        adminButton.addEventListener('click', function() {
-            alert('Fitur pendaftaran admin lomba akan segera tersedia!');
-            // Di aplikasi nyata, ini akan mengarahkan ke halaman pendaftaran admin
-        });
-    </script>
 </body>
-
 </html>

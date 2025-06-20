@@ -1,70 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    <!-- Tambahkan CSRF Token untuk request POST/DELETE -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Detail Lomba - Lombaku</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        #loading-overlay { display: flex; }
+        /* Style untuk tombol bookmark aktif */
+        .bookmarked {
+            background-color: #3b82f6 !important; /* blue-500 */
+            color: white !important;
+            border-color: #3b82f6 !important;
+        }
+    </style>
 </head>
 
-<body>
-    <x-kemahasiswaan-header-nav />
+<body class="bg-gray-100">
 
-    <main class="lg:w-[1038px] mx-auto p-4 lg:py-10 lg:px-0">
+    <!-- Pastikan Anda punya komponen blade untuk header -->
+    @include('layouts.navbar') <!-- Ganti dengan path include header Anda -->
 
-        <!-- Kontainer utama yang akan diisi oleh JavaScript -->
-        <section id="lomba-detail-container" class="grid grid-cols-4 lg:grid-cols-12 gap-4 mt-5">
-            <!-- Placeholder/Loading state -->
-            <div class="col-span-12 text-center p-10">
-                <p class="text-lg font-semibold text-gray-500">Memuat data lomba...</p>
-            </div>
-        </section>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-75 z-50 justify-center items-center">
+        <i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i>
+    </div>
 
-        <!-- Template untuk detail lomba (disembunyikan secara default) -->
-        <template id="lomba-detail-template">
-            <img id="lomba-image" src="" alt="Foto Lomba" class="col-span-4 lg:col-span-5 rounded-lg object-cover w-full aspect-square" />
+    <!-- Kontainer utama, awalnya disembunyikan -->
+    <main id="main-content" class="container mx-auto p-4 lg:py-10 lg:px-0 opacity-0 transition-opacity duration-500">
+        
+        <!-- Kontainer untuk detail lomba -->
+        <section id="lomba-detail-container" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Kolom Kiri: Gambar dan Tombol Aksi -->
+            <div class="lg:col-span-4">
+                <img id="lomba-image" src="" alt="Foto Lomba" class="rounded-lg object-cover w-full aspect-[4/3] shadow-lg bg-gray-200">
+                <div class="mt-6 space-y-3">
+                    
+                    <button id="daftar-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <i class="fas fa-edit mr-2"></i> Daftar Lomba
+                    </button>
+                    
+                    <button id="bookmark-btn" class="w-full bg-white border border-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition-all">
+                        <i class="far fa-bookmark mr-2"></i> <span>Simpan Lomba</span>
+                    </button>
 
-            <div class="ml-0 lg:ml-2 col-span-4 lg:col-span-7">
-                <h1 id="lomba-nama" class="text-2xl font-bold"></h1>
-                <p id="lomba-tingkat" class="text-black/60 mt-1 text-lg capitalize"></p>
-
-                <!-- Area untuk Tags -->
-                <div id="lomba-tags" class="flex flex-wrap gap-2 mt-4">
-                    <!-- Tag akan diisi oleh JS di sini -->
                 </div>
+            </div>
 
-                <table class="mt-4 w-full">
-                    <tbody>
-                        <tr>
-                            <th class="font-normal text-start pb-2 w-1/2">Lokasi</th>
-                            <td id="lomba-lokasi" class="pb-2 capitalize"></td>
-                        </tr>
-                        <tr>
-                            <th class="font-normal text-start pb-2 w-1/2">Status</th>
-                            <td id="lomba-status" class="pb-2 capitalize"></td>
-                        </tr>
-                        <tr>
-                            <th class="font-normal text-start pb-2 w-1/2">Tanggal Akhir Daftar</th>
-                            <td id="lomba-tanggal-akhir-registrasi" class="pb-2"></td>
-                        </tr>
-                        <tr>
-                            <th class="font-normal text-start pb-2">Tanggal Mulai Lomba</th>
-                            <td id="lomba-tanggal-mulai" class="pb-2"></td>
-                        </tr>
-                        <tr>
-                            <th class="font-normal text-start pb-2">Tanggal Akhir Lomba</th>
-                            <td id="lomba-tanggal-selesai" class="pb-2"></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Kolom Kanan: Informasi Detail -->
+            <div class="lg:col-span-8">
+                <div id="lomba-tags" class="flex flex-wrap gap-2 mb-2"></div>
+                <h1 id="lomba-nama" class="text-3xl font-bold text-gray-800">Memuat nama lomba...</h1>
+                <p id="penyelenggara-nama" class="text-gray-500 mt-1 text-md"></p>
+                
+                <div class="border-t my-6"></div>
 
-                <div class="flex gap-2 mt-3 bg-gray-100 w-full p-3 rounded-lg">
-                    <img id="penyelenggara-foto" src="{{ asset('images/default-profile.png') }}" alt="foto penyelenggara" class="w-12 h-12 rounded-full object-cover">
-                    <div>
-                        <p class="text-xs text-black/60">Penyelenggara</p>
-                        <h1 id="penyelenggara-nama" class="font-semibold mt-1"></h1>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4 text-md">
+                    <div class="flex items-start">
+                        <i class="fas fa-award fa-lg text-blue-500 mt-1 mr-4"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Tingkat</p>
+                            <p id="lomba-tingkat" class="text-gray-600 capitalize">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-map-marker-alt fa-lg text-blue-500 mt-1 mr-4"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Lokasi</p>
+                            <p id="lomba-lokasi" class="text-gray-600 capitalize">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-flag-checkered fa-lg text-blue-500 mt-1 mr-4"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Status</p>
+                            <p id="lomba-status" class="text-gray-600 capitalize">-</p>
+                        </div>
+                    </div>
+                     <div class="flex items-start col-span-2 sm:col-span-1">
+                        <i class="fas fa-calendar-times fa-lg text-red-500 mt-1 mr-4"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Batas Registrasi</p>
+                            <p id="lomba-tanggal-akhir-registrasi" class="text-gray-600">-</p>
+                        </div>
                     </div>
                 </div>
 
@@ -98,62 +124,65 @@
                 </table>
             </div>
         </section>
-
-
     </main>
 
-    <!-- Script dipanggil setelah semua HTML dimuat -->
+   <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                    Daftar sebagai Admin Lomba
+                </button>
+            </div>
+        </div>
+        <div class="bg-gray-900 py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const mainContent = document.getElementById('main-content');
+        const bookmarkBtn = document.getElementById('bookmark-btn');
+        const daftarBtn = document.getElementById('daftar-btn');
 
-            // Helper function untuk memformat tanggal
-            function formatDate(dateString) {
-                const options = {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                };
-                return new Date(dateString).toLocaleDateString('id-ID', options);
+        // Mengambil ID Lomba dari URL
+        const pathParts = window.location.pathname.split('/');
+        const lombaId = pathParts[pathParts.length - 1];
+
+        // Helper untuk format tanggal
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // --- FUNGSI UTAMA UNTUK MENGAMBIL DATA ---
+        async function loadLombaData() {
+            if (!lombaId || isNaN(lombaId)) {
+                showError('ID Lomba tidak valid.');
+                return;
             }
 
-            function capitalize(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-
-            // --- Fungsi untuk merender detail lomba ---
-            function renderLombaDetails(lomba) {
-                const container = document.getElementById('lomba-detail-container');
-                const template = document.getElementById('lomba-detail-template');
-                const clone = template.content.cloneNode(true);
-
-                clone.getElementById('lomba-image').src = `/${lomba.foto_lomba}`;
-                clone.getElementById('lomba-nama').textContent = lomba.nama_lomba;
-                clone.getElementById('lomba-tingkat').textContent = lomba.tingkat;
-                clone.getElementById('lomba-lokasi').textContent = lomba.lokasi;
-                clone.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
-                clone.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
-                clone.getElementById('lomba-tanggal-mulai').textContent = formatDate(lomba.tanggal_mulai_lomba);
-                clone.getElementById('lomba-tanggal-selesai').textContent = formatDate(lomba.tanggal_selesai_lomba);
-                clone.getElementById('penyelenggara-nama').textContent = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui');
-                if (lomba.pembuat.foto_profile) {
-                    clone.getElementById('penyelenggara-foto').src = `/${lomba.pembuat.foto_profile}`;
-                }
-                clone.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
-
-                const tagsContainer = clone.getElementById('lomba-tags');
-                if (lomba.tags && lomba.tags.length > 0) {
-                    lomba.tags.forEach(tag => {
-                        const tagElement = document.createElement('span');
-                        tagElement.className = 'bg-blue-100 text-blue-500 py-1 px-2 rounded-md font-semibold text-sm';
-                        tagElement.textContent = tag.nama_tag;
-                        tagsContainer.appendChild(tagElement);
-                    });
+            try {
+                // Panggil API untuk mendapatkan detail lomba.
+                // Jika user login, token akan otomatis disertakan oleh Sanctum jika setup benar.
+                const response = await axios.get(`/api/lomba/${lombaId}`);
+                
+                if (response.data.success) {
+                    renderPage(response.data.data);
                 } else {
-                    tagsContainer.innerHTML = '<p class="text-sm text-gray-500">Tidak ada tag.</p>';
+                    showError(response.data.message || 'Lomba tidak ditemukan.');
                 }
-
-                container.innerHTML = '';
-                container.appendChild(clone);
+            } catch (error) {
+                console.error('Error fetching lomba data:', error);
+                showError('Gagal memuat data lomba. Coba muat ulang halaman.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+                mainContent.classList.remove('opacity-0');
             }
 
             // --- Fungsi untuk merender tabel peserta ---
@@ -225,10 +254,9 @@
                 }
             }
 
-            // Panggil fungsi utama saat halaman dimuat
-            loadPageData();
-        });
+        // Panggil fungsi utama saat halaman dimuat
+        loadLombaData();
+    });
     </script>
 </body>
-
 </html>

@@ -9,18 +9,7 @@ class ProfilMahasiswa extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel yang terhubung dengan model.
-     *
-     * @var string
-     */
     protected $table = 'profil_mahasiswa';
-
-    /**
-     * Primary key untuk model.
-     *
-     * @var string
-     */
     protected $primaryKey = 'id_profil_mahasiswa';
 
     /**
@@ -32,6 +21,26 @@ class ProfilMahasiswa extends Model
         'nim',
         'id_user',
         'id_program_studi',
+        // --- TAMBAHKAN SEMUA KOLOM BARU DI SINI ---
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'headline',
+        'domisili_provinsi',
+        'domisili_kabupaten',
+        'kode_pos',
+        'alamat_lengkap',
+        'sosial_media',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        // Memberitahu Laravel untuk otomatis mengubah kolom JSON menjadi array/object
+        'sosial_media' => 'array',
+        'tanggal_lahir' => 'date',
     ];
 
     /**
@@ -49,4 +58,4 @@ class ProfilMahasiswa extends Model
     {
         return $this->belongsTo(ProgramStudi::class, 'id_program_studi', 'id_program_studi');
     }
-}   
+}
