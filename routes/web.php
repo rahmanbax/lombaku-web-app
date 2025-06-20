@@ -5,16 +5,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Models\Lomba;
 use App\Http\Controllers\API\PrestasiController;
+use App\Http\Controllers\API\RegistrasiLombaController; 
 
 
+Route::get('/lomba/{lomba}/registrasi', [RegistrasiLombaController::class, 'create'])
+    ->middleware('auth') // Wajib login untuk akses
+    ->name('lomba.registrasi');
+
+// Rute welcome Anda sudah benar.
 Route::get('/', function () {
-    // Menghapus filter ->whereIn() agar semua lomba diambil
-    $lombas = Lomba::with(['tags'])
-        ->latest('created_at') // Urutkan dari yang terbaru
-        ->paginate(9);         // Gunakan paginate untuk manajemen halaman yang baik
-
-    return view('welcome', ['lombas' => $lombas]);
+    // Hanya menampilkan view, data akan di-fetch oleh JavaScript
+    return view('welcome');
 })->name('home');
+
 Route::get('/ajukan-rekognisi', function () {
     return view('mahasiswa.lomba.ajukanrekognisi');
 })->name('rekognisi.create')->middleware('auth');
@@ -32,6 +35,7 @@ Route::get('/simpanlomba', function () {
     return view('mahasiswa.lomba.simpanlomba');
 })->name('simpanlomba')->middleware('auth');
 
+// Kode yang dikomentari ini sudah benar untuk dihapus.
 // Route::get('status', function () {
 //     return view('mahasiswa.lomba.statuslomba');
 // })->name('status');
@@ -60,8 +64,9 @@ Route::get('profile', function () {
         return view('mahasiswa.profile.edit-profile');
     })->name('profile.edit');
 
-Route::get('/lomba/{id}', function ($id) {
-    return view('mahasiswa.lomba.detaillomba');
+// PERBAIKAN 2: Menggunakan Route Model Binding agar konsisten.
+Route::get('/lomba/{lomba}', function (Lomba $lomba) {
+    return view('mahasiswa.lomba.detaillomba', compact('lomba'));
 })->name('lomba.show');
 
 // route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
@@ -74,6 +79,9 @@ Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
 
     return response()->file($path);
 })->name('sertifikat.prestasi');
+
+
+
 
 // Dashboard Route Kemahasiswaan
 Route::get('/dashboard/kemahasiswaan', function () {

@@ -26,20 +26,15 @@
         <div class="bg-white rounded-xl shadow-md p-8">
             <h1 class="text-2xl font-bold text-gray-800 mb-8">Edit Profil Mahasiswa</h1>
 
-            <!-- Form fields (tidak berubah) -->
             <!-- Data Diri & Akademik -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Informasi Akademik & Kontak</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label for="nama" class="form-label">Nama Lengkap</label>
                     <input type="text" id="nama" name="nama" class="w-full p-2 border rounded-md form-input">
                     <p id="error-nama" class="error-message"></p>
                 </div>
-                <div>
-                    <label for="headline" class="form-label">Headline (cth: "Web Developer | UI/UX Enthusiast")</label>
-                    <input type="text" id="headline" name="headline" class="w-full p-2 border rounded-md form-input">
-                    <p id="error-headline" class="error-message"></p>
-                </div>
-                <div>
+                 <div>
                     <label for="nim" class="form-label">NIM</label>
                     <input type="text" id="nim" name="nim" class="w-full p-2 border rounded-md form-input">
                     <p id="error-nim" class="error-message"></p>
@@ -51,9 +46,6 @@
                     </select>
                     <p id="error-id_program_studi" class="error-message"></p>
                 </div>
-            </div>
-            <!-- Informasi Kontak -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label for="email" class="form-label">Email</label>
                     <input type="email" id="email" name="email" class="w-full p-2 border rounded-md form-input">
@@ -65,7 +57,9 @@
                     <p id="error-notelp" class="error-message"></p>
                 </div>
             </div>
+
             <!-- Informasi Personal -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 mt-8">Informasi Personal</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
@@ -81,40 +75,12 @@
                     </select>
                     <p id="error-jenis_kelamin" class="error-message"></p>
                 </div>
-            </div>
-            <!-- Informasi Domisili -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                 <div>
-                    <label for="domisili_provinsi" class="form-label">Provinsi</label>
-                    <input type="text" id="domisili_provinsi" name="domisili_provinsi" class="w-full p-2 border rounded-md form-input">
-                </div>
-                 <div>
-                    <label for="domisili_kabupaten" class="form-label">Kabupaten/Kota</label>
-                    <input type="text" id="domisili_kabupaten" name="domisili_kabupaten" class="w-full p-2 border rounded-md form-input">
-                </div>
-                 <div>
-                    <label for="kode_pos" class="form-label">Kode Pos</label>
-                    <input type="text" id="kode_pos" name="kode_pos" class="w-full p-2 border rounded-md form-input">
-                </div>
-                <div class="md:col-span-3">
+                <div class="md:col-span-2">
                     <label for="alamat_lengkap" class="form-label">Alamat Lengkap</label>
                     <textarea id="alamat_lengkap" name="alamat_lengkap" rows="3" class="w-full p-2 border rounded-md form-input"></textarea>
                 </div>
             </div>
-            <!-- Sosial Media -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label for="sosial_media_linkedin" class="form-label">LinkedIn URL</label>
-                    <input type="url" id="sosial_media_linkedin" name="sosial_media[linkedin]" class="w-full p-2 border rounded-md form-input" placeholder="https://linkedin.com/in/username">
-                    <p id="error-sosial_media_linkedin" class="error-message"></p>
-                </div>
-                <div>
-                    <label for="sosial_media_github" class="form-label">GitHub URL</label>
-                    <input type="url" id="sosial_media_github" name="sosial_media[github]" class="w-full p-2 border rounded-md form-input" placeholder="https://github.com/username">
-                    <p id="error-sosial_media_github" class="error-message"></p>
-                </div>
-            </div>
-
+            
             <!-- Tombol Aksi -->
             <div class="border-t border-gray-200 mt-8 pt-6 flex justify-end items-center gap-4">
                 <a href="{{ route('profile') }}" class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-md">Batal</a>
@@ -129,7 +95,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-    // ... (Definisi variabel form, submitButton, etc. tidak berubah)
     const form = document.getElementById('edit-profile-form');
     const submitButton = document.getElementById('submit-button');
     const successMessage = document.getElementById('success-message');
@@ -138,25 +103,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     axios.defaults.withCredentials = true;
 
-    // Fungsi populateForm dan populateProdi tidak berubah
     const populateForm = (data) => {
         const profile = data.data;
         document.getElementById('nama').value = profile.user.nama || '';
         document.getElementById('email').value = profile.user.email || '';
         document.getElementById('notelp').value = profile.user.notelp || '';
         document.getElementById('nim').value = profile.nim || '';
-        document.getElementById('headline').value = profile.headline || '';
         document.getElementById('tanggal_lahir').value = profile.tanggal_lahir ? profile.tanggal_lahir.split('T')[0] : '';
         document.getElementById('jenis_kelamin').value = profile.jenis_kelamin || '';
-        document.getElementById('domisili_provinsi').value = profile.domisili_provinsi || '';
-        document.getElementById('domisili_kabupaten').value = profile.domisili_kabupaten || '';
-        document.getElementById('kode_pos').value = profile.kode_pos || '';
         document.getElementById('alamat_lengkap').value = profile.alamat_lengkap || '';
-        if(profile.sosial_media) {
-            document.getElementById('sosial_media_linkedin').value = profile.sosial_media.linkedin || '';
-            document.getElementById('sosial_media_github').value = profile.sosial_media.github || '';
-        }
     };
+
     const populateProdi = (prodiList, selectedId) => {
         const select = document.getElementById('id_program_studi');
         select.innerHTML = '<option value="">Pilih Program Studi</option>';
@@ -168,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             select.appendChild(option);
         });
     };
+
     const displayErrors = (errors) => {
         document.querySelectorAll('.error-message').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
         for (const field in errors) {
@@ -179,7 +137,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     
-    // Blok try...catch untuk mengambil data awal tidak berubah
     try {
         const [profileRes, prodiRes] = await Promise.all([
             axios.get('/api/profil-mahasiswa'),
@@ -197,19 +154,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.reload();
     }
 
-    // --- PERBAIKAN PADA EVENT SUBMIT FORM ---
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         submitButton.disabled = true;
         submitButton.textContent = 'Menyimpan...';
         successMessage.style.display = 'none';
-        displayErrors({}); // Bersihkan error lama
+        displayErrors({});
 
-        // Langsung gunakan FormData, ini lebih robust untuk nested data
         const formData = new FormData(form);
 
         try {
-            // Kirim FormData secara langsung. Axios akan mengatur header yang benar.
             const response = await axios.post('/api/profil-mahasiswa', formData);
             
             successMessage.textContent = response.data.message;

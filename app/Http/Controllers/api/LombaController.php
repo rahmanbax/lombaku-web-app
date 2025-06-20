@@ -39,13 +39,14 @@ class LombaController extends Controller
             $query->where('lokasi', $request->lokasi);
         }
 
-        // ==========================================================
-        // === PERUBAHAN UTAMA ADA DI SINI ===
-        // ==========================================================
-        // 3. Paginasi Kustom
-        // Ambil nilai 'limit' dari request. Jika tidak ada, gunakan 10 sebagai default.
         $perPage = $request->input('limit', 10);
-
+       if ($request->has('tags') && is_array($request->tags) && count($request->tags) > 0) {
+            $tagIds = $request->tags;
+            // Gunakan whereHas untuk memfilter lomba yang memiliki setidaknya satu dari tag yang dipilih
+            $query->whereHas('tags', function ($tagQuery) use ($tagIds) {
+                $tagQuery->whereIn('tags.id_tag', $tagIds);
+            });
+        }
         // Ganti get() dengan paginate()
         // Metode latest() tetap digunakan untuk mengurutkan
         $lombas = $query->latest()->paginate($perPage);
