@@ -6,6 +6,37 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Lomba;
 use App\Http\Controllers\API\PrestasiController;
 use App\Http\Controllers\API\RegistrasiLombaController; 
+use App\Http\Controllers\Api\AdminProdiController;
+
+Route::get('/adminprodi', function () {
+    return view('admin.dashboard');
+})->name('dashboard.admin_prodi.view');
+
+Route::get('/adminprodi/daftar-lomba', function () {
+    return view('admin.daftar-lomba');
+})->name('admin_prodi.lomba.index');
+
+Route::get('/adminprodi/lomba/{id}', function ($id) {
+    return view('admin.detail-lomba', ['id' => $id]); 
+})->name('admin_prodi.lomba.show');
+
+// === ROUTE BARU UNTUK HALAMAN VERIFIKASI ===
+Route::get('/adminprodi/verifikasi-prestasi', function () {
+    return view('admin.verifikasi-prestasi');
+})->name('admin_prodi.prestasi.verifikasi');
+
+// === TAMBAHKAN ROUTE BARU INI ===
+Route::get('/adminprodi/riwayat-pendaftaran', function() {
+    return view('admin.riwayat-pendaftaran');
+})->name('admin_prodi.registrasi.history');
+
+Route::get('/adminprodi/arsip-lomba', function() {
+    return view('admin.arsip-lomba');
+})->name('admin_prodi.lomba.arsip');
+
+// Data JSON untuk Dashboard
+Route::get('/dashboard/admin-prodi-data', [AdminProdiController::class, 'index'])
+     ->name('dashboard.admin_prodi.data');
 
 
 Route::get('/lomba/{lomba}/registrasi', [RegistrasiLombaController::class, 'create'])

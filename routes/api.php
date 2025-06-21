@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminProdiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
@@ -22,7 +23,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Rute yang memerlukan autentikasi
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-   Route::get('/profil-mahasiswa', [ProfilMahasiswaController::class, 'show']);
+    Route::get('/profil-mahasiswa', [ProfilMahasiswaController::class, 'show']);
     Route::post('/profil-mahasiswa', [ProfilMahasiswaController::class, 'update']);
     Route::post('/prestasi', [PrestasiController::class, 'store']);
     Route::get('/riwayat', [RiwayatController::class, 'getRiwayat']);
@@ -33,8 +34,21 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 });
- 
 
+Route::get('/admin-prodi/arsip-lomba', [App\Http\Controllers\Api\AdminProdiController::class, 'getArchivedLombas']);
+Route::get('/admin-prodi/registration-history', [App\Http\Controllers\Api\AdminProdiController::class, 'getRegistrationHistory']);
+
+Route::get('/admin-prodi/prestasi-verifikasi', [App\Http\Controllers\Api\AdminProdiController::class, 'getPrestasiVerifications']);
+// ======================
+Route::get('/admin-prodi/lombas', [AdminProdiController::class, 'getLombaList']);
+// ==========================================================
+
+// Rute Publik & Lainnya
+Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
+Route::patch('/prestasi/{id}/verifikasi/setujui', [App\Http\Controllers\Api\AdminProdiController::class, 'approvePrestasi']);
+Route::patch('/prestasi/{id}/verifikasi/tolak', [App\Http\Controllers\Api\AdminProdiController::class, 'rejectPrestasi']);
+
+Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
 
 Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
 Route::get('/lomba/stats', [LombaController::class, 'getStats']);
