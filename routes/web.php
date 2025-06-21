@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Models\Lomba;
 use App\Http\Controllers\API\PrestasiController;
-use App\Http\Controllers\API\RegistrasiLombaController; 
+use App\Http\Controllers\API\RegistrasiLombaController;
 
 
 Route::get('/lomba/{lomba}/registrasi', [RegistrasiLombaController::class, 'create'])
@@ -54,9 +54,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('profile', function () {
     return view('mahasiswa.profile.profile');
 })->name('profile');
-  Route::get('profile/edit', function () {
-        return view('mahasiswa.profile.edit-profile');
-    })->name('profile.edit');
+
+Route::get('profile/edit', function () {
+    return view('mahasiswa.profile.edit-profile');
+})->name('profile.edit');
 
 // PERBAIKAN 2: Menggunakan Route Model Binding agar konsisten.
 Route::get('/lomba/{lomba}', function (Lomba $lomba) {
@@ -66,7 +67,7 @@ Route::get('/lomba/{lomba}', function (Lomba $lomba) {
 // route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
 Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
     $path = storage_path('app/public/sertifikat_prestasi/' . $filename);
-    
+
     if (!file_exists($path)) {
         abort(404);
     }
@@ -74,48 +75,49 @@ Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
     return response()->file($path);
 })->name('sertifikat.prestasi');
 
-
-
-
 // Dashboard Route Kemahasiswaan
-Route::get('/dashboard/kemahasiswaan', function () {
-    return view('dashboard.kemahasiswaan.index');
-});
 
-Route::get('/dashboard/kemahasiswaan/lomba', function () {
-    return view('dashboard.kemahasiswaan.lomba.index');
-});
+// lindungi dengan middleware auth
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard/kemahasiswaan', function () {
+        return view('dashboard.kemahasiswaan.index');
+    });
 
-Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
-    return view('dashboard.kemahasiswaan.lomba.buat');
-});
+    Route::get('/dashboard/kemahasiswaan/lomba', function () {
+        return view('dashboard.kemahasiswaan.lomba.index');
+    });
 
-Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
-    return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
-});
+    Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
+        return view('dashboard.kemahasiswaan.lomba.buat');
+    });
 
-Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
-    return view('dashboard.kemahasiswaan.mahasiswa.index');
-});
+    Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
+        return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
+    });
 
-Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
-    return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
-});
+    Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
+        return view('dashboard.kemahasiswaan.mahasiswa.index');
+    });
 
-// Dashboard Route Admin Lomba
-Route::get('/dashboard/adminlomba/lomba', function () {
-    return view('dashboard.adminlomba.lomba.index');
-});
+    Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
+        return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
+    });
 
-Route::get('/dashboard/adminlomba/lomba/buat', function () {
-    return view('dashboard.adminlomba.lomba.buat');
-});
+    // Dashboard Route Admin Lomba
+    Route::get('/dashboard/adminlomba/lomba', function () {
+        return view('dashboard.adminlomba.lomba.index');
+    });
 
-Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
-    return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
-});
+    Route::get('/dashboard/adminlomba/lomba/buat', function () {
+        return view('dashboard.adminlomba.lomba.buat');
+    });
+
+    Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
+        return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
+    });
 
 
-Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
-    return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
+    Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
+        return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
+    });
 });
