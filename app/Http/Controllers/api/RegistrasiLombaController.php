@@ -21,9 +21,9 @@ class RegistrasiLombaController extends Controller
     {
         $dosenList = User::where('role', 'dosen')->orderBy('nama')->get(['id_user', 'nama']);
         $mahasiswaList = User::where('role', 'mahasiswa')
-                             ->where('id_user', '!=', Auth::id())
-                             ->orderBy('nama')
-                             ->get(['id_user', 'nama']);
+            ->where('id_user', '!=', Auth::id())
+            ->orderBy('nama')
+            ->get(['id_user', 'nama']);
         return view('mahasiswa.lomba.registrasilomba', compact('lomba', 'dosenList', 'mahasiswaList'));
     }
 
@@ -48,20 +48,20 @@ class RegistrasiLombaController extends Controller
         $validator = Validator::make($request->all(), [
             'id_lomba'          => 'required|exists:lomba,id_lomba',
             'tipe_pendaftaran'  => 'required|in:individu,kelompok',
-            
+
             // Aturan baru yang lebih cerdas untuk nama_tim
             'nama_tim'          => [
                 'nullable', // 1. Bolehkan field ini kosong atau tidak ada.
                 'string',   // 2. Jika ada, harus berupa string.
                 'max:255',
-                 // 3. Wajib diisi HANYA JIKA tipe pendaftaran adalah 'kelompok'.
+                // 3. Wajib diisi HANYA JIKA tipe pendaftaran adalah 'kelompok'.
                 Rule::requiredIf($request->tipe_pendaftaran == 'kelompok'),
             ],
-            
+
             'members'           => 'nullable|array',
             // Aturan ini juga kita perbaiki agar hanya berjalan jika tipe kelompok
             'members.*'         => ['required_with:nama_tim', 'integer', Rule::exists('users', 'id_user')->where('role', 'mahasiswa')],
-            
+
             'id_dosen'          => [
                 'nullable',
                 'integer',
@@ -78,7 +78,7 @@ class RegistrasiLombaController extends Controller
 
         // Cek duplikasi pendaftaran (kode ini tetap sama)
         if (RegistrasiLomba::where('id_lomba', $request->id_lomba)->where('id_mahasiswa', $user->id_user)->exists()) {
-             return response()->json(['success' => false, 'message' => 'Anda sudah terdaftar pada lomba ini.'], 409);
+            return response()->json(['success' => false, 'message' => 'Anda sudah terdaftar pada lomba ini.'], 409);
         }
 
         // Transaksi Database (kode ini tetap sama)
@@ -107,5 +107,73 @@ class RegistrasiLombaController extends Controller
             Log::error('Gagal saat proses pendaftaran lomba: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server.'], 500);
         }
+    }
+
+    public function getMyButuhPenilaian()
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Tidak terautentikasi.'], 401);
+        }
+
+        // 1. Ambil semua LOMBA yang relevan milik admin ini
+        $lombas = Lomba::where('id_pembuat', $userId)
+            ->whereIn('status', ['berlangsung', 'selesai'])
+            // Eager load semua relasi yang akan kita butuhkan nanti
+            ->with([
+                'tahaps:id_lomba,id_tahap', // Hanya butuh ID untuk menghitung
+                'registrasi' => function ($query) {
+                    // Ambil hanya pendaftar yang diterima
+                    $query->where('status_verifikasi', 'diterima')
+                        // Untuk setiap pendaftar, hitung penilaiannya
+                        ->withCount('penilaian')
+                        // Dan ambil data mahasiswanya
+                        ->with('mahasiswa:id_user,nama');
+                }
+            ])
+            ->get();
+
+        // 2. Olah data di level Collection untuk membentuk struktur yang diinginkan
+        $lombasButuhPenilaian = $lombas->map(function ($lomba) {
+
+            // Hitung total tahap sekali saja untuk lomba ini
+            $totalTahap = $lomba->tahaps->count();
+
+            // Filter pendaftar dari lomba ini yang penilaiannya belum lengkap
+            $pesertaButuhDinilai = $lomba->registrasi->filter(function ($pendaftar) use ($totalTahap) {
+                return $pendaftar->penilaian_count < $totalTahap;
+            });
+
+            // Jika ada peserta yang butuh dinilai di lomba ini
+            if ($pesertaButuhDinilai->isNotEmpty()) {
+                // Kembalikan objek baru dengan struktur yang kita inginkan
+                return [
+                    'id_lomba' => $lomba->id_lomba,
+                    'nama_lomba' => $lomba->nama_lomba,
+                    'peserta' => $pesertaButuhDinilai->map(function ($pendaftar) {
+                        return [
+                            'id_registrasi_lomba' => $pendaftar->id_registrasi_lomba,
+                            'nama_mahasiswa' => $pendaftar->mahasiswa->nama,
+                        ];
+                    })->values() // ->values() untuk mereset key array
+                ];
+            }
+
+            // Jika tidak ada peserta yang butuh dinilai, kembalikan null
+            return null;
+        })
+            // Hilangkan semua hasil null dari koleksi
+            ->filter()
+            // Urutkan berdasarkan nama lomba
+            ->sortBy('nama_lomba')
+            // Ambil 5 lomba teratas
+            ->take(5);
+
+        if ($lombasButuhPenilaian->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada submission yang perlu Anda nilai saat ini.'], 404);
+        }
+
+        // ->values() untuk mereset key array setelah semua proses
+        return response()->json(['success' => true, 'data' => $lombasButuhPenilaian->values()]);
     }
 }

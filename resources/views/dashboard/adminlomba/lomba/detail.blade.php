@@ -84,7 +84,7 @@
             </div>
         </template>
 
-        <section class="lg:w-[1038px] mx-auto p-4 lg:px-0 mt-10">
+        <section class="lg:w-[1038px] mx-auto lg:px-0 mt-10">
             <h2 class="text-2xl font-bold mb-4">Daftar Peserta</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
@@ -115,8 +115,11 @@
             <!-- Header Modal -->
             <div class="flex justify-between items-start pb-3">
                 <div>
-                    <h3 id="detail-modal-title" class="text-xl font-semibold text-gray-900">Detail Penilaian</h3>
+                    <h3 class="text-xl font-semibold text-gray-900">Detail Pengumpulan</h3>
                     <p id="detail-modal-subtitle" class="text-sm text-gray-500 mt-1"></p>
+                    <p id="detail-modal-deskripsi-pengumpulan" class=" mt-2"></p>
+                    <p class="mt-2 text-sm text-black/60">Link Pengumpulan:</p>
+                    <a id="detail-modal-link-pengumpulan" class="text-sm text-blue-500 hover:underline"></a>
                 </div>
                 <button id="close-detail-modal-btn" type="button" class="text-gray-400 hover:text-gray-600 rounded-full p-1 -mt-2 -mr-2">
                     <span class="material-symbols-outlined">close</span>
@@ -124,6 +127,7 @@
             </div>
 
             <!-- Konten Modal: Daftar Tahap -->
+            <h3 class="text-xl font-semibold text-gray-900">Detail Penilaian</h3>
             <div id="tahap-penilaian-list" class="mt-4 space-y-2 max-h-80 overflow-y-auto">
                 <!-- Daftar tahap dan nilai/tombol akan diisi oleh JS di sini -->
                 <p class="text-center text-gray-500 p-4">Memuat data tahap...</p>
@@ -141,17 +145,17 @@
 
                 <div>
                     <label for="penilaian-nilai-input" class="block text-sm font-medium text-gray-700">Nilai (0-100)</label>
-                    <input type="number" id="penilaian-nilai-input" min="0" max="100" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                    <input type="number" id="penilaian-nilai-input" placeholder="Masukkan nilai" min="0" max="100" required class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <div>
                     <label for="penilaian-catatan-textarea" class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
-                    <textarea id="penilaian-catatan-textarea" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 sm:text-sm" placeholder="Berikan feedback untuk peserta..."></textarea>
+                    <textarea id="penilaian-catatan-textarea" rows="3" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan catatan"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-2">
-                    <button id="batal-penilaian-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
-                    <button id="kirim-penilaian-btn" type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold">Simpan</button>
+                <div class="flex justify-end gap-2">
+                    <button id="batal-penilaian-btn" type="button" class="px-3 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
+                    <button id="kirim-penilaian-btn" type="submit" class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-semibold">Simpan</button>
                 </div>
             </form>
         </div>
@@ -165,8 +169,9 @@
 
             // Modal 1: Detail Peserta
             const detailModal = document.getElementById('detail-peserta-modal');
-            const detailModalTitle = document.getElementById('detail-modal-title');
             const detailModalSubtitle = document.getElementById('detail-modal-subtitle');
+            const detailModalDeskripsi = document.getElementById('detail-modal-deskripsi-pengumpulan');
+            const detailModalLink = document.getElementById('detail-modal-link-pengumpulan');
             const tahapPenilaianList = document.getElementById('tahap-penilaian-list');
             const closeDetailModalBtn = document.getElementById('close-detail-modal-btn');
 
@@ -182,6 +187,36 @@
             const kirimPenilaianBtn = document.getElementById('kirim-penilaian-btn');
 
             let allRegistrations = []; // Variabel global untuk simpan data peserta
+            let totalTahapLomba = 0;
+
+            function renderPesertaTable(registrations, lombaData) { // <-- BARU: Terima data lomba
+                allRegistrations = registrations;
+                totalTahapLomba = lombaData.tahaps ? lombaData.tahaps.length : 0;
+                pesertaTableBody.innerHTML = '';
+                if (!registrations || registrations.length === 0) {
+                    pesertaTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
+                    return;
+                }
+                registrations.forEach((reg, index) => {
+                    // ... (kode render baris tabel tetap sama) ...
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white bg-gray-50 hover:bg-gray-100';
+                    const mahasiswa = reg.mahasiswa;
+                    const profil = mahasiswa.profil_mahasiswa;
+
+                    row.innerHTML = `
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa.nama}</th>
+                    <td class="px-6 py-4">${profil ? profil.nim : '-'}</td>
+                    <td class="px-6 py-4">${profil?.program_studi?.nama_program_studi || '-'}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="detail-btn py-1 px-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-semibold" data-index="${index}">
+                            Detail Penilaian
+                        </button>
+                    </td>
+                `;
+                    pesertaTableBody.appendChild(row);
+                });
+            }
 
             // --- Helper Functions ---
             function formatDate(dateString) {
@@ -191,10 +226,6 @@
                     day: 'numeric'
                 };
                 return new Date(dateString).toLocaleDateString('id-ID', options);
-            }
-
-            function capitalize(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
             }
 
             function renderLombaDetails(lomba) {
@@ -281,7 +312,6 @@
 
             // --- Fungsi utama untuk mengambil semua data halaman ---
             async function loadPageData() {
-                // ... (kode tidak berubah, tetap memanggil renderLombaDetails dan renderPesertaTable)
                 const lombaId = window.location.pathname.split('/').pop();
                 try {
                     const [lombaResponse, pesertaResponse] = await Promise.all([
@@ -297,8 +327,10 @@
 
             // --- Fungsi untuk membuka Modal 1 (Detail Peserta) ---
             async function showDetailModal(registration) {
-                detailModalTitle.textContent = `Detail Penilaian`;
                 detailModalSubtitle.textContent = `${registration.mahasiswa.nama}`;
+                detailModalDeskripsi.textContent = `${registration.deskripsi_pengumpulan}`;
+                detailModalLink.textContent = `${registration.link_pengumpulan}`;
+                detailModalLink.href = `${registration.link_pengumpulan}`;
                 tahapPenilaianList.innerHTML = `<p class="text-center text-gray-500 p-4">Memuat data tahap...</p>`;
                 detailModal.classList.remove('hidden');
 
@@ -322,9 +354,18 @@
                         let scoreOrButton;
                         if (score) {
                             scoreOrButton = `
-                            <div class="flex flex-col justify-end">
+                            <div class="flex flex-col items-end justify-end">
+                                
                                 <h2 class="font-bold text-end text-lg">${score.nilai}</h2>
-                                <p class="text-gray-500 text-xs">${score.catatan}</p>
+                                    <p class="text-gray-500 text-end text-xs">${score.catatan}</p>
+                                    <button class="mt-2 w-fit edit-nilai-btn text-blue-500 hover:bg-blue-100 border border-blue-500 px-3 py-1 flex items-center justify-center rounded-md hover:bg-blue-100 flex gap-1 text-xs"
+                                        title="Edit Nilai"
+                                        data-penilaian-id="${score.id_penilaian}" 
+                                        data-nilai-lama="${score.nilai}"
+                                        data-catatan-lama="${score.catatan || ''}"
+                                        data-tahap-nama="${tahap.nama_tahap}">
+                                    <span class="material-symbols-outlined" style="font-size: 10px;">edit</span>Edit
+                                </button>
                             </div>
                             `;
                         } else {
@@ -344,6 +385,21 @@
                 `;
                         tahapPenilaianList.appendChild(listItem);
                     });
+
+                    if (existingScores.length === totalTahapLomba && totalTahapLomba > 0) {
+                        const prestasiButton = document.createElement('div');
+                        prestasiButton.className = 'mt-6 pt-4 border-t';
+                        prestasiButton.innerHTML = `
+                        <p class="text-sm text-center text-green-700 mb-2">Semua tahap telah dinilai.</p>
+                        <button id="beri-prestasi-btn" 
+                                data-registrasi-id="${registration.id_registrasi_lomba}"
+                                class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined">military_tech</span>
+                            Berikan Prestasi
+                        </button>
+                    `;
+                        tahapPenilaianList.appendChild(prestasiButton);
+                    }
                 } catch (error) {
                     console.error('Gagal memuat tahap lomba:', error);
                     tahapPenilaianList.innerHTML = `<p class="text-center text-red-500 p-4">Gagal memuat data tahap.</p>`;
@@ -354,44 +410,41 @@
                 detailModal.classList.add('hidden');
             }
 
-            // --- Fungsi untuk membuka Modal 2 (Form Penilaian) ---
-            function showPenilaianModal(registrasiId, tahapId, tahapNama) {
-                formPenilaianTitle.textContent = `Beri Nilai untuk Tahap "${tahapNama}"`;
-                penilaianForm.reset();
-                penilaianRegistrasiIdInput.value = registrasiId;
-                penilaianTahapIdInput.value = tahapId;
-                penilaianModal.classList.remove('hidden');
-                penilaianNilaiInput.focus();
-            }
-
             function hidePenilaianModal() {
                 penilaianModal.classList.add('hidden');
             }
 
-            // --- Fungsi untuk mengirim data penilaian ---
-            async function submitPenilaian() {
-                kirimPenilaianBtn.disabled = true;
-                kirimPenilaianBtn.textContent = 'Menyimpan...';
+            async function refreshDataAfterSubmit() {
+                hidePenilaianModal(); // Tutup modal form penilaian
+                hideDetailModal(); // Tutup juga modal detail peserta
 
-                const data = {
-                    id_registrasi_lomba: penilaianRegistrasiIdInput.value,
-                    id_tahap: penilaianTahapIdInput.value,
-                    nilai: penilaianNilaiInput.value,
-                    catatan: penilaianCatatanTextarea.value
-                };
+                // Panggil kembali fungsi yang memuat semua data dari awal
+                await loadPageData();
 
-                try {
-                    await axios.post('/api/penilaian', data);
-                    hidePenilaianModal(); // Tutup modal form
-                    hideDetailModal(); // Tutup modal detail juga
-                    await loadPageData(); // Muat ulang seluruh data halaman
-                } catch (error) {
-                    const msg = error.response?.data?.message || 'Gagal menyimpan penilaian.';
-                    alert(msg);
-                } finally {
-                    kirimPenilaianBtn.disabled = false;
-                    kirimPenilaianBtn.textContent = 'Simpan';
+                // Beri sedikit jeda agar pengguna melihat perubahan di tabel
+                // sebelum mungkin membuka modal lagi
+            }
+
+            function openPenilaianModal(options) {
+                penilaianForm.reset();
+
+                if (options.mode === 'edit') {
+                    // Mode EDIT
+                    formPenilaianTitle.textContent = `Edit Nilai untuk Tahap: ${options.tahapNama}`;
+                    penilaianForm.dataset.mode = 'edit';
+                    penilaianForm.dataset.penilaianId = options.penilaianId; // ID untuk URL PUT
+                    penilaianNilaiInput.value = options.nilaiLama;
+                    penilaianCatatanTextarea.value = options.catatanLama;
+                } else {
+                    // Mode CREATE (Default)
+                    formPenilaianTitle.textContent = `Beri Nilai untuk Tahap: ${options.tahapNama}`;
+                    penilaianForm.dataset.mode = 'create';
+                    penilaianForm.dataset.registrasiId = options.registrasiId; // ID untuk data POST
+                    penilaianForm.dataset.tahapId = options.tahapId; // ID untuk data POST
                 }
+
+                penilaianModal.classList.remove('hidden');
+                penilaianNilaiInput.focus();
             }
 
             // --- Event Listeners ---
@@ -406,23 +459,73 @@
 
             tahapPenilaianList.addEventListener('click', function(event) {
                 const beriNilaiButton = event.target.closest('.beri-nilai-spesifik-btn');
+                const editNilaiButton = event.target.closest('.edit-nilai-btn');
+
                 if (beriNilaiButton) {
                     const {
                         registrasiId,
                         tahapId,
                         tahapNama
                     } = beriNilaiButton.dataset;
-                    showPenilaianModal(registrasiId, tahapId, tahapNama);
+                    // Panggil fungsi gabungan dengan data untuk mode 'create'
+                    openPenilaianModal({
+                        mode: 'create',
+                        registrasiId,
+                        tahapId,
+                        tahapNama
+                    });
+                } else if (editNilaiButton) {
+                    const {
+                        penilaianId,
+                        nilaiLama,
+                        catatanLama,
+                        tahapNama
+                    } = editNilaiButton.dataset;
+                    // Panggil fungsi gabungan dengan data untuk mode 'edit'
+                    openPenilaianModal({
+                        mode: 'edit',
+                        penilaianId,
+                        nilaiLama,
+                        catatanLama,
+                        tahapNama
+                    });
                 }
             });
 
-            penilaianForm.addEventListener('submit', function(e) {
+            penilaianForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                submitPenilaian();
+                kirimPenilaianBtn.disabled = true;
+
+                const mode = penilaianForm.dataset.mode;
+                const data = {
+                    nilai: penilaianNilaiInput.value,
+                    catatan: penilaianCatatanTextarea.value,
+                };
+
+                try {
+                    if (mode === 'edit') {
+                        const penilaianId = penilaianForm.dataset.penilaianId;
+                        await axios.put(`/api/penilaian/${penilaianId}`, data);
+                        alert('Penilaian berhasil diperbarui!');
+                    } else { // mode 'create'
+                        data.id_registrasi_lomba = penilaianForm.dataset.registrasiId;
+                        data.id_tahap = penilaianForm.dataset.tahapId;
+                        await axios.post('/api/penilaian', data);
+                        alert('Penilaian berhasil disimpan!');
+                    }
+                    await refreshDataAfterSubmit();
+                } catch (error) {
+                    const msg = error.response?.data?.message || 'Gagal menyimpan penilaian.';
+                    alert(msg);
+                } finally {
+                    kirimPenilaianBtn.disabled = false;
+                    kirimPenilaianBtn.textContent = 'Simpan';
+                }
             });
 
             closeDetailModalBtn.addEventListener('click', hideDetailModal);
             batalPenilaianBtn.addEventListener('click', hidePenilaianModal);
+
 
             // Panggil fungsi utama saat halaman dimuat
             loadPageData();

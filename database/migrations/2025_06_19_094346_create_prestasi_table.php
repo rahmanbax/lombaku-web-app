@@ -21,6 +21,9 @@ return new class extends Migration
             // 'internal' untuk lomba yang terdaftar di sistem, 'eksternal' untuk prestasi di luar sistem
             $table->enum('lomba_dari', ['internal', 'eksternal'])->default('internal');
 
+            // Di dalam migrasi
+            $table->enum('tipe_prestasi', ['pemenang', 'peserta'])->default('peserta');
+
             // --- Kolom untuk Prestasi Internal ---
             // Lomba dari dalam sistem (bisa NULL jika prestasi eksternal)
             $table->foreignId('id_lomba')->nullable()->constrained('lomba', 'id_lomba')->onDelete('set null');

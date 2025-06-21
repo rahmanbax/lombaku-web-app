@@ -41,6 +41,18 @@ class LombaController extends Controller
             $query->where('lokasi', $request->lokasi);
         }
 
+        if (Auth::check() && in_array(Auth::user()->role, ['admin_lomba', 'kemahasiswaan'])) {
+
+            // A. Filter berdasarkan status jika ada di request
+            if ($request->filled('status')) {
+                $query->where('status', $request->query('status'));
+            }
+
+            // B. Urutkan berdasarkan prioritas status untuk admin
+            //    'belum disetujui' akan selalu muncul paling atas.
+            $query->orderByRaw("FIELD(status, 'belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak')");
+        }
+
         $perPage = $request->input('limit', 10);
         if ($request->has('tags') && is_array($request->tags) && count($request->tags) > 0) {
             $tagIds = $request->tags;
@@ -82,7 +94,7 @@ class LombaController extends Controller
             'tags'          => 'required|array',
             'tags.*'        => 'exists:tags,id_tag', // Memastikan setiap tag ID ada di tabel tags
             'tahap'         => 'required|array|min:1', // <-- VALIDASI BARU
-            'tahap.*'       => 'required|string|max:255', // <-- VALIDASI BARU
+            'tahap.*.nama'        => 'required|string|max:100',
             'tahap.*.deskripsi'   => 'nullable|string'
         ]);
 
@@ -150,11 +162,12 @@ class LombaController extends Controller
         // Lampirkan tags ke lomba yang baru dibuat
         $lomba->tags()->attach($request->tags);
 
-        foreach ($request->tahap as $dataTahap) {
+        foreach ($request->tahap as $index => $dataTahap) {
             TahapLomba::create([
                 'id_lomba' => $lomba->id_lomba,
                 'nama_tahap' => $dataTahap['nama'],
                 'deskripsi' => $dataTahap['deskripsi'] ?? null,
+                'urutan' => $index + 1,
             ]);
         }
 
@@ -173,7 +186,7 @@ class LombaController extends Controller
      */
     public function show($id)
     {
-        $lomba = Lomba::with(['tags', 'pembuat'])->find($id);
+        $lomba = Lomba::with(['tags', 'pembuat', 'tahaps'])->find($id);
 
         if (!$lomba) {
             return response()->json([
@@ -210,7 +223,7 @@ class LombaController extends Controller
     {
         Log::info($request);
 
-        $lomba = Lomba::find($id);
+        $lomba = Lomba::with('tahaps')->find($id);
 
         if (!$lomba) {
             return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
@@ -235,6 +248,10 @@ class LombaController extends Controller
             'foto_lomba'    => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tags'          => 'sometimes|required|array',
             'tags.*'        => 'exists:tags,id_tag',
+            'tahap'               => 'sometimes|required|array|min:1',
+            'tahap.*.id'          => 'nullable|integer|exists:tahap_lomba,id_tahap', // ID boleh null (untuk tahap baru)
+            'tahap.*.nama'        => 'required|string|max:100',
+            'tahap.*.deskripsi'   => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -243,6 +260,10 @@ class LombaController extends Controller
 
         // Mengambil data yang tervalidasi
         $validatedData = $validator->validated();
+
+        if ($lomba->status === 'ditolak') {
+            $validatedData['status'] = 'belum disetujui';
+        }
 
         if (isset($validatedData['lokasi']) && $validatedData['lokasi'] === 'online') {
             $validatedData['lokasi_offline'] = null;
@@ -259,6 +280,31 @@ class LombaController extends Controller
 
         // Update lomba dengan data yang divalidasi
         $lomba->update($validatedData);
+
+        if ($request->has('tahap')) {
+            $incomingTahaps = collect($request->tahap);
+            $incomingTahapIds = $incomingTahaps->pluck('id')->filter()->all(); // Ambil semua ID yang dikirim
+
+            // 1. Hapus tahap yang tidak ada lagi di request
+            $lomba->tahaps()->whereNotIn('id_tahap', $incomingTahapIds)->delete();
+
+            // 2. Update atau Buat tahap baru
+            foreach ($incomingTahaps as $index => $tahapData) {
+                TahapLomba::updateOrCreate(
+                    [
+                        // Kondisi untuk mencari: ID Lomba dan ID Tahap (jika ada)
+                        'id_lomba' => $lomba->id_lomba,
+                        'id_tahap' => $tahapData['id'] ?? null,
+                    ],
+                    [
+                        // Data untuk diupdate atau dibuat
+                        'nama_tahap' => $tahapData['nama'],
+                        'deskripsi' => $tahapData['deskripsi'] ?? null,
+                        'urutan' => $index + 1,
+                    ]
+                );
+            }
+        }
 
         // Sinkronisasi tags, sync() akan menghapus tag lama dan menambah tag baru
         if ($request->has('tags')) {
@@ -442,11 +488,8 @@ class LombaController extends Controller
      */
     public function getMyLombas(Request $request)
     {
-        // 1. Dapatkan user yang sedang terautentikasi
         $user = Auth::user();
 
-        // Jika tidak ada user yang login, kembalikan error.
-        // Sebaiknya, route ini dilindungi oleh middleware 'auth:sanctum'.
         if (!$user) {
             return response()->json([
                 'success' => false,
@@ -454,27 +497,36 @@ class LombaController extends Controller
             ], 401);
         }
 
-        // 2. Mulai query untuk lomba yang dibuat oleh user ini
         $query = Lomba::where('id_pembuat', $user->id_user)
-            ->with(['tags', 'pembuat']) // Eager load tags
-            ->withCount('registrasi'); // Hitung jumlah pendaftar
+            ->with(['tags', 'pembuat'])
+            ->withCount('registrasi');
 
-        // 3. Tambahkan fungsionalitas pencarian (opsional, tapi berguna)
-        if ($request->has('search')) {
+        if ($request->filled('search')) { // Gunakan filled() untuk Cek jika parameter ada dan tidak kosong
             $searchTerm = $request->search;
             $query->where('nama_lomba', 'like', '%' . $searchTerm . '%');
         }
 
-        // 4. Tambahkan fungsionalitas filter status (opsional, tapi berguna)
-        if ($request->has('status') && in_array($request->status, ['belum disetujui', 'disetujui', 'berlangsung', 'selesai'])) {
-            $query->where('status', $request->status);
+        if ($request->filled('status')) { // Gunakan filled() untuk Cek jika parameter ada dan tidak kosong
+            // Validasi status agar lebih aman
+            $validStatuses = ['belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak'];
+            if (in_array($request->status, $validStatuses)) {
+                $query->where('status', $request->status);
+            }
         }
 
-        // 5. Eksekusi query dengan paginasi
+        // ==========================================================
+        // === TAMBAHAN KODE: SORTING PRIORITAS UNTUK ADMIN ===
+        // ==========================================================
+        // Urutkan berdasarkan prioritas status. 'belum disetujui' akan selalu di atas.
+        $query->orderByRaw("FIELD(status, 'belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak')");
+        // ==========================================================
+        // === AKHIR TAMBAHAN KODE ===
+        // ==========================================================
+
         $perPage = $request->input('limit', 10);
+        // latest() sekarang menjadi pengurutan sekunder setelah orderByRaw
         $lombas = $query->latest()->paginate($perPage);
 
-        // 6. Kembalikan respons
         return response()->json([
             'success' => true,
             'message' => 'Daftar lomba Anda berhasil diambil',
@@ -534,6 +586,77 @@ class LombaController extends Controller
             'success' => true,
             'message' => 'Lomba berhasil ditolak.',
             'data' => $lomba
+        ], 200);
+    }
+
+    public function getMyLombaDitolak()
+    {
+        // Dapatkan ID user yang sedang login
+        $userId = Auth::id();
+
+        // Jika tidak ada user yang login (sebagai pengaman tambahan)
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Tidak terautentikasi.'], 401);
+        }
+
+        $lombasDitolak = Lomba::where('status', 'ditolak')
+            // === PERUBAHAN UTAMA DI SINI ===
+            // Tambahkan kondisi untuk hanya mengambil lomba yang dibuat oleh user ini
+            ->where('id_pembuat', $userId)
+            // ===============================
+            ->with('pembuat')
+            ->latest()
+            ->take(5) // Ambil 5 terbaru saja agar tidak terlalu panjang
+            ->get();
+
+        if ($lombasDitolak->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada lomba Anda yang ditolak.'], 404);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Daftar lomba Anda yang ditolak berhasil diambil.', 'data' => $lombasDitolak]);
+    }
+
+    public function getMyStats()
+    {
+        // 1. Dapatkan ID user yang sedang login
+        $userId = Auth::id();
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Tidak terautentikasi.'], 401);
+        }
+
+        // 2. Hitung jumlah lomba berdasarkan status menggunakan satu query efisien
+        //    Ini akan menjadi dasar untuk semua statistik lomba
+        $statusCounts = Lomba::where('id_pembuat', $userId)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status'); // pluck() membuat koleksi ['status' => total, ...]
+
+        // 3. Hitung statistik yang dibutuhkan
+
+        // 'Lomba Aktif' adalah gabungan dari 'Disetujui' dan 'Berlangsung'
+        $lombaAktif = $statusCounts->get('disetujui', 0) + $statusCounts->get('berlangsung', 0);
+
+        // 'Total Pendaftar' dihitung dari semua lomba yang dibuat oleh user ini
+        $totalPendaftar = RegistrasiLomba::whereHas('lomba', function ($query) use ($userId) {
+            $query->where('id_pembuat', $userId);
+        })->count();
+
+        // 4. Siapkan data untuk respons JSON
+        $data = [
+            'lomba_aktif' => $lombaAktif,
+            'total_pendaftar' => $totalPendaftar,
+            'disetujui' => $statusCounts->get('disetujui', 0),
+            'berlangsung' => $statusCounts->get('berlangsung', 0),
+            'selesai' => $statusCounts->get('selesai', 0),
+            // Anda juga bisa menambahkan statistik lain jika perlu
+            'menunggu_persetujuan' => $statusCounts->get('belum disetujui', 0),
+        ];
+
+        // 5. Gabungkan semua data ke dalam satu respons
+        return response()->json([
+            'success' => true,
+            'message' => 'Statistik pribadi Anda berhasil diambil',
+            'data' => $data
         ], 200);
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('foto_lomba');
             $table->string('nama_lomba');
             $table->string('deskripsi');
+            $table->enum('jenis_lomba', ['individu', 'kelompok'])->default('individu');
             $table->enum('lokasi', ['online', 'offline'])->default('online');
             $table->string('lokasi_offline')->nullable();
             $table->enum('tingkat', ['nasional', 'internasional', 'internal'])->default('nasional');

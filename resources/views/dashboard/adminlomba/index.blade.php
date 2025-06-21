@@ -15,7 +15,7 @@
     <main class=" lg:w-[1038px] mx-auto p-4 lg:py-10 lg:px-0">
         <div class="flex items-center justify-between">
             <h1 class="font-semibold">Lomba</h1>
-            <a href="/dashboard/kemahasiswaan/lomba" class="flex items-center font-semibold text-blue-500">Lihat <span class="material-symbols-outlined">chevron_right</span></a>
+            <a href="/dashboard/adminlomba/lomba" class="flex items-center font-semibold text-blue-500">Lihat <span class="material-symbols-outlined">chevron_right</span></a>
         </div>
 
         <!-- lomba stats -->

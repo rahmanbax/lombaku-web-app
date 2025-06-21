@@ -101,6 +101,37 @@
                     <input type="date" name="tanggal_selesai_lomba" id="tanggal_selesai_lomba" required class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
 
+                <hr class="col-span-4 lg:col-span-12 text-gray-300 my-2">
+
+                <!-- Bagian untuk Tahapan Lomba -->
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <div class="flex justify-between items-center">
+                        <label class="text-black/60 font-semibold">Tahapan Lomba</label>
+                        <button type="button" id="tambah-tahap-btn" class="bg-blue-500 text-white px-2 py-1 rounded-md font-semibold hover:bg-blue-600 cursor-pointer">
+                            + Tambah Tahap
+                        </button>
+                    </div>
+
+                    <!-- Kontainer untuk input tahap dinamis -->
+                    <div id="tahap-container" class="mt-3">
+                        <!-- Input Tahap Pertama (Default) -->
+                        <div class="flex flex-col items-center gap-2 tahap-item border border-gray-300 p-3 rounded-md">
+                            <input
+                                type="text"
+                                name="tahap[][nama]"
+                                placeholder="Masukkan nama tahap"
+                                required
+                                class="w-full border bg-white border-gray-300 col-span-4 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <!-- Tombol hapus tidak ada untuk input pertama -->
+                            <textarea
+                                name="tahap[0][deskripsi]"
+                                placeholder="Deskripsi tahap"
+                                class="w-full border bg-white border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" class="mt-4 col-span-4 lg:col-span-12 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600 text-white px-3 py-2">Simpan Perubahan</button>
             </section>
         </form>
@@ -119,6 +150,10 @@
             const pathParts = window.location.pathname.split('/');
             const lombaId = pathParts[pathParts.length - 1];
 
+            // --- BARU: Elemen untuk Tahap Lomba ---
+            const tahapContainer = document.getElementById('tahap-container');
+            const tambahTahapBtn = document.getElementById('tambah-tahap-btn');
+
             // === Fungsi untuk memuat dan mengisi form ===
             async function populateForm() {
                 try {
@@ -133,10 +168,13 @@
                     document.getElementById('nama_lomba').value = lomba.nama_lomba;
                     document.getElementById('deskripsi').value = lomba.deskripsi;
                     document.getElementById('lokasi').value = lomba.lokasi;
+                    document.getElementById('lokasi_offline').value = lomba.lokasi_offline;
                     document.getElementById('tingkat').value = lomba.tingkat;
                     document.getElementById('tanggal_akhir_registrasi').value = lomba.tanggal_akhir_registrasi;
                     document.getElementById('tanggal_mulai_lomba').value = lomba.tanggal_mulai_lomba;
                     document.getElementById('tanggal_selesai_lomba').value = lomba.tanggal_selesai_lomba;
+
+                    handleLokasiChange();
 
                     // Tampilkan foto saat ini
                     const currentFoto = document.getElementById('current-foto');
@@ -145,6 +183,20 @@
                     } else {
                         currentFoto.style.display = 'none';
                     }
+
+                    const tahaps = lomba.tahaps || []; // Asumsi relasi bernama 'tahaps'
+                    tahapContainer.innerHTML = ''; // Kosongkan container
+                    if (tahaps.length > 0) {
+                        tahaps.forEach((tahap, index) => {
+                            const tahapItem = createTahapItem(index, tahap);
+                            tahapContainer.appendChild(tahapItem);
+                        });
+                    } else {
+                        // Jika tidak ada tahap, tambahkan satu input kosong sebagai default
+                        const defaultTahap = createTahapItem(0);
+                        tahapContainer.appendChild(defaultTahap);
+                    }
+
 
                     // --- Isi dan pilih Tags ---
                     const allTags = tagsResponse.data.data;
@@ -169,8 +221,70 @@
                 }
             }
 
-            // Panggil fungsi untuk mengisi form saat halaman dimuat
-            populateForm();
+            function createTahapItem(index, data = {}) {
+                const tahapItem = document.createElement('div');
+                tahapItem.className = 'tahap-item p-3 border border-gray-300 rounded-md mt-6 relative flex flex-col gap-2';
+
+                // Isi data nama dan deskripsi jika ada (untuk mode edit)
+                const nama = data.nama_tahap || ''; // Sesuaikan dengan nama kolom di database
+                const deskripsi = data.deskripsi || ''; // Sesuaikan dengan nama kolom
+
+                // 1. Buat variabel untuk menampung HTML tombol hapus
+                let deleteButtonHtml = '';
+
+                // 2. Kondisi: Jika index BUKAN 0 (artinya bukan item pertama), tambahkan HTML tombol hapus
+                if (index > 0) {
+                    deleteButtonHtml = `
+            <button type="button" class="hapus-tahap-btn absolute top-[-16px] right-[-16px] bg-white border border-gray-300 text-gray-500 rounded-full flex items-center justify-center w-8 h-8 hover:bg-gray-100 cursor-pointer">
+                <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+            </button>
+        `;
+                }
+
+                // 3. Gabungkan semua HTML menjadi satu
+                tahapItem.innerHTML = `
+        ${deleteButtonHtml} 
+        <input 
+            type="text"
+            name="tahap[${index}][nama]"
+            placeholder="Masukkan nama tahap"
+            required
+            value="${nama}"
+            class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        />
+        <textarea
+            name="tahap[${index}][deskripsi]"
+            placeholder="Deskripsi tahap"
+            class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            rows="2"
+        >${deskripsi}</textarea>
+    `;
+
+                // === AKHIR PERUBAHAN ===
+
+                return tahapItem;
+            }
+
+            // --- BARU: Fungsi untuk menambah tahap baru (dari tombol) ---
+            function tambahTahap() {
+                const itemCount = tahapContainer.querySelectorAll('.tahap-item').length;
+                const newItem = createTahapItem(itemCount); // Buat item kosong baru
+                tahapContainer.appendChild(newItem);
+            }
+
+            // --- BARU: Fungsi untuk menghapus input tahap ---
+            function hapusTahap(event) {
+                if (event.target.closest('.hapus-tahap-btn')) {
+                    const tahapItem = event.target.closest('.tahap-item');
+                    tahapItem.remove();
+
+                    // Update index 'name' pada item yang tersisa
+                    tahapContainer.querySelectorAll('.tahap-item').forEach((item, index) => {
+                        item.querySelector('input').name = `tahap[${index}][nama]`;
+                        item.querySelector('textarea').name = `tahap[${index}][deskripsi]`;
+                    });
+                }
+            }
 
             // Fungsi untuk menampilkan/menyembunyikan field lokasi offline
             function handleLokasiChange() {
@@ -181,10 +295,6 @@
                     lokasiOfflineContainer.classList.add('hidden');
                 }
             }
-
-
-            // 2. Pasang event listener untuk dropdown lokasi
-            lokasiSelect.addEventListener('change', handleLokasiChange);
 
             // === Menangani submit form untuk UPDATE ===
             lombaForm.addEventListener("submit", async function(event) {
@@ -218,6 +328,12 @@
                     console.error("Error submitting form:", error.response);
                 }
             });
+
+            // === INISIALISASI DAN EVENT LISTENERS ===
+            lokasiSelect.addEventListener('change', handleLokasiChange);
+            tambahTahapBtn.addEventListener('click', tambahTahap);
+            tahapContainer.addEventListener('click', hapusTahap);
+            populateForm(); // Panggil fungsi untuk mengisi form
         });
     </script>
 </body>

@@ -79,6 +79,13 @@ class Lomba extends Model
         // Foreign key untuk User di tabel pivot adalah 'id_user'.
         // Foreign key untuk Lomba (model ini) di tabel pivot adalah 'id_lomba'.
         return $this->belongsToMany(User::class, 'lomba_bookmarks', 'id_lomba', 'id_user')
-                    ->withTimestamps();
+            ->withTimestamps();
+    }
+
+    public function tahaps()
+    {
+        // Parameter kedua: foreign key di tabel tujuan ('tahap_lomba')
+        // Parameter ketiga: primary key di tabel ini ('lomba')
+        return $this->hasMany(TahapLomba::class, 'id_lomba', 'id_lomba')->orderBy('urutan', 'asc');
     }
 }

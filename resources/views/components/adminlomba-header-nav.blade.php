@@ -36,8 +36,8 @@
             close
         </span>
     </button>
-    <a href="/dashboard/kemahasiswaan" class="block">Dashboard</a>
-    <a href="/dashboard/kemahasiswaan/lomba" class="block">Lomba</a>
+    <a href="/dashboard/adminlomba" class="block">Dashboard</a>
+    <a href="/dashboard/adminlomba/lomba" class="block">Lomba</a>
 </div>
 
 <!-- Script -->

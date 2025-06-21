@@ -11,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class PenilaianController extends Controller
 {
+    // index kosong
+    public function index() {}
     /**
      * Menyimpan data penilaian baru.
      * Method ini akan dipanggil oleh POST /api/penilaian
@@ -66,5 +68,48 @@ class PenilaianController extends Controller
         ]);
 
         return response()->json(['success' => true, 'message' => 'Penilaian berhasil disimpan.', 'data' => $penilaian], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        // 1. Cari data penilaian yang akan diupdate
+        $penilaian = PenilaianPeserta::find($id);
+
+        if (!$penilaian) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data penilaian tidak ditemukan.'
+            ], 404);
+        }
+
+        // 2. Otorisasi: Pastikan hanya pembuat penilaian yang bisa mengedit
+        if ($penilaian->id_penilai !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk mengubah penilaian ini.'
+            ], 403); // 403 Forbidden
+        }
+
+        // 3. Validasi input yang masuk
+        // 'sometimes' digunakan karena mungkin user hanya ingin update nilai, atau hanya catatan
+        $validator = Validator::make($request->all(), [
+            'nilai' => 'sometimes|required|integer|min:0|max:100',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Validasi gagal.', 'errors' => $validator->errors()], 422);
+        }
+
+        // 4. Lakukan update pada record
+        // Menggunakan $validator->validated() untuk keamanan, agar hanya field yang divalidasi yang diupdate
+        $penilaian->update($validator->validated());
+
+        // 5. Kembalikan respons sukses dengan data yang sudah diperbarui
+        return response()->json([
+            'success' => true,
+            'message' => 'Penilaian berhasil diperbarui.',
+            'data' => $penilaian
+        ], 200);
     }
 }

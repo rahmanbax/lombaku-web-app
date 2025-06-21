@@ -59,14 +59,19 @@ Route::get('/admin-prodi/lombas', [AdminProdiController::class, 'getLombaList'])
 Route::patch('/prestasi/{id}/verifikasi/setujui', [App\Http\Controllers\Api\AdminProdiController::class, 'approvePrestasi']);
 Route::patch('/prestasi/{id}/verifikasi/tolak', [App\Http\Controllers\Api\AdminProdiController::class, 'rejectPrestasi']);
 
+// Rute Kemahasiswaan dan Admin Lomba
+Route::get('/submission/butuh-penilaian', [RegistrasiLombaController::class, 'getMyButuhPenilaian']);
+Route::get('/lomba/mystats', [LombaController::class, 'getMyStats']);
+Route::get('/lomba/ditolak', [LombaController::class, 'getMyLombaDitolak']);
 Route::get('/lomba/stats', [LombaController::class, 'getStats']);
 Route::get('/lomba/butuh-persetujuan', [LombaController::class, 'getLombaButuhPersetujuan']);
 Route::get('/program-studi', [ProgramStudiController::class, 'index']);
 Route::get('/lomba/saya', [LombaController::class, 'getMyLombas']);
 Route::get('/lomba/{id}/tahap', [TahapLombaController::class, 'index']);
-Route::post('/penilaian', [PenilaianController::class, 'store']);
 Route::patch('/lomba/{id}/setujui', [LombaController::class, 'setujuiLomba']);
 Route::patch('/lomba/{id}/tolak', [LombaController::class, 'tolakLomba']);
+Route::put('/penilaian/{id}', [PenilaianController::class, 'update']);
+Route::post('/penilaian', [PenilaianController::class, 'store']);
 Route::apiResource('lomba', LombaController::class);
 Route::apiResource('tags', TagController::class)->only(['index']);
 Route::apiResource('mahasiswa', MahasiswaController::class);
