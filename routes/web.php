@@ -104,6 +104,10 @@ Route::middleware('auth')->group(function () {
     });
 
     // Dashboard Route Admin Lomba
+    Route::get('/dashboard/adminlomba', function () {
+        return view('dashboard.adminlomba.index');
+    });
+
     Route::get('/dashboard/adminlomba/lomba', function () {
         return view('dashboard.adminlomba.lomba.index');
     });
