@@ -29,9 +29,7 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
-        .role-section {
-            /* Dikelola oleh JS */
-        }
+        /* .role-section dikelola oleh JS */
     </style>
 </head>
 

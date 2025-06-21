@@ -31,35 +31,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookmarks', [BookmarkController::class, 'index']);
     Route::post('/bookmarks', [BookmarkController::class, 'store']);
     Route::delete('/bookmarks/{id_lomba}', [BookmarkController::class, 'destroy']);
+    Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
+
+    // ==========================================================
+    // === TAMBAHKAN ROUTE INI UNTUK MENANGANI PENDAFTARAN LOMBA ===
+    // ==========================================================
+    Route::post('/registrasi-lomba', [RegistrasiLombaController::class, 'store']);
+    // ==========================================================
+    
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 });
 
 
-  Route::get('/dosen/dashboard', [DosenController::class, 'dashboardData']);
-    
-    // === TAMBAHKAN ROUTE BARU INI ===
-    Route::get('/dosen/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
+// Rute Dosen (sudah di dalam middleware auth)
+Route::get('/dosen/dashboard', [DosenController::class, 'dashboardData']);
+Route::get('/dosen/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
 
+// Rute Admin Prodi (sudah di dalam middleware auth)
 Route::get('/admin-prodi/arsip-lomba', [App\Http\Controllers\Api\AdminProdiController::class, 'getArchivedLombas']);
 Route::get('/admin-prodi/registration-history', [App\Http\Controllers\Api\AdminProdiController::class, 'getRegistrationHistory']);
-
 Route::get('/admin-prodi/prestasi-verifikasi', [App\Http\Controllers\Api\AdminProdiController::class, 'getPrestasiVerifications']);
-// ======================
 Route::get('/admin-prodi/lombas', [AdminProdiController::class, 'getLombaList']);
-// ==========================================================
-
-
 
 // Rute Publik & Lainnya
-Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
 Route::patch('/prestasi/{id}/verifikasi/setujui', [App\Http\Controllers\Api\AdminProdiController::class, 'approvePrestasi']);
 Route::patch('/prestasi/{id}/verifikasi/tolak', [App\Http\Controllers\Api\AdminProdiController::class, 'rejectPrestasi']);
 
-Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
-
-Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
 Route::get('/lomba/stats', [LombaController::class, 'getStats']);
 Route::get('/lomba/butuh-persetujuan', [LombaController::class, 'getLombaButuhPersetujuan']);
 Route::get('/program-studi', [ProgramStudiController::class, 'index']);
