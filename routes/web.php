@@ -20,6 +20,10 @@ Route::get('/dosen/riwayat', function () {
     return view('dosen.riwayat');
 })->middleware('auth')->name('dosen.riwayat');
 // ==========================================================
+// === TAMBAHKAN ROUTE BARU INI ===
+Route::get('/dosen/persetujuan', function () {
+    return view('dosen.persetujuan');
+})->middleware('auth')->name('dosen.persetujuan');
 
 // ==========================================================
 // Rute Admin Prodi

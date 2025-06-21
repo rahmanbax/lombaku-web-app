@@ -108,4 +108,73 @@ class DosenController extends Controller
             ], 500);
         }
     }
+    public function getPersetujuanList()
+    {
+        $dosen = Auth::user();
+        if (!$dosen || $dosen->role !== 'dosen') {
+            return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
+        }
+
+        $persetujuanList = RegistrasiLomba::where('id_dosen', $dosen->id_user)
+            ->where('status_verifikasi', 'menunggu') // Hanya yang statusnya menunggu
+            ->with(['mahasiswa:id_user,nama', 'lomba:id_lomba,nama_lomba', 'tim'])
+            ->latest()
+            ->paginate(10);
+
+        return response()->json(['success' => true, 'data' => $persetujuanList]);
+    }
+
+    /**
+     * Menyetujui pendaftaran lomba oleh dosen.
+     * Endpoint: PATCH /api/dosen/pendaftaran/{id}/setujui
+     * 
+     * @param int $id ID dari registrasi_lomba
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function setujuiPendaftaran($id)
+    {
+        $dosen = Auth::user();
+        $registrasi = RegistrasiLomba::find($id);
+
+        if (!$registrasi) {
+            return response()->json(['success' => false, 'message' => 'Pendaftaran tidak ditemukan.'], 404);
+        }
+
+        // Keamanan: Pastikan dosen hanya bisa menyetujui bimbingannya sendiri
+        if ($registrasi->id_dosen !== $dosen->id_user) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak berhak melakukan aksi ini.'], 403);
+        }
+
+        $registrasi->status_verifikasi = 'diterima';
+        $registrasi->save();
+
+        return response()->json(['success' => true, 'message' => 'Pendaftaran berhasil disetujui.']);
+    }
+
+    /**
+     * Menolak pendaftaran lomba oleh dosen.
+     * Endpoint: PATCH /api/dosen/pendaftaran/{id}/tolak
+     * 
+     * @param int $id ID dari registrasi_lomba
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function tolakPendaftaran($id)
+    {
+        $dosen = Auth::user();
+        $registrasi = RegistrasiLomba::find($id);
+
+        if (!$registrasi) {
+            return response()->json(['success' => false, 'message' => 'Pendaftaran tidak ditemukan.'], 404);
+        }
+
+        if ($registrasi->id_dosen !== $dosen->id_user) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak berhak melakukan aksi ini.'], 403);
+        }
+
+        $registrasi->status_verifikasi = 'ditolak';
+        $registrasi->save();
+
+        return response()->json(['success' => true, 'message' => 'Pendaftaran berhasil ditolak.']);
+    }
 }
+
