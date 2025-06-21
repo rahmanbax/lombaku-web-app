@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Models\Lomba;
 use App\Http\Controllers\API\PrestasiController;
-use App\Http\Controllers\API\RegistrasiLombaController; 
+use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\Api\AdminProdiController;
 use App\Http\Controllers\API\DosenController;
 use App\Http\Controllers\API\HasilLombaController;
@@ -129,38 +129,52 @@ Route::get('/lomba/{lomba}', function (Lomba $lomba) {
 
 // ==========================================================
 // Dashboard Route Kemahasiswaan
-// ==========================================================
-Route::get('/dashboard/kemahasiswaan', function () {
-    return view('dashboard.kemahasiswaan.index');
-});
-// ... sisa rute dashboard Anda ...
-Route::get('/dashboard/kemahasiswaan/lomba', function () {
-    return view('dashboard.kemahasiswaan.lomba.index');
-});
-Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
-    return view('dashboard.kemahasiswaan.lomba.buat');
-});
-Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
-    return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
-});
-Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
-    return view('dashboard.kemahasiswaan.mahasiswa.index');
-});
-Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
-    return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
-});
-// ==========================================================
-// Dashboard Route Admin Lomba
-// ==========================================================
-Route::get('/dashboard/adminlomba/lomba', function () {
-    return view('dashboard.adminlomba.lomba.index');
-});
-Route::get('/dashboard/adminlomba/lomba/buat', function () {
-    return view('dashboard.adminlomba.lomba.buat');
-});
-Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
-    return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
-});
-Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
-    return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
+
+// lindungi dengan middleware auth
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard/kemahasiswaan', function () {
+        return view('dashboard.kemahasiswaan.index');
+    });
+
+    Route::get('/dashboard/kemahasiswaan/lomba', function () {
+        return view('dashboard.kemahasiswaan.lomba.index');
+    });
+
+    Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
+        return view('dashboard.kemahasiswaan.lomba.buat');
+    });
+
+    Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
+        return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
+    });
+
+    Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
+        return view('dashboard.kemahasiswaan.mahasiswa.index');
+    });
+
+    Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
+        return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
+    });
+
+    // Dashboard Route Admin Lomba
+    Route::get('/dashboard/adminlomba', function () {
+        return view('dashboard.adminlomba.index');
+    });
+
+    Route::get('/dashboard/adminlomba/lomba', function () {
+        return view('dashboard.adminlomba.lomba.index');
+    });
+
+    Route::get('/dashboard/adminlomba/lomba/buat', function () {
+        return view('dashboard.adminlomba.lomba.buat');
+    });
+
+    Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
+        return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
+    });
+
+
+    Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
+        return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
+    });
 });
