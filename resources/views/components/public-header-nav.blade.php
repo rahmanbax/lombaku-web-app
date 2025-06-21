@@ -17,7 +17,7 @@
         visibility: hidden;
         transform: translateY(10px);
         transition: all 0.3s ease;
-        display: block; /* Selalu display block agar transisi berfungsi */
+        display: block;
     }
 
     .dropdown.active .dropdown-menu {
@@ -28,19 +28,14 @@
 
     .dropdown-item { transition: all 0.2s ease; }
     .dropdown-item:hover { background-color: #f8fafc; padding-left: 1.25rem; }
-
-    /* ======================================================== */
-    /* === PERBAIKAN UTAMA UNTUK MENU MOBILE ADA DI SINI === */
-    /* ======================================================== */
     
-    /* Secara default, sembunyikan .nav-items di bawah 768px */
     @media (max-width: 767px) {
         .nav-items {
-            display: none; /* Sembunyikan sepenuhnya secara default di mobile */
+            display: none;
             flex-direction: column;
             width: 100%;
             position: absolute;
-            top: 100%; /* Posisi di bawah navbar */
+            top: 100%;
             left: 0;
             background-color: white;
             padding: 1rem;
@@ -49,23 +44,22 @@
         }
 
         .nav-items.active {
-            display: flex; /* Tampilkan saat kelas .active ditambahkan */
+            display: flex;
         }
         
-        /* Pastikan dropdown di mobile juga bekerja dengan baik */
         .dropdown-menu {
-            position: static; /* Hapus positioning absolute di mobile */
+            position: static;
             opacity: 1;
             visibility: visible;
             transform: none;
             box-shadow: none;
             border: none;
-            padding-left: 1rem; /* Indentasi submenu */
-            display: none; /* Sembunyikan submenu secara default di mobile */
+            padding-left: 1rem;
+            display: none;
         }
         
         .dropdown.active .dropdown-menu {
-            display: block; /* Tampilkan submenu saat parent-nya active */
+            display: block;
         }
     }
 </style>
@@ -85,7 +79,6 @@
         </button>
 
         <!-- Nav Items Container -->
-        <!-- Kelas 'hidden' akan menyembunyikan di mobile, 'md:flex' akan menampilkan di desktop -->
         <div class="nav-items hidden md:flex md:items-center md:space-x-6 lg:space-x-8" id="navItems">
             <a href="{{ route('home') }}" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors">Beranda</a>
             <a href="{{ route('lombaterkini') }}" class="block py-2 md:py-0 text-gray-700 hover:text-blue-600 font-medium transition-colors">Lomba Terkini</a>
@@ -101,13 +94,16 @@
                     <a href="{{ route('status')}}" class="dropdown-item block px-4 py-2 text-gray-700">Riwayat Kegiatan</a>
                     <a href="{{ route('simpanlomba') }}" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Disimpan</a>
                     <a href="{{ route('rekognisi.create') }}" class="dropdown-item block px-4 py-2 text-gray-700">Ajukan Rekognisi Prestasi</a>
+                    
+                    {{-- === INILAH PERBAIKANNYA === --}}
                     @if(in_array(Auth::user()->role, ['dosen', 'admin_lomba', 'kemahasiswaan']))
                         <div class="border-t my-1"></div>
-                        <a href="" class="dropdown-item block px-4 py-2 text-gray-700">Penilaian Juri</a>
+                        <a href="#" class="dropdown-item block px-4 py-2 text-gray-700">Penilaian Juri</a>
                     @else
                         <div class="border-t my-1"></div>
-                        <a href="" class="dropdown-item block px-4 py-2 text-gray-700">Hasil Lomba</a>
+                        <a href="{{ route('hasil-lomba.index') }}" class="dropdown-item block px-4 py-2 text-gray-700">Hasil Lomba</a>
                     @endif
+                    {{-- ======================== --}}
                 </div>
             </div>
 
@@ -145,31 +141,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.getElementById('navItems');
     if (hamburger && navItems) {
         hamburger.addEventListener('click', () => {
-            // Ini akan menambahkan/menghapus kelas 'active' pada #navItems
             navItems.classList.toggle('active');
         });
     }
 
-    // Dropdown logic for both desktop and mobile
     document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', (e) => {
             const dropdown = toggle.closest('.dropdown');
-            // Mencegah penutupan dropdown jika yang diklik adalah toggle
             e.stopPropagation(); 
             
-            // Tutup dropdown lain kecuali yang ini
             document.querySelectorAll('.dropdown.active').forEach(activeDropdown => {
                 if (activeDropdown !== dropdown) {
                     activeDropdown.classList.remove('active');
                 }
             });
             
-            // Toggle dropdown saat ini
             dropdown.classList.toggle('active');
         });
     });
 
-    // Tutup semua dropdown jika klik di luar
     document.addEventListener('click', () => {
         document.querySelectorAll('.dropdown.active').forEach(dropdown => {
             dropdown.classList.remove('active');

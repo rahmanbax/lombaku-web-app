@@ -4,15 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\TahapLomba;
 
 class PenilaianPeserta extends Model
 {
     use HasFactory;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'penilaian_peserta';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
     protected $primaryKey = 'id_penilaian';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'id_registrasi_lomba',
         'id_tahap',
@@ -21,25 +36,27 @@ class PenilaianPeserta extends Model
         'catatan',
     ];
 
+    /**
+     * Get the registration associated with the assessment.
+     */
     public function registrasiLomba()
     {
         return $this->belongsTo(RegistrasiLomba::class, 'id_registrasi_lomba', 'id_registrasi_lomba');
     }
 
-    public function tahapLomba()
+    /**
+     * Get the stage associated with the assessment.
+     */
+    public function tahap()
     {
         return $this->belongsTo(TahapLomba::class, 'id_tahap', 'id_tahap');
     }
 
+    /**
+     * Get the judge who gave the assessment.
+     */
     public function penilai()
     {
         return $this->belongsTo(User::class, 'id_penilai', 'id_user');
-    }
-
-    public function tahap()
-    {
-        // Parameter kedua: foreign key di tabel 'penilaian_peserta'
-        // Parameter ketiga: primary key di tabel 'tahap_lomba'
-        return $this->belongsTo(TahapLomba::class, 'id_tahap', 'id_tahap');
     }
 }

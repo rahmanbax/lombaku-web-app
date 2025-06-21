@@ -35,12 +35,7 @@ class ProfilMahasiswa extends Model
         // Kolom-kolom tambahan dari migrasi terakhir
         'tanggal_lahir',
         'jenis_kelamin',
-        'headline',
-        'domisili_provinsi',
-        'domisili_kabupaten',
-        'kode_pos',
-        'alamat_lengkap',
-        'sosial_media',
+      
     ];
     
     /**
@@ -49,7 +44,7 @@ class ProfilMahasiswa extends Model
      * @var array
      */
     protected $casts = [
-        'sosial_media' => 'array',
+        
         'tanggal_lahir' => 'date',
     ];
 

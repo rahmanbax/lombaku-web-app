@@ -6,15 +6,61 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Lomba;
 use App\Http\Controllers\API\PrestasiController;
 use App\Http\Controllers\API\RegistrasiLombaController;
+use App\Http\Controllers\Api\AdminProdiController;
+use App\Http\Controllers\API\DosenController;
+use App\Http\Controllers\API\HasilLombaController;
+// ==========================================================
+// Rute Dosen
+// ==========================================================
+Route::get('/dosen', function () {
+    return view('dosen.dashboard');
+})->middleware('auth')->name('dosen.dashboard');
 
+Route::get('/dosen/riwayat', function () {
+    return view('dosen.riwayat');
+})->middleware('auth')->name('dosen.riwayat');
+// ==========================================================
 
+// ==========================================================
+// Rute Admin Prodi
+// ==========================================================
+Route::get('/adminprodi', function () {
+    return view('admin.dashboard');
+})->name('dashboard.admin_prodi.view');
+
+Route::get('/adminprodi/daftar-lomba', function () {
+    return view('admin.daftar-lomba');
+})->name('admin_prodi.lomba.index');
+
+Route::get('/adminprodi/lomba/{id}', function ($id) {
+    return view('admin.detail-lomba', ['id' => $id]); 
+})->name('admin_prodi.lomba.show');
+
+Route::get('/adminprodi/verifikasi-prestasi', function () {
+    return view('admin.verifikasi-prestasi');
+})->name('admin_prodi.prestasi.verifikasi');
+
+Route::get('/adminprodi/riwayat-pendaftaran', function() {
+    return view('admin.riwayat-pendaftaran');
+})->name('admin_prodi.registrasi.history');
+
+Route::get('/adminprodi/arsip-lomba', function() {
+    return view('admin.arsip-lomba');
+})->name('admin_prodi.lomba.arsip');
+
+// Data JSON untuk Dashboard Admin Prodi
+Route::get('/dashboard/admin-prodi-data', [AdminProdiController::class, 'index'])
+     ->name('dashboard.admin_prodi.data');
+// ==========================================================
+
+// ==========================================================
+// Rute Umum Mahasiswa & Publik
+// ==========================================================
 Route::get('/lomba/{lomba}/registrasi', [RegistrasiLombaController::class, 'create'])
     ->middleware('auth') // Wajib login untuk akses
     ->name('lomba.registrasi');
 
-// Rute welcome Anda sudah benar.
 Route::get('/', function () {
-    // Hanya menampilkan view, data akan di-fetch oleh JavaScript
     return view('welcome');
 })->name('home');
 
@@ -27,7 +73,6 @@ Route::get('status', function () {
 })->name('status')->middleware('auth');
 
 Route::get('lombaterkini', function () {
-    // Hanya kembalikan view-nya saja. JavaScript akan mengurus pengambilan data.
     return view('mahasiswa.lomba.lombaterkini');
 })->name('lombaterkini');
 
@@ -35,22 +80,32 @@ Route::get('/simpanlomba', function () {
     return view('mahasiswa.lomba.simpanlomba');
 })->name('simpanlomba')->middleware('auth');
 
-// Kode yang dikomentari ini sudah benar untuk dihapus.
-// Route::get('status', function () {
-//     return view('mahasiswa.lomba.statuslomba');
-// })->name('status');
+// Rute untuk halaman daftar hasil lomba
+Route::get('/hasil-lomba', [HasilLombaController::class, 'index'])
+    ->middleware('auth')
+    ->name('hasil-lomba.index');
 
+// Rute untuk halaman detail hasil lomba per pendaftaran
+Route::get('/hasil-lomba/{registrasi}', [HasilLombaController::class, 'show'])
+    ->middleware('auth')
+    ->name('hasil-lomba.show');
+// ==========================================================
+// Rute Autentikasi
+// ==========================================================
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// Route untuk Login dan Logout
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ==========================================================
+// Rute Profil & Detail Lomba
+// ==========================================================
 Route::get('profile', function () {
     return view('mahasiswa.profile.profile');
 })->name('profile');
@@ -59,22 +114,16 @@ Route::get('profile/edit', function () {
     return view('mahasiswa.profile.edit-profile');
 })->name('profile.edit');
 
-// PERBAIKAN 2: Menggunakan Route Model Binding agar konsisten.
 Route::get('/lomba/{lomba}', function (Lomba $lomba) {
     return view('mahasiswa.lomba.detaillomba', compact('lomba'));
 })->name('lomba.show');
 
-// route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
-Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
-    $path = storage_path('app/public/sertifikat_prestasi/' . $filename);
+// ==========================================================
+// === RUTE SERTIFIKAT DIHAPUS DARI SINI ===
+// Akses file akan ditangani langsung oleh web server melalui symbolic link.
+// ==========================================================
 
-    if (!file_exists($path)) {
-        abort(404);
-    }
-
-    return response()->file($path);
-})->name('sertifikat.prestasi');
-
+// ==========================================================
 // Dashboard Route Kemahasiswaan
 
 // lindungi dengan middleware auth
