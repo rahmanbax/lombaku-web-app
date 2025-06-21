@@ -10,21 +10,21 @@ class Tag extends Model
     use HasFactory;
 
     /**
-     * Nama tabel yang terhubung dengan model.
+     * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'tags';
 
     /**
-     * Primary key untuk model.
+     * The primary key for the model.
      *
      * @var string
      */
     protected $primaryKey = 'id_tag';
 
     /**
-     * Atribut yang dapat diisi secara massal (mass assignable).
+     * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
@@ -33,13 +33,10 @@ class Tag extends Model
     ];
 
     /**
-     * Mendefinisikan relasi "many-to-many" ke model Lomba melalui tabel pivot 'daftar_tag'.
+     * The contests that belong to the tag.
      */
     public function lombas()
     {
-        // Parameter kedua: nama tabel pivot
-        // Parameter ketiga: foreign key model ini (Tag) di tabel pivot
-        // Parameter keempat: foreign key model lain (Lomba) di tabel pivot
         return $this->belongsToMany(Lomba::class, 'daftar_tag', 'id_tag', 'id_lomba');
     }
 }

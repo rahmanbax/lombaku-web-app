@@ -28,12 +28,9 @@ return new class extends Migration
             // --- Kolom-kolom baru yang Anda tambahkan ---
             $table->date('tanggal_lahir')->nullable();
             $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
-            $table->string('headline', 255)->nullable();
-            $table->string('domisili_provinsi')->nullable();
-            $table->string('domisili_kabupaten')->nullable();
-            $table->string('kode_pos', 10)->nullable();
-            $table->text('alamat_lengkap')->nullable();
-            $table->json('sosial_media')->nullable();
+        
+        
+
 
             $table->timestamps();
         });

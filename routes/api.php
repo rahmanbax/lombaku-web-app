@@ -22,7 +22,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Rute yang memerlukan autentikasi
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/profil-mahasiswa', [ProfilMahasiswaController::class, 'show']);
+   Route::get('/profil-mahasiswa', [ProfilMahasiswaController::class, 'show']);
     Route::post('/profil-mahasiswa', [ProfilMahasiswaController::class, 'update']);
     Route::post('/prestasi', [PrestasiController::class, 'store']);
     Route::get('/riwayat', [RiwayatController::class, 'getRiwayat']);
@@ -33,7 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 });
-
+ 
 
 
 Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
