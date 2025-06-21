@@ -38,8 +38,8 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return redirect()->route('register')
-                        ->withErrors($validator)
-                        ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         try {
@@ -65,12 +65,12 @@ class AuthController extends Controller
             });
         } catch (\Exception $e) {
             return redirect()->route('register')
-                        ->with('error', 'Registrasi Gagal. Terjadi kesalahan pada server.')
-                        ->withInput();
+                ->with('error', 'Registrasi Gagal. Terjadi kesalahan pada server.')
+                ->withInput();
         }
 
         return redirect()->route('login')
-                    ->with('success', 'Registrasi berhasil! Silakan masuk dengan akun Anda.');
+            ->with('success', 'Registrasi berhasil! Silakan masuk dengan akun Anda.');
     }
 
     public function login(Request $request)
@@ -90,8 +90,15 @@ class AuthController extends Controller
                     return redirect()->intended('/dashboard/kemahasiswaan');
                 case 'admin_lomba':
                     return redirect()->intended('/dashboard/adminlomba');
-                // Tambahkan case lain jika perlu
-                
+                    // Tambahkan case lain jika perlu
+                case 'admin_prodi':
+                    // Arahkan ke URL /adminprodi, sesuai dengan yang ada di web.php
+                    return redirect()->intended('/adminprodi');
+
+                case 'dosen':
+                    // Arahkan ke URL /dosen, sesuai dengan yang ada di web.php
+                    return redirect()->intended('/dosen');
+
                 case 'mahasiswa':
                 default:
                     // PERUBAHAN: Arahkan ke halaman utama (root URL) yang menampilkan welcome.blade.php

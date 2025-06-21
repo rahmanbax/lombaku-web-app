@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\API\BookmarkController;
+use App\Http\Controllers\API\DosenController;
 use App\Http\Controllers\API\HasilLombaController;
 use App\Http\Controllers\api\LombaController;
 use App\Http\Controllers\api\TagController;
@@ -35,6 +36,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+
+  Route::get('/dosen/dashboard', [DosenController::class, 'dashboardData']);
+    
+    // === TAMBAHKAN ROUTE BARU INI ===
+    Route::get('/dosen/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
+
 Route::get('/admin-prodi/arsip-lomba', [App\Http\Controllers\Api\AdminProdiController::class, 'getArchivedLombas']);
 Route::get('/admin-prodi/registration-history', [App\Http\Controllers\Api\AdminProdiController::class, 'getRegistrationHistory']);
 
@@ -42,6 +49,8 @@ Route::get('/admin-prodi/prestasi-verifikasi', [App\Http\Controllers\Api\AdminPr
 // ======================
 Route::get('/admin-prodi/lombas', [AdminProdiController::class, 'getLombaList']);
 // ==========================================================
+
+
 
 // Rute Publik & Lainnya
 Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);

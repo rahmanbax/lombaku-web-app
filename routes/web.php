@@ -7,6 +7,21 @@ use App\Models\Lomba;
 use App\Http\Controllers\API\PrestasiController;
 use App\Http\Controllers\API\RegistrasiLombaController; 
 use App\Http\Controllers\Api\AdminProdiController;
+use App\Http\Controllers\API\DosenController;
+
+// ==========================================================
+// === PERUBAHAN DI SINI ===
+// Hapus rute duplikat dan pastikan namanya benar.
+// ==========================================================
+Route::get('/dosen', function () {
+    return view('dosen.dashboard');
+})->middleware('auth')->name('dosen.dashboard');
+
+Route::get('/dosen/riwayat', function () {
+    return view('dosen.riwayat');
+})->middleware('auth')->name('dosen.riwayat');
+// ==========================================================
+
 
 Route::get('/adminprodi', function () {
     return view('admin.dashboard');
@@ -20,12 +35,10 @@ Route::get('/adminprodi/lomba/{id}', function ($id) {
     return view('admin.detail-lomba', ['id' => $id]); 
 })->name('admin_prodi.lomba.show');
 
-// === ROUTE BARU UNTUK HALAMAN VERIFIKASI ===
 Route::get('/adminprodi/verifikasi-prestasi', function () {
     return view('admin.verifikasi-prestasi');
 })->name('admin_prodi.prestasi.verifikasi');
 
-// === TAMBAHKAN ROUTE BARU INI ===
 Route::get('/adminprodi/riwayat-pendaftaran', function() {
     return view('admin.riwayat-pendaftaran');
 })->name('admin_prodi.registrasi.history');
@@ -45,7 +58,6 @@ Route::get('/lomba/{lomba}/registrasi', [RegistrasiLombaController::class, 'crea
 
 // Rute welcome Anda sudah benar.
 Route::get('/', function () {
-    // Hanya menampilkan view, data akan di-fetch oleh JavaScript
     return view('welcome');
 })->name('home');
 
@@ -58,18 +70,12 @@ Route::get('status', function () {
 })->name('status')->middleware('auth');
 
 Route::get('lombaterkini', function () {
-    // Hanya kembalikan view-nya saja. JavaScript akan mengurus pengambilan data.
     return view('mahasiswa.lomba.lombaterkini');
 })->name('lombaterkini');
 
 Route::get('/simpanlomba', function () {
     return view('mahasiswa.lomba.simpanlomba');
 })->name('simpanlomba')->middleware('auth');
-
-// Kode yang dikomentari ini sudah benar untuk dihapus.
-// Route::get('status', function () {
-//     return view('mahasiswa.lomba.statuslomba');
-// })->name('status');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -82,19 +88,19 @@ Route::get('/login', function () {
 })->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 Route::get('profile', function () {
     return view('mahasiswa.profile.profile');
 })->name('profile');
-  Route::get('profile/edit', function () {
-        return view('mahasiswa.profile.edit-profile');
-    })->name('profile.edit');
 
-// PERBAIKAN 2: Menggunakan Route Model Binding agar konsisten.
+Route::get('profile/edit', function () {
+    return view('mahasiswa.profile.edit-profile');
+})->name('profile.edit');
+
 Route::get('/lomba/{lomba}', function (Lomba $lomba) {
     return view('mahasiswa.lomba.detaillomba', compact('lomba'));
 })->name('lomba.show');
 
-// route untuk lihat sertifikat di rute /storage/sertifikat_prestasi/{filename}
 Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
     $path = storage_path('app/public/sertifikat_prestasi/' . $filename);
     
@@ -104,8 +110,6 @@ Route::get('/storage/sertifikat_prestasi/{filename}', function ($filename) {
 
     return response()->file($path);
 })->name('sertifikat.prestasi');
-
-
 
 
 // Dashboard Route Kemahasiswaan

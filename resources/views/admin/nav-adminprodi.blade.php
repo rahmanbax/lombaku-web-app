@@ -4,7 +4,7 @@
         <h1 class="text-xl font-bold">Admin Prodi</h1>
     </div>
 
-    <!-- Navigasi Sidebar -->
+    <!-- Navigasi Sidebar (flex-1 membuat bagian ini mengisi ruang yang tersedia) -->
     <nav class="flex-1 px-2 py-4 space-y-2">
         
         {{-- Link Dashboard --}}
@@ -55,7 +55,7 @@
             <span class="ml-3">Riwayat Pendaftaran</span>
         </a>
         
-        {{-- Link Arsip Lomba (SUDAH DIPERBAIKI) --}}
+        {{-- Link Arsip Lomba --}}
         <a href="{{ route('admin_prodi.lomba.arsip') }}"
            class="flex items-center px-4 py-2 mt-2 rounded-md
                   @if(request()->routeIs('admin_prodi.lomba.arsip')) 
@@ -67,4 +67,33 @@
             <span class="ml-3">Arsip Lomba</span>
         </a>
     </nav>
+
+    <!-- =============================================================== -->
+    <!-- === BAGIAN BARU: INFO USER DAN LOGOUT === -->
+    <!-- =============================================================== -->
+    <div class="mt-auto p-4 border-t border-gray-700">
+        @auth
+            <div class="flex items-center">
+                <!-- Avatar Placeholder -->
+                <div class="flex-shrink-0">
+                    <svg class="w-10 h-10 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <!-- User Info -->
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-semibold text-white">{{ Auth::user()->nama }}</p>
+                    <p class="text-xs text-gray-400 capitalize">{{ ucwords(str_replace('_', ' ', Auth::user()->role)) }}</p>
+                </div>
+                <!-- Logout Button -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" title="Logout" class="ml-2 p-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
+                </form>
+            </div>
+        @endauth
+    </div>
+    <!-- =============================================================== -->
+    <!-- === AKHIR BAGIAN BARU === -->
+    <!-- =============================================================== -->
 </aside>
