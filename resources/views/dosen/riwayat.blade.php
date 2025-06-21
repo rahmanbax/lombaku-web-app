@@ -19,6 +19,7 @@
             <nav>
                 <a href="{{ route('dosen.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('dosen.dashboard') ? 'bg-gray-700' : 'hover:bg-gray-700' }}">Dashboard</a>
                 <a href="{{ route('dosen.riwayat') }}" class="block py-2.5 px-4 rounded transition duration-200 mt-2 {{ request()->routeIs('dosen.riwayat') ? 'bg-gray-700' : 'hover:bg-gray-700' }}">Riwayat Peserta</a>
+                <a href="{{ route('dosen.persetujuan') }}" class="block py-2.5 px-4 rounded transition duration-200 mt-2 {{ request()->routeIs('dosen.persetujuan') ? 'bg-gray-700' : 'hover:bg-gray-700' }}">Persetujuan Lomba</a>
             </nav>
         </div>
 

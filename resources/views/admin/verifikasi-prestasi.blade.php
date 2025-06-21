@@ -57,7 +57,6 @@
     </div>
 
     <script>
-        // Script JS tidak perlu diubah
         document.addEventListener('DOMContentLoaded', function() {
             const tbody = document.getElementById('verifikasi-tbody');
             const statusFilter = document.getElementById('status-filter');
@@ -67,9 +66,10 @@
             const fetchVerifications = async (url = API_URL) => {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">Memuat data...</td></tr>`;
                 try {
-                    const params = new URLSearchParams();
-                    params.append('status', statusFilter.value);
-                    const response = await axios.get(`${url}?${params.toString()}`);
+                    const config = {
+                        params: { status: statusFilter.value }
+                    };
+                    const response = await axios.get(url, config);
                     renderTable(response.data.data);
                     renderPagination(response.data);
                 } catch (error) {
@@ -77,6 +77,10 @@
                     tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-500">Gagal memuat data.</td></tr>`;
                 }
             };
+
+            // =======================================================
+            // === BLOK KODE YANG DIPERBAIKI ADA DI SINI ===
+            // =======================================================
             const renderTable = (items) => {
                 tbody.innerHTML = '';
                 if (items.length === 0) {
@@ -89,13 +93,36 @@
                     if (item.status_verifikasi === 'menunggu') {
                         actionButtons = `<button onclick="handleApprove(${item.id_prestasi})" class="text-green-600 hover:text-green-900 text-sm">Setujui</button><button onclick="handleReject(${item.id_prestasi})" class="text-red-600 hover:text-red-900 ml-2 text-sm">Tolak</button>`;
                     }
-                    row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${item.mahasiswa.nama}</div><div class="text-sm text-gray-500">${item.mahasiswa.profil_mahasiswa.nim}</div></td><td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${item.nama_lomba_eksternal}</div><div class="text-sm text-gray-500">${item.peringkat} - ${item.penyelenggara_eksternal}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${new Date(item.tanggal_diraih).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td><td class="px-6 py-4 whitespace-nowrap">${getStatusBadge(item.status_verifikasi)}</td><td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"><a href="/storage/${item.sertifikat_path}" target="_blank" class="text-blue-600 hover:text-blue-900">Lihat Sertifikat</a>${actionButtons}</td>`;
+
+                    // --- PERBAIKAN UTAMA: Tambahkan pengecekan sebelum mengakses properti ---
+                    const mahasiswa = item.mahasiswa;
+                    const profil = mahasiswa.profil_mahasiswa;
+                    // Gunakan ternary operator untuk menampilkan 'N/A' jika profil tidak ada
+                    const nimDisplay = profil ? profil.nim : '<span class="text-red-500">Profil Hilang</span>';
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${mahasiswa.nama}</div>
+                            <div class="text-sm text-gray-500">${nimDisplay}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${item.nama_lomba_eksternal}</div>
+                            <div class="text-sm text-gray-500">${item.peringkat} - ${item.penyelenggara_eksternal}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${new Date(item.tanggal_diraih).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${getStatusBadge(item.status_verifikasi)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            <a href="/storage/${item.sertifikat_path}" target="_blank" class="text-blue-600 hover:text-blue-900">Lihat Sertifikat</a>
+                            ${actionButtons}
+                        </td>
+                    `;
                     tbody.appendChild(row);
                 });
             };
+
             const renderPagination = (data) => {
                 paginationContainer.innerHTML = '';
-                if (data.last_page <= 1) return;
+                if (!data || !data.links || data.last_page <= 1) return;
                 const nav = document.createElement('nav');
                 nav.className = 'flex items-center justify-between';
                 const linksHtml = data.links.map(link => {
@@ -105,15 +132,19 @@
                 nav.innerHTML = `<div class="flex-1 flex justify-center">${linksHtml}</div>`;
                 paginationContainer.appendChild(nav);
             };
+
             const getStatusBadge = (status) => {
                 const statuses = { 'menunggu': 'bg-yellow-100 text-yellow-800', 'disetujui': 'bg-green-100 text-green-800', 'ditolak': 'bg-red-100 text-red-800' };
                 const text = status.charAt(0).toUpperCase() + status.slice(1);
                 return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statuses[status] || ''}">${text}</span>`;
             };
+
             window.handleApprove = (id) => { Swal.fire({ title: 'Setujui Pengajuan?', icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Setujui!' }).then(async (result) => { if (result.isConfirmed) { try { await axios.patch(`/api/prestasi/${id}/verifikasi/setujui`); Swal.fire('Berhasil!', 'Prestasi telah disetujui.', 'success'); fetchVerifications(); } catch (error) { Swal.fire('Error!', 'Gagal menyetujui prestasi.', 'error'); } } }); };
             window.handleReject = (id) => { Swal.fire({ title: 'Tolak Pengajuan?', input: 'textarea', inputLabel: 'Alasan Penolakan', inputPlaceholder: 'Tuliskan alasan penolakan di sini...', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'Ya, Tolak!', inputValidator: (value) => !value && 'Anda harus menuliskan alasan penolakan!' }).then(async (result) => { if (result.isConfirmed) { try { await axios.patch(`/api/prestasi/${id}/verifikasi/tolak`, { catatan_verifikasi: result.value }); Swal.fire('Berhasil!', 'Prestasi telah ditolak.', 'success'); fetchVerifications(); } catch (error) { Swal.fire('Error!', 'Gagal menolak prestasi.', 'error'); } } }); };
+            
             statusFilter.addEventListener('change', () => fetchVerifications());
             document.addEventListener('click', function(e) { if (e.target.classList.contains('pagination-btn')) { e.preventDefault(); fetchVerifications(e.target.href); } });
+            
             fetchVerifications();
         });
     </script>

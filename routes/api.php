@@ -45,9 +45,22 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-// Rute Dosen (sudah di dalam middleware auth)
-Route::get('/dosen/dashboard', [DosenController::class, 'dashboardData']);
-Route::get('/dosen/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
+Route::prefix('dosen')->group(function () {
+        // URL yang dihasilkan: /api/dosen/dashboard
+        Route::get('/dashboard', [DosenController::class, 'dashboardData']);
+        
+        // URL yang dihasilkan: /api/dosen/riwayat-peserta
+        Route::get('/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
+        
+        // URL yang dihasilkan: /api/dosen/persetujuan
+        Route::get('/persetujuan', [DosenController::class, 'getPersetujuanList']);
+        
+        // URL yang dihasilkan: /api/dosen/pendaftaran/{id}/setujui
+        Route::patch('/pendaftaran/{id}/setujui', [DosenController::class, 'setujuiPendaftaran']);
+        
+        // URL yang dihasilkan: /api/dosen/pendaftaran/{id}/tolak
+        Route::patch('/pendaftaran/{id}/tolak', [DosenController::class, 'tolakPendaftaran']);
+    });
 
 // Rute Admin Prodi (sudah di dalam middleware auth)
 Route::get('/admin-prodi/arsip-lomba', [App\Http\Controllers\Api\AdminProdiController::class, 'getArchivedLombas']);
