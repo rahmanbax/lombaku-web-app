@@ -15,6 +15,27 @@
         .status-menunggu { background-color: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A;}
         .status-diterima { background-color: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE;}
         .status-ditolak { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA;}
+        
+        /* Gaya untuk Paginasi */
+        .pagination-link {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            border-radius: 0.375rem;
+        }
+        .pagination-link:hover { background-color: #f0f0f0; }
+        .pagination-link.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .pagination-link.disabled {
+            color: #aaa;
+            pointer-events: none;
+            border-color: #eee;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -30,9 +51,7 @@
             <p class="text-gray-600">Daftar partisipasi lomba dan prestasi yang telah Anda raih.</p>
         </div>
         
-        <!-- History List Container -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <!-- Table Header -->
             <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-3 border-b border-gray-200 text-sm">
                 <div class="col-span-5 font-semibold text-gray-600">Nama Kegiatan</div>
                 <div class="col-span-2 font-semibold text-gray-600">Tanggal</div>
@@ -40,7 +59,6 @@
                 <div class="col-span-3 font-semibold text-gray-600">Aksi</div>
             </div>
             
-            <!-- Cangkang untuk diisi JavaScript -->
             <div id="history-list-container">
                 <!-- Loading State -->
                 <div id="loading-state" class="p-10 text-center">
@@ -51,7 +69,7 @@
         </div>
         
         <!-- Pagination Container -->
-        <div id="pagination-container" class="mt-8"></div>
+        <div id="pagination-container" class="mt-8 flex justify-center"></div>
     </div>
 </div>
 
@@ -64,8 +82,6 @@
                 <p class="item-type text-xs font-semibold uppercase tracking-wider"></p>
                 <h3 class="item-name font-bold text-gray-800"></h3>
                 <p class="item-kategori text-gray-500 text-sm mt-1"></p>
-
-                <!-- Placeholder untuk info tambahan (Dosen & Tim) -->
                 <div class="item-extra-info mt-3 space-y-2 text-xs">
                     <div class="item-dosen-info hidden"></div>
                     <div class="item-tim-info hidden"></div>
@@ -84,21 +100,8 @@
     </div>
 </template>
 
- <!-- Footer -->
 <footer class="bg-gray-800 text-white mt-20">
-    <div class="container mx-auto px-4 py-12">
-        <div class="max-w-3xl mx-auto text-center mb-8">
-            <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-            <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
-                Daftar sebagai Admin Lomba
-            </button>
-        </div>
-    </div>
-    <div class="bg-gray-900 py-6">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
-        </div>
-    </div>
+    {{-- Footer Anda --}}
 </footer>
 
 <script>
@@ -119,22 +122,27 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = ''; 
         container.appendChild(loadingState);
         try {
-            const response = await axios.get(url, { headers: { 'Accept': 'application/json' } });
+            const response = await axios.get(url);
+            // Panggil renderItems dengan array 'data' dari respons
             renderItems(response.data.data);
+            // Panggil renderPagination dengan seluruh objek respons paginasi
             renderPagination(response.data);
         } catch (error) {
             console.error('Gagal mengambil riwayat:', error);
-            container.innerHTML = `<div class="p-6 text-center text-red-500">Gagal memuat data. Silakan coba lagi.</div>`;
+            container.innerHTML = `<div class="p-6 text-center text-red-500">Gagal memuat data. Silakan muat ulang halaman.</div>`;
         } finally {
             loadingState.style.display = 'none';
         }
     };
 
     const renderItems = (items) => {
-        container.innerHTML = '';
+        container.innerHTML = ''; // Kosongkan container utama
+        
+        // --- INI BAGIAN KUNCI UNTUK PENGGUNA BARU ---
+        // Jika array 'items' kosong, tampilkan pesan.
         if (items.length === 0) {
-            container.innerHTML = `<div class="p-6 text-center text-gray-500">Anda belum memiliki riwayat kegiatan.</div>`;
-            return;
+            container.innerHTML = `<div class="p-12 text-center text-gray-500"><i class="fas fa-box-open fa-3x mb-4 text-gray-300"></i><h3 class="text-xl font-semibold">Belum Ada Riwayat</h3><p>Anda belum pernah mendaftar lomba atau mengajukan prestasi.</p></div>`;
+            return; // Hentikan fungsi agar tidak mencoba render item
         }
 
         items.forEach(item => {
@@ -147,9 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const statusBadge = card.querySelector('.item-status-badge');
             statusBadge.textContent = item.status_text;
-            if (item.status_class) {
-                statusBadge.classList.add(item.status_class);
-            }
+            if (item.status_class) { statusBadge.classList.add(item.status_class); }
             
             const itemIcon = card.querySelector('.item-icon');
             const actionsContainer = card.querySelector('.item-actions');
@@ -160,46 +166,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemIcon.innerHTML = `<i class="fas fa-medal text-yellow-500"></i>`;
                 itemIcon.className += ' bg-yellow-100';
                 if (item.sertifikat_path) {
-                    const sertifikatUrl = `${baseUrl}/storage/${item.sertifikat_path}`;
-                    actionsContainer.innerHTML = `<a href="${sertifikatUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-certificate mr-1"></i> Lihat Sertifikat</a>`;
+                    actionsContainer.innerHTML = `<a href="${baseUrl}/storage/${item.sertifikat_path}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-certificate mr-1"></i> Lihat Sertifikat</a>`;
                 }
-            } else { // Partisipasi Lomba
+            } else { 
                 itemIcon.innerHTML = `<i class="fas fa-flag-checkered text-indigo-500"></i>`;
                 itemIcon.className += ' bg-indigo-100';
 
-                if (item.lomba_id) {
-                     const lombaUrl = `${baseUrl}/lomba/${item.lomba_id}`;
-                     actionsContainer.innerHTML = `<a href="${lombaUrl}" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-eye mr-1"></i> Detail Lomba</a>`;
+                if (item.action_url && item.action_text) {
+                     actionsContainer.innerHTML = `<a href="${item.action_url}" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-eye mr-1"></i> ${item.action_text}</a>`;
                 } else {
-                    actionsContainer.innerHTML = `<span class="text-gray-400 text-sm">Lomba tidak tersedia</span>`;
+                    actionsContainer.innerHTML = `<span class="text-gray-400 text-sm">Tidak ada aksi</span>`;
                 }
 
-                // Tampilkan Dosen Pembimbing jika ada
                 if (item.nama_dosen) {
-                    dosenInfoContainer.innerHTML = `
-                        <p class="flex items-center text-gray-600">
-                            <i class="fas fa-user-tie fa-fw mr-2 text-gray-400"></i>
-                            Dosen: <strong>${item.nama_dosen}</strong>
-                        </p>`;
+                    dosenInfoContainer.innerHTML = `<p class="flex items-center text-gray-600"><i class="fas fa-user-tie fa-fw mr-2 text-gray-400"></i>Dosen: <strong>${item.nama_dosen}</strong></p>`;
                     dosenInfoContainer.classList.remove('hidden');
                 }
 
-                // Tampilkan Info Tim jika ada
                 if (item.nama_tim && item.members && item.members.length > 0) {
-                    const membersHtml = item.members.map(nama => 
-                        `<span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md">${nama}</span>`
-                    ).join(' ');
-
-                    timInfoContainer.innerHTML = `
-                        <div class="flex items-start text-gray-600">
-                            <i class="fas fa-users fa-fw mr-2 mt-0.5 text-gray-400"></i>
-                            <div>
-                                <p>Tim: <strong>${item.nama_tim}</strong></p>
-                                <div class="pl-0 mt-1 flex flex-wrap gap-1.5">
-                                    ${membersHtml}
-                                </div>
-                            </div>
-                        </div>`;
+                    const membersHtml = item.members.map(nama => `<span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md">${nama}</span>`).join(' ');
+                    timInfoContainer.innerHTML = `<div class="flex items-start text-gray-600"><i class="fas fa-users fa-fw mr-2 mt-0.5 text-gray-400"></i><div><p>Tim: <strong>${item.nama_tim}</strong></p><div class="pl-0 mt-1 flex flex-wrap gap-1.5">${membersHtml}</div></div></div>`;
                     timInfoContainer.classList.remove('hidden');
                 }
             }
@@ -207,38 +193,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // --- FUNGSI BARU DAN LENGKAP UNTUK RENDER PAGINASI ---
     const renderPagination = (data) => {
         paginationContainer.innerHTML = '';
-        if (!data || data.total <= data.per_page) return;
-
-        const linksHtml = data.links.map(link => {
-            const isActive = link.active;
-            const isDisabled = !link.url;
-            let classes = 'px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm rounded-md transition-colors';
-            if (isActive) classes = 'px-4 py-2 border border-blue-500 bg-blue-500 text-white text-sm rounded-md';
-            if (isDisabled) classes += ' opacity-50 cursor-not-allowed';
-            
-            return `<button data-url="${link.url}" class="${classes}" ${isDisabled ? 'disabled' : ''}>${link.label.replace(/«/g, '<i class="fas fa-chevron-left"></i>').replace(/»/g, '<i class="fas fa-chevron-right"></i>').replace(' Previous', '').replace('Next ', '')}</button>`;
-        }).join('');
-
-        paginationContainer.innerHTML = `
-            <div class="flex justify-between items-center flex-wrap gap-4">
-                <div class="text-sm text-gray-600">Menampilkan ${data.from} - ${data.to} dari ${data.total} hasil</div>
-                <div class="flex space-x-1">${linksHtml}</div>
-            </div>
-        `;
         
-        paginationContainer.querySelectorAll('button[data-url]').forEach(button => {
-            if (button.dataset.url && button.dataset.url !== 'null') {
-                button.addEventListener('click', () => fetchRiwayat(button.dataset.url));
+        // Jangan render paginasi jika hanya ada 1 halaman atau tidak ada data
+        if (data.last_page <= 1) {
+            return;
+        }
+
+        const nav = document.createElement('nav');
+        nav.className = 'flex items-center space-x-2';
+
+        data.links.forEach(link => {
+            const a = document.createElement('a');
+            a.href = '#'; // Cegah navigasi
+            a.innerHTML = link.label;
+            a.className = 'pagination-link';
+
+            if (link.url === null) {
+                a.classList.add('disabled');
+            } else {
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fetchRiwayat(link.url);
+                });
             }
+
+            if (link.active) {
+                a.classList.add('active');
+            }
+            
+            nav.appendChild(a);
         });
+
+        paginationContainer.appendChild(nav);
     };
     
-    // Initial fetch
+    // Panggil fungsi pertama kali saat halaman dimuat
     fetchRiwayat();
 });
 </script>
-
 </body>
 </html>

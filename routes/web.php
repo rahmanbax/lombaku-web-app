@@ -40,23 +40,17 @@ Route::get('/simpanlomba', function () {
 //     return view('mahasiswa.lomba.statuslomba');
 // })->name('status');
 
-// Logout route
-Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// Rute untuk menampilkan form login (GET)
-Route::get('login', function () {
+// Route untuk Login dan Logout
+Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
-
-// Rute untuk menangani proses login (POST)
-Route::post('login', [AuthController::class, 'login'])->name('login.post');
-
-Route::get('register', function () {
-    return view('auth.register');
-})->name('register'); 
-
-Route::post('register', [AuthController::class, 'register'])->name('register.post');
-
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('profile', function () {
     return view('mahasiswa.profile.profile');
 })->name('profile');

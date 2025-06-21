@@ -10,21 +10,21 @@ class Tim extends Model
     use HasFactory;
 
     /**
-     * Nama tabel yang terhubung dengan model.
+     * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'tim';
 
     /**
-     * Primary key untuk model.
+     * The primary key for the model.
      *
      * @var string
      */
     protected $primaryKey = 'id_tim';
 
     /**
-     * Atribut yang dapat diisi secara massal (mass assignable).
+     * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
@@ -33,25 +33,21 @@ class Tim extends Model
     ];
 
     /**
-     * Mendefinisikan relasi "many-to-many" ke model User (sebagai anggota tim).
-     * Sebuah Tim bisa memiliki banyak User (mahasiswa) sebagai anggota.
+     * The members that belong to the team.
      */
     public function members()
     {
-        // Parameter kedua: nama tabel pivot
-        // Parameter ketiga: foreign key model ini (Tim) di tabel pivot
-        // Parameter keempat: foreign key model lain (User) di tabel pivot
+        // Relasi ke User melalui tabel pivot 'member_tim'
+        // Foreign key untuk Tim di pivot adalah 'id_tim'
+        // Foreign key untuk User di pivot adalah 'id_mahasiswa'
         return $this->belongsToMany(User::class, 'member_tim', 'id_tim', 'id_mahasiswa');
     }
 
     /**
-     * Mendefinisikan relasi "has many" ke model RegistrasiLomba.
-     * Sebuah Tim bisa mendaftar di banyak Lomba.
+     * Get all of the contest registrations for the team.
      */
     public function registrasiLomba()
     {
-        // Parameter kedua: foreign key di tabel 'registrasi_lomba'
-        // Parameter ketiga: primary key di tabel 'tim'
         return $this->hasMany(RegistrasiLomba::class, 'id_tim', 'id_tim');
     }
 }

@@ -10,21 +10,21 @@ class Lomba extends Model
     use HasFactory;
 
     /**
-     * Nama tabel yang terhubung dengan model.
+     * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'lomba';
 
     /**
-     * Primary key untuk model.
+     * The primary key for the model.
      *
      * @var string
      */
     protected $primaryKey = 'id_lomba';
 
     /**
-     * Atribut yang dapat diisi secara massal (mass assignable).
+     * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
@@ -32,8 +32,10 @@ class Lomba extends Model
         'foto_lomba',
         'nama_lomba',
         'deskripsi',
+        'lokasi', // Anda lupa menambahkan ini di fillable
         'tingkat',
         'status',
+        'alasan_penolakan', // Anda lupa menambahkan ini di fillable
         'tanggal_akhir_registrasi',
         'tanggal_mulai_lomba',
         'tanggal_selesai_lomba',
@@ -42,36 +44,39 @@ class Lomba extends Model
     ];
 
     /**
-     * Mendefinisikan relasi "belongs to" ke model User (pembuat lomba).
+     * Get the user who created the contest.
      */
     public function pembuat()
     {
-        // Parameter kedua: foreign key di tabel 'lomba'
-        // Parameter ketiga: primary key di tabel 'users'
         return $this->belongsTo(User::class, 'id_pembuat', 'id_user');
     }
 
     /**
-     * Mendefinisikan relasi "many-to-many" ke model Tag melalui tabel pivot 'daftar_tag'.
+     * The tags that belong to the contest.
      */
     public function tags()
     {
-        // Parameter kedua: nama tabel pivot
-        // Parameter ketiga: foreign key model ini di tabel pivot
-        // Parameter keempat: foreign key model lain di tabel pivot
         return $this->belongsToMany(Tag::class, 'daftar_tag', 'id_lomba', 'id_tag');
     }
 
     /**
-     * Mendefinisikan relasi "has many" ke model RegistrasiLomba.
+     * Get all of the registrations for the contest.
      */
     public function registrasi()
     {
         return $this->hasMany(RegistrasiLomba::class, 'id_lomba', 'id_lomba');
     }
-    public function bookmarkedLombas()
+
+    /**
+     * --- INI PERBAIKANNYA ---
+     * Get the users who have bookmarked this contest.
+     */
+    public function bookmarkedByUsers()
     {
-        return $this->belongsToMany(Lomba::class, 'lomba_bookmarks', 'user_id', 'id_lomba')
+        // Relasi ke User, bukan ke Lomba lagi.
+        // Foreign key untuk User di tabel pivot adalah 'id_user'.
+        // Foreign key untuk Lomba (model ini) di tabel pivot adalah 'id_lomba'.
+        return $this->belongsToMany(User::class, 'lomba_bookmarks', 'id_lomba', 'id_user')
                     ->withTimestamps();
     }
 }
