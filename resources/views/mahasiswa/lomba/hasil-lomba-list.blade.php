@@ -43,5 +43,21 @@
             </div>
         </div>
     </main>
+    
+     <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                    Daftar sebagai Admin Lomba
+                </button>
+            </div>
+        </div>
+        <div class="bg-gray-900 py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

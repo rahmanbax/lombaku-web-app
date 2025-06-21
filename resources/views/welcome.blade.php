@@ -10,7 +10,6 @@
         .card-lomba:hover .lomba-image {
             transform: scale(1.05);
         }
-        /* Animasi sederhana untuk elemen yang masuk */
         .fade-in-up {
             opacity: 0;
             transform: translateY(20px);
@@ -25,6 +24,13 @@
             background-image:
                 radial-gradient(at 0% 0%, hsla(253, 100%, 75%, 0.15) 0px, transparent 50%),
                 radial-gradient(at 98% 1%, hsla(220, 100%, 75%, 0.15) 0px, transparent 50%);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-transform: capitalize;
         }
     </style>
 </head>
@@ -42,7 +48,6 @@
             <p class="text-gray-600 text-lg max-w-2xl mx-auto mb-8 fade-in-up" style="transition-delay: 150ms;">
                 Platform terpusat untuk semua informasi kompetisi. Dari tingkat kampus hingga internasional, mulailah perjalanan prestasimu di sini.
             </p>
-
             <div class="max-w-xl mx-auto fade-in-up" style="transition-delay: 300ms;">
                 <div class="relative">
                     <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -59,14 +64,11 @@
     <!-- Lomba Terbaru Section -->
     <section id="lomba-terbaru" class="container mx-auto px-4 py-16">
         <h2 class="text-3xl font-bold text-center text-gray-800 mb-12 fade-in-up">Lomba Terbaru Untukmu</h2>
-
         <div id="lomba-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
-            <!-- Loading state -->
             <div id="loading-state" class="col-span-full flex justify-center items-center">
                 <i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i>
             </div>
         </div>
-        
         <div class="mt-16 text-center fade-in-up">
             <a href="{{ route('lombaterkini') }}" class="inline-block bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg">
                 Lihat Semua Lomba <i class="fas fa-arrow-right ml-2"></i>
@@ -81,19 +83,16 @@
                 <a class="lomba-link-img" href="#">
                     <img class="lomba-image w-full h-52 object-cover transition-transform duration-300" src="" alt="">
                 </a>
-                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                    <!-- Tags akan diisi di sini -->
-                </div>
+                <div class="absolute top-3 left-3 flex flex-wrap gap-2"></div>
+                <div class="lomba-status-badge absolute top-3 right-3"></div>
             </div>
             <div class="p-6">
                 <p class="lomba-penyelenggara text-sm text-gray-500 mb-2 capitalize"></p>
                 <h3 class="lomba-nama text-xl font-bold text-gray-800 mb-4 h-14" title=""></h3>
-                
                 <div class="flex items-center text-gray-600 text-sm">
                     <i class="fas fa-calendar-alt mr-2 text-red-500"></i>
                     <span class="lomba-tanggal"></span>
                 </div>
-
                 <a class="lomba-link-detail mt-6 block w-full bg-blue-600 text-white text-center font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-colors">
                     Lihat Detail
                 </a>
@@ -101,6 +100,7 @@
         </div>
     </template>
 
+ 
  <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
@@ -122,11 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('lomba-container');
     const loadingState = document.getElementById('loading-state');
     const template = document.getElementById('lomba-card-template');
-    const baseUrl = window.location.origin;
 
     const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
-    // Fungsi untuk mengambil data lomba dari API
     async function fetchLatestLombas() {
         loadingState.style.display = 'flex';
         container.innerHTML = '';
@@ -134,7 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await axios.get('/api/lomba', { params: { limit: 6 } });
-            const lombas = response.data.data.data;
+            
+            // === PERBAIKAN: HAPUS FILTER JAVASCRIPT ===
+            // Kita asumsikan backend sudah mengirim data yang benar, atau kita tampilkan apa adanya.
+            const lombas = response.data.data.data; // Langsung gunakan data tanpa filter.
             
             loadingState.style.display = 'none';
             
@@ -146,18 +147,21 @@ document.addEventListener('DOMContentLoaded', () => {
             lombas.forEach((lomba, index) => {
                 const card = template.content.cloneNode(true);
                 const cardElement = card.querySelector('.card-lomba');
-                
-                // Tambahkan animasi fade-in-up
                 cardElement.classList.add('fade-in-up');
                 cardElement.style.transitionDelay = `${index * 100}ms`;
 
-                const link = `${baseUrl}/lomba/${lomba.id_lomba}`;
+                const link = `/lomba/${lomba.id_lomba}`;
                 
-                card.querySelector('.lomba-image').src = `${baseUrl}/${lomba.foto_lomba}`;
-                card.querySelector('.lomba-image').alt = lomba.nama_lomba;
+                const imageEl = card.querySelector('.lomba-image');
+                if (lomba.foto_lomba) {
+                    imageEl.src = lomba.foto_lomba;
+                } else {
+                    imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=E0E7FF&color=3730A3&size=300`;
+                }
+                imageEl.alt = lomba.nama_lomba;
                 card.querySelector('.lomba-link-img').href = link;
                 
-                const tagsContainer = card.querySelector('.absolute.top-3');
+                const tagsContainer = card.querySelector('.absolute.top-3.left-3');
                 tagsContainer.innerHTML = '';
                 lomba.tags.slice(0, 2).forEach(tag => {
                     const tagEl = document.createElement('span');
@@ -165,6 +169,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     tagEl.textContent = tag.nama_tag;
                     tagsContainer.appendChild(tagEl);
                 });
+
+                const statusContainer = card.querySelector('.lomba-status-badge');
+                if (lomba.status) {
+                    const statusEl = document.createElement('span');
+                    statusEl.className = 'status-badge';
+                    let statusText = lomba.status.replace(/_/g, ' ');
+
+                    switch (lomba.status) {
+                        case 'pendaftaran_dibuka':
+                            statusEl.classList.add('bg-green-100', 'text-green-800');
+                            statusText = "Buka Pendaftaran";
+                            break;
+                        case 'pendaftaran_ditutup':
+                            statusEl.classList.add('bg-yellow-100', 'text-yellow-800');
+                            statusText = "Pendaftaran Ditutup";
+                            break;
+                        case 'sedang_berlangsung':
+                            statusEl.classList.add('bg-blue-100', 'text-blue-800');
+                            statusText = "Berlangsung";
+                            break;
+                        case 'selesai':
+                            statusEl.classList.add('bg-gray-200', 'text-gray-800');
+                            statusText = "Selesai";
+                            break;
+                        case 'belum_disetujui': // Menangani status internal
+                            statusEl.classList.add('bg-orange-100', 'text-orange-800');
+                            statusText = "Review";
+                            break;
+                        default: 
+                            statusEl.classList.add('bg-gray-100', 'text-gray-600');
+                            break;
+                    }
+                    statusEl.textContent = statusText;
+                    statusContainer.appendChild(statusEl);
+                }
 
                 card.querySelector('.lomba-nama').textContent = lomba.nama_lomba;
                 card.querySelector('.lomba-nama').title = lomba.nama_lomba;
@@ -175,11 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.appendChild(card);
             });
             
-            // Pemicu animasi setelah elemen ditambahkan ke DOM
             setTimeout(() => {
-                document.querySelectorAll('.fade-in-up').forEach(el => {
-                    el.classList.add('visible');
-                });
+                document.querySelectorAll('.fade-in-up').forEach(el => el.classList.add('visible'));
             }, 100);
 
         } catch (error) {
@@ -189,24 +225,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fungsi untuk pencarian
     const searchInput = document.getElementById('search-input-welcome');
     function handleSearch() {
         const query = searchInput.value.trim();
         if (query) {
-            window.location.href = `${baseUrl}/lombaterkini?search=${encodeURIComponent(query)}`;
+            window.location.href = `/lombaterkini?search=${encodeURIComponent(query)}`;
         }
     }
 
-    // Event listener untuk search bar
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // Mencegah submit form jika ada
+            e.preventDefault();
             handleSearch();
         }
     });
     
-    // Trigger animasi untuk elemen statis
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -215,11 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.1 });
 
-    document.querySelectorAll('.fade-in-up').forEach(el => {
-        observer.observe(el);
-    });
+    document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
 
-    // Panggil fungsi untuk memuat data saat halaman dimuat
     fetchLatestLombas();
 });
 </script>
