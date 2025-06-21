@@ -35,4 +35,11 @@ class PenilaianPeserta extends Model
     {
         return $this->belongsTo(User::class, 'id_penilai', 'id_user');
     }
+
+    public function tahap()
+    {
+        // Parameter kedua: foreign key di tabel 'penilaian_peserta'
+        // Parameter ketiga: primary key di tabel 'tahap_lomba'
+        return $this->belongsTo(TahapLomba::class, 'id_tahap', 'id_tahap');
+    }
 }

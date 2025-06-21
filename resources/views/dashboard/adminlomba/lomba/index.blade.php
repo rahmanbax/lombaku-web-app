@@ -59,7 +59,7 @@
             <div class="flex gap-2 mt-4">
                 <!-- search -->
                 <input type="text" id="search-lomba-input" placeholder="Cari Lomba" class="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring focus:ring-blue-500">
-                <a href="/dashboard/kemahasiswaan/lomba/buat" class="whitespace-nowrap py-2 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">Publikasikan Lomba</a>
+                <a href="/dashboard/adminlomba/lomba/buat" class="whitespace-nowrap py-2 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">Publikasikan Lomba</a>
             </div>
 
             <div class="mt-4 overflow-x-auto">
@@ -227,7 +227,7 @@
                         // Loop dan append data lomba
                         lombaButuhPersetujuan.forEach((lomba) => {
                             const lombaElement = document.createElement('div');
-                            lombaElement.className = 'flex items-center gap-2 p-3 bg-gray-100 rounded-lg mb-2';
+                            lombaElement.className = 'flex items-center gap-2 p-3 bg-gray-100 rounded-lg';
                             lombaElement.innerHTML = `
                     <div class="flex-1"><p class="text-xs text-black/50">
                         <a href="/dashboard/adminlomba/lomba/${lomba.id_lomba}" class="text-base font-medium hover:underline text-black">${lomba.nama_lomba}</a>

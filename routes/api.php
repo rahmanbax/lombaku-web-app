@@ -14,6 +14,7 @@ use App\Http\Controllers\api\ProgramStudiController;
 use App\Http\Controllers\API\PrestasiController;
 use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\API\RiwayatController;
+use App\Http\Controllers\api\TahapLombaController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -40,6 +41,8 @@ Route::get('/lomba/stats', [LombaController::class, 'getStats']);
 Route::get('/lomba/butuh-persetujuan', [LombaController::class, 'getLombaButuhPersetujuan']);
 Route::get('/program-studi', [ProgramStudiController::class, 'index']);
 Route::get('/lomba/saya', [LombaController::class, 'getMyLombas']);
+Route::get('/lomba/{id}/tahap', [TahapLombaController::class, 'index']);
+Route::post('/penilaian', [PenilaianController::class, 'store']);
 Route::patch('/lomba/{id}/setujui', [LombaController::class, 'setujuiLomba']);
 Route::patch('/lomba/{id}/tolak', [LombaController::class, 'tolakLomba']);
 Route::apiResource('lomba', LombaController::class);

@@ -113,6 +113,10 @@ Route::get('/dashboard/adminlomba/lomba', function () {
     return view('dashboard.adminlomba.lomba.index');
 });
 
+Route::get('/dashboard/adminlomba/lomba/buat', function () {
+    return view('dashboard.adminlomba.lomba.buat');
+});
+
 Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
     return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
 });

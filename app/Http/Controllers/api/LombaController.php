@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lomba;
 use App\Models\RegistrasiLomba;
+use App\Models\TahapLomba;
 use Illuminate\Support\Facades\Log;
 
 class LombaController extends Controller
@@ -41,7 +42,7 @@ class LombaController extends Controller
         }
 
         $perPage = $request->input('limit', 10);
-       if ($request->has('tags') && is_array($request->tags) && count($request->tags) > 0) {
+        if ($request->has('tags') && is_array($request->tags) && count($request->tags) > 0) {
             $tagIds = $request->tags;
             // Gunakan whereHas untuk memfilter lomba yang memiliki setidaknya satu dari tag yang dipilih
             $query->whereHas('tags', function ($tagQuery) use ($tagIds) {
@@ -71,6 +72,7 @@ class LombaController extends Controller
             'nama_lomba'    => 'required|string|max:255',
             'deskripsi'     => 'required|string',
             'lokasi'     => 'required|in:online,offline',
+            'lokasi_offline' => 'nullable|string|max:255|required_if:lokasi,offline',
             'tingkat'       => 'required|in:nasional,internasional,internal',
             'tanggal_akhir_registrasi' => 'required|date',
             'tanggal_mulai_lomba' => 'required|date|after_or_equal:tanggal_akhir_registrasi',
@@ -79,6 +81,9 @@ class LombaController extends Controller
             'foto_lomba'    => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tags'          => 'required|array',
             'tags.*'        => 'exists:tags,id_tag', // Memastikan setiap tag ID ada di tabel tags
+            'tahap'         => 'required|array|min:1', // <-- VALIDASI BARU
+            'tahap.*'       => 'required|string|max:255', // <-- VALIDASI BARU
+            'tahap.*.deskripsi'   => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -116,6 +121,7 @@ class LombaController extends Controller
             'nama_lomba'    => $request->nama_lomba,
             'deskripsi'     => $request->deskripsi,
             'lokasi'        => $request->lokasi,
+            'lokasi_offline' => $request->lokasi === 'offline' ? $request->lokasi_offline : null,
             'tingkat'       => $request->tingkat,
             'status'        => 'belum disetujui',
             'penyelenggara' => $request->penyelenggara, // Bisa diisi atau dibiarkan kosong
@@ -126,6 +132,14 @@ class LombaController extends Controller
             'id_pembuat'    => $id_pembuat,
         ]);
 
+        Log::info('Lomba created by user ID: ' . $id_pembuat, [
+            'lomba_id' => $lomba->id_lomba,
+            'nama_lomba' => $lomba->nama_lomba,
+            'penyelenggara' => $lomba['penyelenggara'],
+            'lokasi' => $request->lokasi,
+            'lokasi_offline' => $request->lokasi_offline
+        ]);
+
         if ($request->filled('penyelenggara')) { // filled() lebih baik dari has() karena juga mengecek string kosong
             $lomba['penyelenggara'] = $request->penyelenggara;
         } else {
@@ -133,14 +147,18 @@ class LombaController extends Controller
             $lomba['penyelenggara'] = $user->nama;
         }
 
-        Log::info('Lomba created by user ID: ' . $id_pembuat, [
-            'lomba_id' => $lomba->id_lomba,
-            'nama_lomba' => $lomba->nama_lomba,
-            'penyelenggara' => $lomba['penyelenggara'],
-        ]);
-
         // Lampirkan tags ke lomba yang baru dibuat
         $lomba->tags()->attach($request->tags);
+
+        foreach ($request->tahap as $dataTahap) {
+            TahapLomba::create([
+                'id_lomba' => $lomba->id_lomba,
+                'nama_tahap' => $dataTahap['nama'],
+                'deskripsi' => $dataTahap['deskripsi'] ?? null,
+            ]);
+        }
+
+        Log::info('Lomba berhasil dibuat:', $lomba->toArray());
 
         return response()->json([
             'success' => true,
@@ -190,6 +208,8 @@ class LombaController extends Controller
      */
     public function update(Request $request, $id)
     {
+        Log::info($request);
+
         $lomba = Lomba::find($id);
 
         if (!$lomba) {
@@ -205,6 +225,7 @@ class LombaController extends Controller
             'nama_lomba'    => 'sometimes|required|string|max:255',
             'deskripsi'     => 'sometimes|required|string',
             'lokasi'        => 'sometimes|in:online,offline',
+            'lokasi_offline' => 'nullable|string|max:255|required_if:lokasi,offline',
             'tingkat'       => 'sometimes|required|in:nasional,internasional,internal',
             'status'        => 'sometimes|required|in:belum disetujui,disetujui,berlangsung,selesai',
             'tanggal_akhir_registrasi' => 'sometimes|required|date',
@@ -222,6 +243,10 @@ class LombaController extends Controller
 
         // Mengambil data yang tervalidasi
         $validatedData = $validator->validated();
+
+        if (isset($validatedData['lokasi']) && $validatedData['lokasi'] === 'online') {
+            $validatedData['lokasi_offline'] = null;
+        }
 
         if ($request->hasFile('foto_lomba')) {
             // Hapus gambar lama
@@ -281,18 +306,20 @@ class LombaController extends Controller
 
     public function getPendaftar($id)
     {
-        // Cek apakah lomba ada
         if (!Lomba::find($id)) {
             return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
         }
 
-        // Ambil semua data registrasi untuk lomba ini
-        // Eager load semua relasi yang dibutuhkan untuk ditampilkan di tabel
+        // --- PERUBAHAN DI SINI ---
+        // Eager load semua relasi yang dibutuhkan, termasuk penilaian dan detailnya
         $registrations = RegistrasiLomba::where('id_lomba', $id)
             ->with([
-                'mahasiswa.profilMahasiswa.programStudi', // Mahasiswa -> Profil -> Prodi
+                'mahasiswa.profilMahasiswa.programStudi',
                 'tim',
-                'dosenPembimbing'
+                'dosenPembimbing',
+                // Muat relasi penilaian, dan di dalam penilaian, muat relasi tahap & penilai
+                'penilaian.tahap',
+                'penilaian.penilai'
             ])
             ->get();
 

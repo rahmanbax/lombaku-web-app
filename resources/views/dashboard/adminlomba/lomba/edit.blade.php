@@ -62,6 +62,16 @@
                     </select>
                 </div>
 
+                <!-- Field Lokasi Offline (disembunyikan secara default) -->
+                <div id="lokasi-offline-container" class="col-span-4 lg:col-span-12 w-full hidden">
+                    <label for="lokasi_offline" class="text-black/60 font-semibold">Alamat Lokasi Offline</label>
+                    <input type="text"
+                        name="lokasi_offline"
+                        id="lokasi_offline"
+                        placeholder="Contoh: Gedung Serbaguna Lt. 3, Kampus A"
+                        class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+
                 <!-- Tingkat -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="tingkat" class="text-black/60 font-semibold">Tingkat</label>
@@ -102,6 +112,8 @@
             const lombaForm = document.getElementById("form-edit-lomba");
             const messageDiv = document.getElementById("response-message");
             const tagsSelect = document.getElementById("tags");
+            const lokasiSelect = document.getElementById('lokasi');
+            const lokasiOfflineContainer = document.getElementById('lokasi-offline-container');
 
             // Ambil ID Lomba dari URL
             const pathParts = window.location.pathname.split('/');
@@ -160,6 +172,19 @@
             // Panggil fungsi untuk mengisi form saat halaman dimuat
             populateForm();
 
+            // Fungsi untuk menampilkan/menyembunyikan field lokasi offline
+            function handleLokasiChange() {
+                const selectedValue = lokasiSelect.value;
+                if (selectedValue === 'offline') {
+                    lokasiOfflineContainer.classList.remove('hidden');
+                } else {
+                    lokasiOfflineContainer.classList.add('hidden');
+                }
+            }
+
+
+            // 2. Pasang event listener untuk dropdown lokasi
+            lokasiSelect.addEventListener('change', handleLokasiChange);
 
             // === Menangani submit form untuk UPDATE ===
             lombaForm.addEventListener("submit", async function(event) {
@@ -176,7 +201,7 @@
                         messageDiv.innerHTML = `<div class="p-4 bg-green-100 text-green-800 rounded-lg">Lomba berhasil diperbarui!</div>`;
                         // Opsional: Arahkan kembali ke halaman detail atau daftar lomba setelah beberapa saat
                         setTimeout(() => {
-                            window.location.href = `/dashboard/kemahasiswaan/lomba/${lombaId}`; // Ganti dengan URL yang sesuai
+                            window.location.href = `/dashboard/adminlomba/lomba/${lombaId}`; // Ganti dengan URL yang sesuai
                         }, 1500);
                     }
                 } catch (error) {

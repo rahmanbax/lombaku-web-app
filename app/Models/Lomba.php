@@ -34,6 +34,8 @@ class Lomba extends Model
         'deskripsi',
         'tingkat',
         'status',
+        'lokasi',
+        'lokasi_offline',
         'tanggal_akhir_registrasi',
         'tanggal_mulai_lomba',
         'tanggal_selesai_lomba',

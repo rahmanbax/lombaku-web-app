@@ -73,4 +73,9 @@ class RegistrasiLomba extends Model
         // Pastikan Anda juga sudah membuat model Tim.php
         return $this->belongsTo(Tim::class, 'id_tim', 'id_tim');
     }
+
+    public function penilaian()
+    {
+        return $this->hasMany(PenilaianPeserta::class, 'id_registrasi_lomba', 'id_registrasi_lomba');
+    }
 }
