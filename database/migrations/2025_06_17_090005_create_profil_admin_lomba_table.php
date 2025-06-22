@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('profil_admin_lomba', function (Blueprint $table) {
             $table->id('id_profil_admin_lomba');
 
+            // id user
+            $table->unsignedBigInteger('id_user')->unique();
+            $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
+            
             // alamat
             $table->string('alamat')->nullable();
             

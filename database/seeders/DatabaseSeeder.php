@@ -102,7 +102,7 @@ class DatabaseSeeder extends Seeder
         // Di sini, kita akan mengasumsikan profil ini milik user dengan id=3.
         DB::table('profil_admin_lomba')->insert([
             // Seharusnya ada: 'id_user' => 3,
-            ['alamat' => 'Jl. Teknologi No. 1, Jakarta', 'jenis_organisasi' => 'Perusahaan', 'created_at' => now(), 'updated_at' => now()]
+            ['id_user' => 3,'alamat' => 'Jl. Teknologi No. 1, Jakarta', 'jenis_organisasi' => 'Perusahaan', 'created_at' => now(), 'updated_at' => now()]
         ]);
 
         // =================================================================

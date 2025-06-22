@@ -21,14 +21,6 @@
             overflow: hidden;
         }
 
-        .input-field {
-            transition: all 0.3s ease;
-        }
-
-        .input-field:focus {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-
         /* .role-section dikelola oleh JS */
     </style>
 </head>
@@ -61,7 +53,7 @@
                 <div class="mb-6">
                     <label for="role" class="block mb-2 text-sm font-medium text-gray-700">Pilih Role</label>
                     <select id="role" name="role"
-                        class="input-field w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5" required>
+                        class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
                         <option value="" disabled selected>Pilih Role Anda</option>
                         <option value="mahasiswa" {{ old('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
                         <option value="dosen" {{ old('role') == 'dosen' ? 'selected' : '' }}>Dosen</option>
@@ -71,20 +63,20 @@
 
                 <!-- Common Fields for All Roles -->
                 <div class="mb-4">
-                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" id="username" name="username" value="{{ old('username') }}" class="input-field w-full ... " placeholder="Username unik Anda" required>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" name="username" value="{{ old('username') }}" class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 " placeholder="Username unik Anda" required>
                 </div>
                 <div class="mb-4">
-                    <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input type="text" id="nama" name="nama" value="{{ old('nama') }}" class="input-field w-full ... " placeholder="Nama lengkap Anda" required>
+                    <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" id="nama" name="nama" value="{{ old('nama') }}" class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Nama lengkap Anda" required>
                 </div>
                 <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" class="input-field w-full ... " placeholder="email@contoh.com" required>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="email@contoh.com" required>
                 </div>
                 <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                     <div class="relative">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div class="relative">
                         <input type="password" id="password" name="password"
                             class="input-field w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                             placeholder="Minimal 6 karakter" required>
@@ -94,23 +86,23 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label for="notelp" class="block text-sm font-medium text-gray-700">No. Telepon</label>
-                    <input type="text" id="notelp" name="notelp" value="{{ old('notelp') }}" class="input-field w-full ... " placeholder="081234567890">
+                    <label for="notelp" class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
+                    <input type="text" id="notelp" name="notelp" value="{{ old('notelp') }}" class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="081234567890">
                 </div>
 
                 <!-- Mahasiswa Fields -->
                 <div id="mahasiswa-fields" class="role-section space-y-4">
                     <div>
-                        <label for="nim" class="block text-sm font-medium text-gray-700">NIM</label>
+                        <label for="nim" class="block text-sm font-medium text-gray-700 mb-2">NIM</label>
                         <!-- PERBAIKAN: name diubah dari "nim_atau_nip" menjadi "nim" -->
                         <input type="text" id="nim" name="nim" value="{{ old('nim') }}"
-                            class="input-field w-full ... " placeholder="Nomor Induk Mahasiswa">
+                            class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Nomor Induk Mahasiswa">
                     </div>
                     <div>
-                        <label for="id_program_studi_mhs" class="block text-sm font-medium text-gray-700">Program Studi</label>
-                         <!-- PERBAIKAN: name diubah dari "program_studi" menjadi "id_program_studi" -->
+                        <label for="id_program_studi_mhs" class="block text-sm font-medium text-gray-700 mb-2">Program Studi</label>
+                        <!-- PERBAIKAN: name diubah dari "program_studi" menjadi "id_program_studi" -->
                         <select id="id_program_studi_mhs" name="id_program_studi"
-                            class="input-field w-full bg-gray-50 ...">
+                            class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                             <option value="" disabled selected>Pilih Program Studi</option>
                             <option value="1" {{ old('id_program_studi') == '1' ? 'selected' : '' }}>D3 Sistem Informasi</option>
                             <option value="2" {{ old('id_program_studi') == '2' ? 'selected' : '' }}>D3 Sistem Informasi Akuntansi</option>
@@ -125,13 +117,32 @@
                 </div>
 
                 <!-- Admin Lomba Fields (Silakan sesuaikan jika diperlukan) -->
-                <div id="admin_lomba-fields" class="role-section">
-                     <!-- ... field untuk Admin Lomba ... -->
+                <!-- Admin Lomba Fields -->
+                <div id="admin_lomba-fields" class="role-section space-y-4">
+                    <div>
+                        <label for="alamat" class="block text-sm font-medium text-gray-700 mb-2">Alamat Organisasi</label>
+                        <!-- PERBAIKAN: name diubah dari "alamat" menjadi "alamat" -->
+                        <!-- PERBAIKAN: placeholder disesuaikan -->
+                        <input type="text" id="alamat" name="alamat" value="{{ old('alamat') }}"
+                            class="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Contoh: Jl. Merdeka No. 10, Jakarta">
+                    </div>
+                    <div>
+                        <label for="jenis_organisasi" class="block text-sm font-medium text-gray-700 mb-2">Jenis Organisasi</label>
+                        <!-- PERBAIKAN: name pada select sudah benar, tetapi value pada option diubah -->
+                        <select id="jenis_organisasi" name="jenis_organisasi"
+                            class="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                            <option value="" disabled selected>Pilih Jenis Organisasi</option>
+                            <!-- PERBAIKAN: value diubah dari angka menjadi string yang sesuai dengan validasi -->
+                            <option value="perusahaan" {{ old('jenis_organisasi') == 'perusahaan' ? 'selected' : '' }}>Perusahaan</option>
+                            <option value="organisasi" {{ old('jenis_organisasi') == 'organisasi' ? 'selected' : '' }}>Organisasi</option>
+                            <option value="lainnya" {{ old('jenis_organisasi') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit"
-                    class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white ...">
+                    class="mt-4 w-full py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-md">
                     Daftar Sekarang
                 </button>
 
@@ -176,7 +187,7 @@
                     const section = roleSections[role];
                     if (section) {
                         const inputs = section.querySelectorAll('input, select, textarea');
-                        
+
                         // Jika section ini adalah yang terpilih
                         if (role === selectedRole) {
                             section.style.display = 'block'; // Tampilkan section

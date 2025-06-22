@@ -708,8 +708,18 @@
                 // Ambil data umum dari form
                 formData.append('peringkat', document.getElementById('prestasi-peringkat-input').value);
                 formData.append('tipe_prestasi', document.querySelector('input[name="tipe_prestasi"]:checked').value);
+                formData.append('peringkat', document.getElementById('prestasi-peringkat-input').value);
+                formData.append('tipe_prestasi', document.querySelector('input[name="tipe_prestasi"]:checked').value);
 
+                // 2. [FIX] Ambil dan tambahkan tanggal dari hidden input
+                formData.append('tanggal_diraih', document.getElementById('prestasi-tanggal-input').value);
+
+                // 3. [FIX] Ambil file dan tambahkan ke FormData JIKA ADA.
+                //    Kunci 'sertifikat_path' harus sesuai dengan yang diharapkan oleh validasi backend Anda.
                 const sertifikatFile = document.getElementById('prestasi-sertifikat-file').files[0];
+                if (sertifikatFile) {
+                    formData.append('sertifikat', sertifikatFile);
+                }
 
                 try {
                     if (mode === 'edit') {

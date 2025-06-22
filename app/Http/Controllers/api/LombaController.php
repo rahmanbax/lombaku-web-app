@@ -352,6 +352,13 @@ class LombaController extends Controller
         ], 200);
     }
 
+    /**
+     * Mengambil daftar pendaftar sebuah lomba.
+     * Logika ini disesuaikan berdasarkan peran user:
+     * - Kemahasiswaan/Prodi melihat pendaftar yang perlu verifikasi ('menunggu_verifikasi', 'ditolak').
+     * - Admin Lomba melihat pendaftar yang sudah diverifikasi ('diterima') untuk dinilai.
+     * GET /api/lomba/{id}/pendaftar
+     */
     public function getPendaftar($id)
     {
         $lomba = Lomba::find($id);
@@ -359,32 +366,46 @@ class LombaController extends Controller
             return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
         }
 
-        // Eager load semua relasi yang dibutuhkan untuk setiap pendaftar
-        $registrations = RegistrasiLomba::where('id_lomba', $id)
-            // Tambahkan filter status verifikasi di sini juga
-            ->where('status_verifikasi', 'diterima')
-            ->with([
-                'mahasiswa' => function ($query) use ($id) {
-                    $query->with([
-                        'profilMahasiswa.programStudi', // Relasi mahasiswa ke profil
-                        // Muat prestasi yang relevan dengan lomba ini saja
-                        'prestasi' => function ($prestasiQuery) use ($id) {
-                            $prestasiQuery->where('id_lomba', $id);
-                        }
-                    ]);
-                },
-                'tim',
-                'dosenPembimbing',
-                'penilaian.tahap',
-                'penilaian.penilai',
-            ])
+        // Dapatkan user yang sedang login untuk menentukan filter
+        $user = Auth::user();
+
+        // Mulai query builder untuk registrasi
+        $registrationsQuery = RegistrasiLomba::where('id_lomba', $id);
+
+        // ==========================================================
+        // === PERUBAHAN UTAMA: Filter Pendaftar Berdasarkan Peran ===
+        // ==========================================================
+        if ($user && in_array($user->role, ['admin_lomba'])) {
+            $registrationsQuery->where('status_verifikasi', 'diterima');
+        }
+        // ==========================================================
+        // === AKHIR PERUBAHAN ===
+        // ==========================================================
+
+        // Eager load semua relasi yang dibutuhkan setelah filter diterapkan
+        $registrations = $registrationsQuery->with([
+            'mahasiswa' => function ($query) use ($id) {
+                $query->with([
+                    'profilMahasiswa.programStudi', // Relasi mahasiswa ke profil
+                    // Muat prestasi yang relevan dengan lomba ini saja
+                    'prestasi' => function ($prestasiQuery) use ($id) {
+                        $prestasiQuery->where('id_lomba', $id);
+                    }
+                ]);
+            },
+            'tim',
+            'dosenPembimbing',
+            'penilaian.tahap',
+            'penilaian.penilai',
+        ])
             ->get();
-            
+
+        // Tambahkan deskripsi pengumpulan dari lomba ke setiap objek registrasi
+        // (ini berguna untuk admin lomba)
         foreach ($registrations as $registration) {
             $registration->deskripsi_pengumpulan = $lomba->deskripsi_pengumpulan;
         }
 
-        // 2. Ubah struktur response JSON untuk menyertakan detail lomba
         return response()->json([
             'success' => true,
             'message' => 'Daftar pendaftar berhasil diambil',

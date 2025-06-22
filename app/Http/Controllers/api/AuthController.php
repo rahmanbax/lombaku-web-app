@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProfilAdminLomba;
 use App\Models\ProfilMahasiswa;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -33,6 +34,10 @@ class AuthController extends Controller
             $rules['tanggal_lahir'] = 'nullable|date';
             $rules['jenis_kelamin'] = 'nullable|in:Laki-laki,Perempuan';
         }
+        if ($request->input('role') === 'admin_lomba') {
+            $rules['alamat'] = 'required|string|max:255';
+            $rules['jenis_organisasi'] = 'required|string|in:perusahaan,organisasi,lainnya';
+        }
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -60,6 +65,13 @@ class AuthController extends Controller
                         'id_program_studi' => $request->id_program_studi,
                         'tanggal_lahir' => $request->tanggal_lahir,
                         'jenis_kelamin' => $request->jenis_kelamin,
+                    ]);
+                }
+                if ($user->role === 'admin_lomba') {
+                    ProfilAdminLomba::create([
+                        'id_user' => $user->id_user,
+                        'alamat' => $request->alamat_organisasi,
+                        'jenis_organisasi' => $request->jenis_organisasi,
                     ]);
                 }
             });

@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Detail Lomba - Kemahasiswaan</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
 </head>
 
 <body>
@@ -37,9 +36,17 @@
 
                 <table class="mt-4 w-full">
                     <tbody>
+                         <tr>
+                            <th class="font-normal text-start pb-2 w-1/2">Jenis Lomba</th>
+                            <td id="jenis-lomba" class="pb-2 capitalize"></td>
+                        </tr>
                         <tr>
                             <th class="font-normal text-start pb-2 w-1/2">Lokasi</th>
                             <td id="lomba-lokasi" class="pb-2 capitalize"></td>
+                        </tr>
+                        <tr id="detail-lokasi-container">
+                            <th class="font-normal text-start pb-2 w-1/2">Detail Lokasi</th>
+                            <td id="lomba-lokasi-offline" class="pb-2 capitalize"></td>
                         </tr>
                         <tr>
                             <th class="font-normal text-start pb-2 w-1/2">Status</th>
@@ -78,14 +85,15 @@
                 <h2 class="font-bold mt-6 text-xl">Deskripsi</h2>
                 <p id="lomba-deskripsi" class="mt-2 text-gray-700 leading-relaxed"></p>
 
-                <div id="lomba-aksi" class="flex gap-2 mt-6">
+                <!-- Kontainer Aksi Persetujuan/Penolakan -->
+                <div id="lomba-aksi" class="flex gap-2 mt-6 hidden">
                     <button class="w-full py-2 px-2 text-red-500 border border-red-500 rounded-lg font-semibold hover:bg-red-100 tolak-lomba-btn cursor-pointer">Tolak</button>
                     <button class="w-full py-2 px-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 setujui-lomba-btn cursor-pointer">Setujui</button>
                 </div>
             </div>
         </template>
 
-        <section class="lg:w-[1038px] mx-auto p-4 lg:px-0 mt-10">
+        <section class="lg:w-[1038px] mx-auto lg:px-0 mt-10">
             <h2 class="text-2xl font-bold mb-4">Daftar Peserta</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
@@ -96,13 +104,13 @@
                             <th scope="col" class="px-6 py-3">Program Studi</th>
                             <th scope="col" class="px-6 py-3">Nama Tim</th>
                             <th scope="col" class="px-6 py-3">Pembimbing</th>
-                            <th scope="col" class="px-6 py-3">Status Verifikasi</th>
+                            <th scope="col" class="px-6 py-3 text-center">Status Pendaftaran</th>
                         </tr>
                     </thead>
                     <tbody id="peserta-table-body">
                         <!-- Loading state -->
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                 Memuat data peserta...
                             </td>
                         </tr>
@@ -110,35 +118,34 @@
                 </table>
             </div>
         </section>
-
-
     </main>
 
     <!-- Modal untuk Konfirmasi Persetujuan -->
-    <div id="setujui-lomba-modal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full flex items-center justify-center hidden">
-        <div class="relative w-full max-w-md shadow-lg rounded-md bg-white p-4 mx-5 lg:mx-auto">
+    <div id="setujui-lomba-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-lg bg-white p-6 mx-5 lg:mx-auto">
             <h3 class="text-lg font-medium text-gray-900">Konfirmasi Persetujuan</h3>
-            <form id="setujui-lomba-form" class="">
+            <form id="setujui-lomba-form">
                 <input type="hidden" id="setujui-lomba-id">
                 <p class="mt-2 text-gray-600">Apakah Anda yakin ingin menyetujui lomba ini? Tindakan ini akan mengubah status lomba menjadi "Disetujui".</p>
-                <div class="items-center flex justify-end gap-2 mt-4">
+                <div class="flex justify-end gap-2 mt-4">
                     <button id="batal-setujui-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
-                    <button id="kirim-persetujuan-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Ya, Setujui</button>
+                    <button id="kirim-persetujuan-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-semibold">Ya, Setujui</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal untuk Alasan Penolakan -->
-    <div id="tolak-lomba-modal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full flex items-center justify-center hidden">
-        <div class="relative w-full max-w-md shadow-lg rounded-md bg-white p-4 mx-5 lg:mx-auto">
+    <div id="tolak-lomba-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-lg bg-white p-6 mx-5 lg:mx-auto">
             <h3 class="text-lg font-medium text-gray-900">Alasan Penolakan</h3>
-            <form id="tolak-lomba-form" class="">
+            <form id="tolak-lomba-form">
                 <input type="hidden" id="tolak-lomba-id">
-                <textarea id="alasan-penolakan-textarea" class="mt-2 w-full p-2 h-20 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alasan penolakkan lomba" required></textarea>
-                <div class="items-center flex justify-end gap-2 mt-2">
+                <label for="alasan-penolakan-textarea" class="block text-sm font-medium text-gray-700 mt-3">Alasan</label>
+                <textarea id="alasan-penolakan-textarea" rows="4" class="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alasan penolakan lomba" required></textarea>
+                <div class="flex justify-end gap-2 mt-3">
                     <button id="batal-tolak-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
-                    <button id="kirim-penolakan-btn" type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Tolak</button>
+                    <button id="kirim-penolakan-btn" type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-semibold">Tolak</button>
                 </div>
             </form>
         </div>
@@ -149,6 +156,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // --- Variabel dan Elemen DOM ---
             const lombaDetailContainer = document.getElementById('lomba-detail-container');
+            const pesertaTableBody = document.getElementById('peserta-table-body');
 
             // Modal Persetujuan
             const setujuiLombaModal = document.getElementById('setujui-lomba-modal');
@@ -163,18 +171,26 @@
             const alasanTextarea = document.getElementById('alasan-penolakan-textarea');
             const batalTolakBtn = document.getElementById('batal-tolak-btn');
 
-            // Helper function untuk memformat tanggal
+            // --- Helper Functions ---
             function formatDate(dateString) {
-                const options = {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                };
+                if (!dateString) return '-';
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
                 return new Date(dateString).toLocaleDateString('id-ID', options);
             }
 
-            function capitalize(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
+            function getStatusBadge(status) {
+                status = status.toLowerCase();
+                let bgColor, textColor;
+                switch (status) {
+                    case 'disetujui':
+                        bgColor = 'bg-green-100'; textColor = 'text-green-700'; break;
+                    case 'ditolak':
+                        bgColor = 'bg-red-100'; textColor = 'text-red-700'; break;
+                    default: // menunggu_verifikasi
+                        bgColor = 'bg-yellow-100'; textColor = 'text-yellow-700'; break;
+                }
+                const formattedStatus = status.replace(/_/g, ' ');
+                return `<span class="px-2 py-1 text-xs font-medium rounded-full ${bgColor} ${textColor}">${formattedStatus}</span>`;
             }
 
             // --- Fungsi untuk merender detail lomba ---
@@ -186,16 +202,22 @@
                 clone.getElementById('lomba-image').src = `/${lomba.foto_lomba}`;
                 clone.getElementById('lomba-nama').textContent = lomba.nama_lomba;
                 clone.getElementById('lomba-tingkat').textContent = lomba.tingkat;
+                clone.getElementById('jenis-lomba').textContent = lomba.jenis_lomba;
                 clone.getElementById('lomba-lokasi').textContent = lomba.lokasi;
+                clone.getElementById('lomba-lokasi-offline').textContent = lomba.lokasi_offline || '-';
                 clone.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
                 clone.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
                 clone.getElementById('lomba-tanggal-mulai').textContent = formatDate(lomba.tanggal_mulai_lomba);
                 clone.getElementById('lomba-tanggal-selesai').textContent = formatDate(lomba.tanggal_selesai_lomba);
                 clone.getElementById('penyelenggara-nama').textContent = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui');
-                if (lomba.pembuat.foto_profile) {
+                clone.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
+                if (lomba.pembuat && lomba.pembuat.foto_profile) {
                     clone.getElementById('penyelenggara-foto').src = `/${lomba.pembuat.foto_profile}`;
                 }
-                clone.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
+
+                if (lomba.lokasi === 'online') {
+                    clone.getElementById('detail-lokasi-container').remove();
+                }
 
                 const tagsContainer = clone.getElementById('lomba-tags');
                 if (lomba.tags && lomba.tags.length > 0) {
@@ -213,53 +235,62 @@
                 const alasanContainer = clone.getElementById('alasan-penolakan-container');
 
                 if (lomba.status === 'belum disetujui') {
-                    // Tampilkan tombol aksi jika butuh persetujuan
                     clone.querySelector('.setujui-lomba-btn').dataset.id = lomba.id_lomba;
                     clone.querySelector('.tolak-lomba-btn').dataset.id = lomba.id_lomba;
-                    aksiContainer.style.display = 'flex';
-                    alasanContainer.style.display = 'none'; // Pastikan alasan disembunyikan
+                    aksiContainer.classList.remove('hidden');
                 } else if (lomba.status === 'ditolak') {
-                    // Tampilkan alasan penolakan jika ditolak
                     const alasanText = clone.getElementById('alasan-penolakan-text');
                     alasanText.textContent = lomba.alasan_penolakan || 'Tidak ada alasan yang diberikan.';
-                    alasanContainer.classList.remove('hidden'); // Tampilkan kontainer alasan
-                    aksiContainer.style.display = 'none'; // Sembunyikan tombol aksi
-                } else {
-                    // Sembunyikan kedua kontainer untuk status lain (disetujui, berlangsung, selesai)
-                    aksiContainer.style.display = 'none';
-                    alasanContainer.style.display = 'none';
+                    alasanContainer.classList.remove('hidden');
                 }
 
                 container.innerHTML = '';
                 container.appendChild(clone);
             }
 
-            // --- Fungsi API Call ---
-            async function submitPersetujuan(lombaId) {
-                try {
-                    await axios.patch(`/api/lomba/${lombaId}/setujui`);
-                    alert('Lomba berhasil disetujui!');
-                    location.reload();
-                } catch (error) {
-                    const msg = error.response?.data?.message || 'Terjadi kesalahan.';
-                    alert(msg);
+            // --- Fungsi untuk merender tabel peserta ---
+            function renderPesertaTable(registrations) {
+                pesertaTableBody.innerHTML = '';
+                if (!registrations || registrations.length === 0) {
+                    pesertaTableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
+                    return;
                 }
+                registrations.forEach(reg => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white hover:bg-gray-50';
+                    const mahasiswa = reg.mahasiswa;
+                    const profil = mahasiswa?.profil_mahasiswa;
+
+                    row.innerHTML = `
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa?.nama || '-'}</th>
+                        <td class="px-6 py-4">${profil?.nim || '-'}</td>
+                        <td class="px-6 py-4">${profil?.program_studi?.nama_program_studi || '-'}</td>
+                        <td class="px-6 py-4">${reg.tim?.nama_tim || 'Individu'}</td>
+                        <td class="px-6 py-4">${reg.dosen_pembimbing?.nama || '-'}</td>
+                        <td class="px-6 py-4 text-center">${getStatusBadge(reg.status_verifikasi)}</td>
+                    `;
+                    pesertaTableBody.appendChild(row);
+                });
             }
 
-            async function submitPenolakan(lombaId, alasan) {
+            // --- Fungsi utama untuk mengambil semua data halaman ---
+            async function loadPageData() {
+                const lombaId = window.location.pathname.split('/').pop();
                 try {
-                    await axios.patch(`/api/lomba/${lombaId}/tolak`, {
-                        alasan_penolakan: alasan
-                    });
-                    alert('Lomba berhasil ditolak.');
-                    location.reload();
+                    const [lombaResponse, pesertaResponse] = await Promise.all([
+                        axios.get(`/api/lomba/${lombaId}`),
+                        axios.get(`/api/lomba/${lombaId}/pendaftar`)
+                    ]);
+                    if (lombaResponse.data.success) renderLombaDetails(lombaResponse.data.data);
+                    if (pesertaResponse.data.success) renderPesertaTable(pesertaResponse.data.data);
                 } catch (error) {
-                    const msg = error.response?.data?.message || 'Terjadi kesalahan.';
-                    alert(msg);
+                    console.error('Gagal mengambil data:', error);
+                    lombaDetailContainer.innerHTML = `<div class="col-span-12 text-center p-10"><p class="text-lg font-semibold text-red-500">Gagal memuat data lomba.</p></div>`;
+                    pesertaTableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Gagal memuat data peserta.</td></tr>`;
                 }
             }
-
-            // --- Fungsi Kontrol Modal ---
+            
+            // --- Fungsi Kontrol Modal & API ---
             function showSetujuiModal(lombaId) {
                 setujuiLombaIdInput.value = lombaId;
                 setujuiLombaModal.classList.remove('hidden');
@@ -272,6 +303,7 @@
             function showTolakModal(lombaId) {
                 tolakLombaIdInput.value = lombaId;
                 tolakLombaModal.classList.remove('hidden');
+                alasanTextarea.focus();
             }
 
             function hideTolakModal() {
@@ -279,98 +311,55 @@
                 tolakLombaModal.classList.add('hidden');
             }
 
-            // --- Fungsi untuk merender tabel peserta ---
-            function renderPesertaTable(registrations) {
-                const tableBody = document.getElementById('peserta-table-body');
-                tableBody.innerHTML = ''; // Hapus loading state
-
-                if (!registrations || registrations.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
-                    return;
+            async function submitPersetujuan(lombaId, button) {
+                button.disabled = true;
+                button.textContent = 'Memproses...';
+                try {
+                    await axios.patch(`/api/lomba/${lombaId}/setujui`);
+                    alert('Lomba berhasil disetujui!');
+                    location.reload();
+                } catch (error) {
+                    const msg = error.response?.data?.message || 'Terjadi kesalahan.';
+                    alert(msg);
+                } finally {
+                    button.disabled = false;
+                    button.textContent = 'Ya, Setujui';
                 }
-
-                registrations.forEach(reg => {
-                    const row = document.createElement('tr');
-                    row.className = 'bg-gray-50';
-
-                    const mahasiswa = reg.mahasiswa;
-                    const profil = mahasiswa.profil_mahasiswa;
-                    const prodi = profil ? profil.program_studi : null;
-
-                    const namaMahasiswa = mahasiswa ? mahasiswa.nama : 'Data tidak lengkap';
-                    const nim = profil ? profil.nim : '-';
-                    const namaProdi = prodi ? prodi.nama_program_studi : '-';
-                    const namaTim = reg.tim ? reg.tim.nama_tim : 'Individu';
-                    const namaPembimbing = reg.dosen_pembimbing ? reg.dosen_pembimbing.nama : 'Tidak ada pembimbing';
-                    const statusVerifikasi = capitalize(reg.status_verifikasi);
-
-                    row.innerHTML = `
-                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${namaMahasiswa}</th>
-                    <td class="px-6 py-4">${nim}</td>
-                    <td class="px-6 py-4">${namaProdi}</td>
-                    <td class="px-6 py-4">${namaTim}</td>
-                    <td class="px-6 py-4">${namaPembimbing}</td>
-                    <td class="px-6 py-4">${statusVerifikasi}</td>
-                `;
-                    tableBody.appendChild(row);
-                });
             }
 
-            // --- Fungsi utama untuk mengambil semua data halaman ---
-            async function loadPageData() {
-                const pathParts = window.location.pathname.split('/');
-                const lombaId = pathParts[pathParts.length - 1];
-
-                if (!lombaId || isNaN(lombaId)) {
-                    document.getElementById('lomba-detail-container').innerHTML = `<p class="text-red-500">ID Lomba tidak valid.</p>`;
-                    return;
-                }
-
+            async function submitPenolakan(lombaId, alasan, button) {
+                button.disabled = true;
+                button.textContent = 'Memproses...';
                 try {
-                    // Panggil kedua API secara bersamaan
-                    const [lombaResponse, pesertaResponse] = await Promise.all([
-                        axios.get(`/api/lomba/${lombaId}`),
-                        axios.get(`/api/lomba/${lombaId}/pendaftar`)
-                    ]);
-
-                    // Render setiap bagian dengan datanya masing-masing
-                    if (lombaResponse.data.success) {
-                        renderLombaDetails(lombaResponse.data.data);
-                    }
-                    if (pesertaResponse.data.success) {
-                        renderPesertaTable(pesertaResponse.data.data);
-                    }
-
+                    await axios.patch(`/api/lomba/${lombaId}/tolak`, { alasan_penolakan: alasan });
+                    alert('Lomba berhasil ditolak.');
+                    location.reload();
                 } catch (error) {
-                    console.error('Error fetching page data:', error);
-                    document.getElementById('lomba-detail-container').innerHTML = `<p class="text-red-500">Gagal memuat data halaman. Silakan coba lagi.</p>`;
-                    document.getElementById('peserta-table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Gagal memuat data peserta.</td></tr>`;
+                    const msg = error.response?.data?.message || 'Terjadi kesalahan.';
+                    alert(msg);
+                } finally {
+                    button.disabled = false;
+                    button.textContent = 'Tolak';
                 }
             }
 
             // --- Event Listeners ---
-            // Event Delegation pada kontainer utama untuk tombol aksi
             lombaDetailContainer.addEventListener('click', function(event) {
                 const setujuiButton = event.target.closest('.setujui-lomba-btn');
                 const tolakButton = event.target.closest('.tolak-lomba-btn');
-
-                if (setujuiButton) {
-                    showSetujuiModal(setujuiButton.dataset.id);
-                } else if (tolakButton) {
-                    showTolakModal(tolakButton.dataset.id);
-                }
+                if (setujuiButton) showSetujuiModal(setujuiButton.dataset.id);
+                if (tolakButton) showTolakModal(tolakButton.dataset.id);
             });
 
-            // Listeners untuk modal
             setujuiLombaForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                submitPersetujuan(setujuiLombaIdInput.value);
+                submitPersetujuan(setujuiLombaIdInput.value, e.submitter);
             });
             batalSetujuiBtn.addEventListener('click', hideSetujuiModal);
 
             tolakLombaForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                submitPenolakan(tolakLombaIdInput.value, alasanTextarea.value.trim());
+                submitPenolakan(tolakLombaIdInput.value, alasanTextarea.value.trim(), e.submitter);
             });
             batalTolakBtn.addEventListener('click', hideTolakModal);
 
