@@ -128,7 +128,8 @@
         // Pie Chart Configuration
         // Data dari kamu, bisa diubah sesuai kebutuhan
         const dataPieChart = {
-            labels: ['Lomba A', 'Lomba B', 'Lomba C'],
+            // labels bisa lebih dari 3 karena jurusan ada banyak di kemahasiswaan
+            labels: ['Jurusan A A', 'Jurusan B', 'Jurusan C'],
             datasets: [{
                 data: [30, 50, 20], // Ini jumlah persentase atau nilai masing-masing kategori
                 backgroundColor: ['#34d399', '#60a5fa', '#f87171'], // Warna slice

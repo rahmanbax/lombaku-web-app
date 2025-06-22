@@ -83,6 +83,7 @@ class LombaController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_lomba'    => 'required|string|max:255',
             'deskripsi'     => 'required|string',
+            'deskripsi_pengumpulan'     => 'required|string',
             'lokasi'     => 'required|in:online,offline',
             'lokasi_offline' => 'nullable|string|max:255|required_if:lokasi,offline',
             'tingkat'       => 'required|in:nasional,internasional,internal',
@@ -111,7 +112,7 @@ class LombaController extends Controller
 
         // 1. Buat nama file yang unik untuk menghindari penimpaan file dengan nama yang sama.
         //    Contoh: 1678886400.jpg
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $imageName = 'lomba' . time() . '.' . $image->getClientOriginalExtension();
 
         // 2. Tentukan folder tujuan di dalam direktori 'public'.
         //    helper public_path() akan memberikan path absolut ke folder public Anda.
@@ -132,6 +133,7 @@ class LombaController extends Controller
         $lomba = Lomba::create([
             'nama_lomba'    => $request->nama_lomba,
             'deskripsi'     => $request->deskripsi,
+            'deskripsi_pengumpulan'     => $request->deskripsi,
             'lokasi'        => $request->lokasi,
             'lokasi_offline' => $request->lokasi === 'offline' ? $request->lokasi_offline : null,
             'tingkat'       => $request->tingkat,
@@ -352,23 +354,37 @@ class LombaController extends Controller
 
     public function getPendaftar($id)
     {
-        if (!Lomba::find($id)) {
+        $lomba = Lomba::find($id);
+        if (!$lomba) {
             return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
         }
 
-        // --- PERUBAHAN DI SINI ---
-        // Eager load semua relasi yang dibutuhkan, termasuk penilaian dan detailnya
+        // Eager load semua relasi yang dibutuhkan untuk setiap pendaftar
         $registrations = RegistrasiLomba::where('id_lomba', $id)
+            // Tambahkan filter status verifikasi di sini juga
+            ->where('status_verifikasi', 'diterima')
             ->with([
-                'mahasiswa.profilMahasiswa.programStudi',
+                'mahasiswa' => function ($query) use ($id) {
+                    $query->with([
+                        'profilMahasiswa.programStudi', // Relasi mahasiswa ke profil
+                        // Muat prestasi yang relevan dengan lomba ini saja
+                        'prestasi' => function ($prestasiQuery) use ($id) {
+                            $prestasiQuery->where('id_lomba', $id);
+                        }
+                    ]);
+                },
                 'tim',
                 'dosenPembimbing',
-                // Muat relasi penilaian, dan di dalam penilaian, muat relasi tahap & penilai
                 'penilaian.tahap',
-                'penilaian.penilai'
+                'penilaian.penilai',
             ])
             ->get();
+            
+        foreach ($registrations as $registration) {
+            $registration->deskripsi_pengumpulan = $lomba->deskripsi_pengumpulan;
+        }
 
+        // 2. Ubah struktur response JSON untuk menyertakan detail lomba
         return response()->json([
             'success' => true,
             'message' => 'Daftar pendaftar berhasil diambil',
@@ -624,6 +640,8 @@ class LombaController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak terautentikasi.'], 401);
         }
 
+        $totalLomba = Lomba::where('id_pembuat', $userId)->count();
+
         // 2. Hitung jumlah lomba berdasarkan status menggunakan satu query efisien
         //    Ini akan menjadi dasar untuk semua statistik lomba
         $statusCounts = Lomba::where('id_pembuat', $userId)
@@ -643,6 +661,7 @@ class LombaController extends Controller
 
         // 4. Siapkan data untuk respons JSON
         $data = [
+            'total_lomba' => $totalLomba,
             'lomba_aktif' => $lombaAktif,
             'total_pendaftar' => $totalPendaftar,
             'disetujui' => $statusCounts->get('disetujui', 0),
@@ -658,5 +677,76 @@ class LombaController extends Controller
             'message' => 'Statistik pribadi Anda berhasil diambil',
             'data' => $data
         ], 200);
+    }
+
+    /**
+     * Mengambil data untuk grafik distribusi pendaftar per lomba.
+     * GET /api/lomba/saya/distribusi-pendaftar
+     */
+    public function getDistribusiPendaftar()
+    {
+        $userId = Auth::id();
+
+        $topLombas = Lomba::where('id_pembuat', $userId)
+            ->withCount('registrasi') // Menghitung pendaftar
+            ->orderBy('registrasi_count', 'desc') // Urutkan dari pendaftar terbanyak
+            ->take(5) // Ambil 5 teratas
+            ->get(['nama_lomba', 'registrasi_count']);
+
+        // Format data agar sesuai dengan kebutuhan Chart.js
+        $labels = $topLombas->pluck('nama_lomba');
+        $data = $topLombas->pluck('registrasi_count');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'labels' => $labels,
+                'data' => $data,
+            ]
+        ]);
+    }
+
+    /**
+     * Mengambil daftar lomba milik admin yang sedang berlangsung.
+     * GET /api/lomba/saya/berlangsung
+     */
+    public function getLombaBerlangsung()
+    {
+        $userId = Auth::id();
+
+        $lombasBerlangsung = Lomba::where('id_pembuat', $userId)
+            ->where('status', 'berlangsung')
+            // dengan total jumlah pendaftar pada lomba tersebut
+            ->with('registrasi')
+            ->withCount('registrasi')
+            ->latest()
+            ->take(5) // Batasi 5 saja
+            ->get(['id_lomba', 'nama_lomba']); // Ambil hanya kolom yang perlu
+
+        if ($lombasBerlangsung->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada lomba yang sedang berlangsung.'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $lombasBerlangsung]);
+    }
+
+    /**
+     * Mengambil 5 lomba terbaru milik admin untuk ditampilkan di dashboard.
+     * GET /api/lomba/saya/terbaru
+     */
+    public function getMyRecentLombas()
+    {
+        $userId = Auth::id();
+
+        $recentLombas = Lomba::where('id_pembuat', $userId)
+            ->withCount('registrasi')
+            ->latest() // Ambil yang paling baru dibuat
+            ->take(5)   // Batasi 5 record
+            ->get(['id_lomba', 'nama_lomba', 'tingkat', 'status']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $recentLombas
+        ]);
     }
 }

@@ -32,6 +32,7 @@ class Lomba extends Model
         'foto_lomba',
         'nama_lomba',
         'deskripsi',
+        'deskripsi_pengumpulan',
         'lokasi', // Anda lupa menambahkan ini di fillable
         'tingkat',
         'status',

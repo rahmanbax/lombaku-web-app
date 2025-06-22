@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==========================================================
     Route::post('/registrasi-lomba', [RegistrasiLombaController::class, 'store']);
     // ==========================================================
-    
+
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -46,21 +46,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::prefix('dosen')->group(function () {
-        // URL yang dihasilkan: /api/dosen/dashboard
-        Route::get('/dashboard', [DosenController::class, 'dashboardData']);
-        
-        // URL yang dihasilkan: /api/dosen/riwayat-peserta
-        Route::get('/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
-        
-        // URL yang dihasilkan: /api/dosen/persetujuan
-        Route::get('/persetujuan', [DosenController::class, 'getPersetujuanList']);
-        
-        // URL yang dihasilkan: /api/dosen/pendaftaran/{id}/setujui
-        Route::patch('/pendaftaran/{id}/setujui', [DosenController::class, 'setujuiPendaftaran']);
-        
-        // URL yang dihasilkan: /api/dosen/pendaftaran/{id}/tolak
-        Route::patch('/pendaftaran/{id}/tolak', [DosenController::class, 'tolakPendaftaran']);
-    });
+    // URL yang dihasilkan: /api/dosen/dashboard
+    Route::get('/dashboard', [DosenController::class, 'dashboardData']);
+
+    // URL yang dihasilkan: /api/dosen/riwayat-peserta
+    Route::get('/riwayat-peserta', [DosenController::class, 'riwayatPeserta']);
+
+    // URL yang dihasilkan: /api/dosen/persetujuan
+    Route::get('/persetujuan', [DosenController::class, 'getPersetujuanList']);
+
+    // URL yang dihasilkan: /api/dosen/pendaftaran/{id}/setujui
+    Route::patch('/pendaftaran/{id}/setujui', [DosenController::class, 'setujuiPendaftaran']);
+
+    // URL yang dihasilkan: /api/dosen/pendaftaran/{id}/tolak
+    Route::patch('/pendaftaran/{id}/tolak', [DosenController::class, 'tolakPendaftaran']);
+});
 
 // Rute Admin Prodi (sudah di dalam middleware auth)
 Route::get('/admin-prodi/arsip-lomba', [App\Http\Controllers\Api\AdminProdiController::class, 'getArchivedLombas']);
@@ -81,9 +81,14 @@ Route::get('/lomba/butuh-persetujuan', [LombaController::class, 'getLombaButuhPe
 Route::get('/program-studi', [ProgramStudiController::class, 'index']);
 Route::get('/lomba/saya', [LombaController::class, 'getMyLombas']);
 Route::get('/lomba/{id}/tahap', [TahapLombaController::class, 'index']);
+Route::get('/lomba/distribusi-pendaftar', [LombaController::class, 'getDistribusiPendaftar']);
+Route::get('/lomba/berlangsung', [LombaController::class, 'getLombaBerlangsung']);
+Route::get('/lomba/terbaru', [LombaController::class, 'getMyRecentLombas']);
 Route::patch('/lomba/{id}/setujui', [LombaController::class, 'setujuiLomba']);
 Route::patch('/lomba/{id}/tolak', [LombaController::class, 'tolakLomba']);
 Route::put('/penilaian/{id}', [PenilaianController::class, 'update']);
+Route::put('/prestasi/{prestasi}', [PrestasiController::class, 'update']);
+Route::post('/prestasi/berikan', [PrestasiController::class, 'berikan']);
 Route::post('/penilaian', [PenilaianController::class, 'store']);
 Route::apiResource('lomba', LombaController::class);
 Route::apiResource('tags', TagController::class)->only(['index']);

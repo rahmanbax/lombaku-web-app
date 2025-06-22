@@ -16,6 +16,18 @@
     --color-accent: #f59e0b;
     --color-dark: #1f2937;
 }
+
+
+
+.choices__list--multiple .choices__item.is-highlighted,
+.choices__list--multiple .choices__item[data-deletable] {
+    @apply bg-blue-500 font-medium text-white border-none;
+}
+
+/* --- Style saat hover di tombol hapus --- */
+.choices__item--selectable .choices__button:hover {
+    @apply bg-black/10; /* Background menjadi sedikit putih saat di-hover */
+}
 /* @tailwind base;
 @tailwind components;
 @tailwind utilities; */

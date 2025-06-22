@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <!-- BARU: Tambahkan CSS untuk Choices.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </head>
@@ -13,7 +17,7 @@
     <x-adminlomba-header-nav />
 
     <main class=" lg:w-[1038px] mx-auto p-4 lg:py-10 lg:px-0">
-
+        <h1 class="text-2xl font-bold mb-4">Buat Lomba</h1>
 
         <!-- buat lomba form -->
         <!-- Letakkan ini di atas form untuk menampilkan pesan sukses/error -->
@@ -41,13 +45,21 @@
                     <textarea name="deskripsi" id="deskripsi" required placeholder="Masukkan Deskripsi Lomba" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 h-30"></textarea>
                 </div>
 
-                <!-- DIUBAH: Menjadi multi-select untuk Tags -->
-                <!-- name="tags[]" penting untuk mengirim sebagai array -->
+                <!-- DIUBAH: Input untuk Tags dengan fitur pencarian -->
                 <div class="col-span-4 lg:col-span-12 w-full">
-                    <label for="tags" class="text-black/60 font-semibold">Tag (bisa pilih lebih dari satu dengan Ctrl/Cmd + Klik)</label>
-                    <select name="tags[]" id="tags" multiple required class="w-full h-32 border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <!-- Opsi tag akan diisi oleh JavaScript dari API -->
-                        <option disabled>Memuat tag...</option>
+                    <!-- Label disederhanakan -->
+                    <label for="tags" class="text-black/60 font-semibold">Tag Lomba</label>
+                    <!-- Elemen select ini akan di-transform oleh Choices.js -->
+                    <select name="tags[]" id="tags" multiple required class="w-full bg-white rounded-lg">
+                        <!-- Opsi akan diisi oleh JavaScript -->
+                    </select>
+                </div>
+
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="jenis_lomba" class="text-black/60 font-semibold">Jenis Lomba</label>
+                    <select name="jenis_lomba" id="jenis_lomba" required class="w-full border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="individu">Individu</option>
+                        <option value="kelompok">Kelompok</option>
                     </select>
                 </div>
 
@@ -80,27 +92,31 @@
                     </select>
                 </div>
 
-                <hr class="col-span-4 lg:col-span-12 text-gray-300 my-2">
-
                 <!-- DIUBAH: name dari 'tanggal_akhir_pendaftaran' menjadi 'tanggal_akhir_registrasi' -->
-                <div class="col-span-4 lg:col-span-12 w-full">
+                <div class="col-span-4 lg:col-span-4 w-full">
                     <label for="tanggal_akhir_registrasi" class="text-black/60 font-semibold">Tanggal Akhir Pendaftaran</label>
                     <input type="date" name="tanggal_akhir_registrasi" id="tanggal_akhir_registrasi" required class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
 
                 <!-- DIUBAH: name dari 'tanggal_mulai_seleksi' menjadi 'tanggal_mulai_lomba' -->
-                <div class="col-span-2 lg:col-span-6 w-full">
+                <div class="col-span-2 lg:col-span-4 w-full">
                     <label for="tanggal_mulai_lomba" class="text-black/60 font-semibold">Tanggal Mulai Kompetisi</label>
                     <input type="date" name="tanggal_mulai_lomba" id="tanggal_mulai_lomba" required class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
 
                 <!-- DIUBAH: name dari 'tanggal_akhir_seleksi' menjadi 'tanggal_selesai_lomba' -->
-                <div class="col-span-2 lg:col-span-6 w-full">
+                <div class="col-span-2 lg:col-span-4 w-full">
                     <label for="tanggal_selesai_lomba" class="text-black/60 font-semibold">Tanggal Akhir Kompetisi</label>
                     <input type="date" name="tanggal_selesai_lomba" id="tanggal_selesai_lomba" required class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
 
                 <hr class="col-span-4 lg:col-span-12 text-gray-300 my-2">
+
+                <!-- deskripsi pengumpulan lomba -->
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label for="deskripsi_pengumpulan" class="text-black/60 font-semibold">Deskripsi Pengumpulan Lomba (Link)</label>
+                    <textarea name="deskripsi_pengumpulan" id="deskripsi_pengumpulan" required placeholder="Masukkan Deskripsi Pengumpulan Lomba" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
 
                 <!-- Bagian untuk Tahapan Lomba -->
                 <div class="col-span-4 lg:col-span-12 w-full">
@@ -117,11 +133,10 @@
                         <div class="flex flex-col items-center gap-2 tahap-item border border-gray-300 p-3 rounded-md">
                             <input
                                 type="text"
-                                name="tahap[][nama]"
+                                name="tahap[0][nama]"
                                 placeholder="Masukkan nama tahap"
                                 required
                                 class="w-full border bg-white border-gray-300 col-span-4 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            <!-- Tombol hapus tidak ada untuk input pertama -->
                             <textarea
                                 name="tahap[0][deskripsi]"
                                 placeholder="Deskripsi tahap"
@@ -135,6 +150,9 @@
             </section>
         </form>
 
+        <!-- BARU: Tambahkan JS untuk Choices.js (letakkan sebelum script utama Anda) -->
+        <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
         <script>
             // Buat lomba
             // Pastikan script dijalankan setelah semua elemen halaman dimuat
@@ -144,105 +162,147 @@
                 const lombaForm = document.getElementById("form-buat-lomba");
                 const messageDiv = document.getElementById("response-message");
 
-                // --- BARU: Elemen untuk Tahap Lomba ---
                 const tahapContainer = document.getElementById('tahap-container');
                 const tambahTahapBtn = document.getElementById('tambah-tahap-btn');
 
-                // Pastikan kita berada di halaman yang memiliki form ini sebelum melanjutkan
                 if (!lombaForm) {
-                    // Jika form tidak ditemukan, hentikan eksekusi script ini
                     return;
                 }
 
                 // Variabel elemen form lainnya
-                const tagsSelect = document.getElementById("tags");
                 const lokasiSelect = document.getElementById('lokasi');
                 const lokasiOfflineContainer = document.getElementById('lokasi-offline-container');
+
+                // --- DIUBAH: Inisialisasi Choices.js untuk Tags ---
+                const tagsSelect = document.getElementById("tags");
+                const choicesInstance = new Choices(tagsSelect, {
+                    removeItemButton: true, // Menampilkan tombol (x) untuk menghapus tag
+                    placeholder: true,
+                    placeholderValue: 'Pilih atau ketik untuk mencari tag...',
+                    searchPlaceholderValue: 'Ketik untuk mencari...',
+                    // itemSelectText: 'Tekan untuk memilih', // Teks kustom jika diperlukan
+                });
 
                 // ==========================================================
                 // --- FUNGSI-FUNGSI ---
                 // ==========================================================
 
-                // Fungsi untuk mengambil data tags dan mengisi dropdown
+                // --- DIUBAH: Fungsi untuk mengambil data tags dan mengisi ke Choices.js ---
                 async function fetchTags() {
+                    // Tampilkan status loading di dalam Choices.js
+                    choicesInstance.setChoices([{
+                        label: 'Memuat tag...',
+                        value: '',
+                        disabled: true
+                    }], 'value', 'label', true);
+
                     try {
                         const response = await axios.get("/api/tags");
                         if (response.data.success) {
-                            tagsSelect.innerHTML = ""; // Kosongkan opsi
-                            response.data.data.forEach((tag) => {
-                                const option = document.createElement("option");
-                                option.value = tag.id_tag;
-                                option.textContent = tag.nama_tag;
-                                tagsSelect.appendChild(option);
-                            });
+                            // Format data dari API agar sesuai dengan format yang dibutuhkan Choices.js
+                            // yaitu: [{ value: '1', label: 'Teknologi' }, { value: '2', label: 'Seni' }]
+                            const formattedTags = response.data.data.map(tag => ({
+                                value: tag.id_tag,
+                                label: tag.nama_tag
+                            }));
+
+                            // Atur pilihan menggunakan API dari Choices.js
+                            choicesInstance.setChoices(formattedTags, 'value', 'label', true);
                         }
                     } catch (error) {
-                        tagsSelect.innerHTML = "<option disabled>Gagal memuat tag</option>";
+                        // Tampilkan pesan error di dalam Choices.js
+                        choicesInstance.setChoices([{
+                            label: 'Gagal memuat tag',
+                            value: '',
+                            disabled: true
+                        }], 'value', 'label', true);
                         console.error("Error fetching tags:", error);
                     }
                 }
 
                 // Fungsi untuk menampilkan/menyembunyikan field lokasi offline
                 function handleLokasiChange() {
-                    const selectedValue = lokasiSelect.value;
-                    if (selectedValue === 'offline') {
+                    if (lokasiSelect.value === 'offline') {
                         lokasiOfflineContainer.classList.remove('hidden');
                     } else {
                         lokasiOfflineContainer.classList.add('hidden');
                     }
                 }
 
-                // --- BARU: Fungsi untuk menambahkan input tahap baru ---
+                // Fungsi untuk menambahkan input tahap baru
                 function tambahTahap() {
-                    const itemCount = tahapContainer.querySelectorAll('.tahap-item').length;
+                    // Dapatkan semua item tahap untuk menentukan indeks array berikutnya
+                    const tahapItems = tahapContainer.querySelectorAll('.tahap-item');
+                    const itemCount = tahapItems.length;
+
                     const tahapItem = document.createElement('div');
-                    tahapItem.className = 'tahap-item p-3 border border-gray-300 rounded-md mt-6 relative flex flex-col gap-2'; // Tambahkan 'relative' untuk positioning tombol hapus
+                    tahapItem.className = 'tahap-item p-3 border border-gray-300 rounded-md mt-6 relative flex flex-col gap-2';
 
                     tahapItem.innerHTML = `
-        <button type="button" class="hapus-tahap-btn absolute top-[-16px] right-[-16px] bg-white border border-gray-300 text-gray-500 rounded-full flex items-center justify-center w-8 h-8 hover:bg-gray-100 cursor-pointer">
-            <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
-        </button>
-        <input 
-            type="text"
-            name="tahap[${itemCount}][nama]"
-            placeholder="Masukkan nama tahap"
-            required
-            class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-        />
-        <textarea
-            name="tahap[${itemCount}][deskripsi]"
-            placeholder="Deskripsi tahap"
-            class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            rows="2"
-        ></textarea>
-    `;
+                        <button type="button" class="hapus-tahap-btn absolute top-[-16px] right-[-16px] bg-white border border-gray-300 text-gray-500 rounded-full flex items-center justify-center w-8 h-8 hover:bg-gray-100 cursor-pointer transition-colors duration-200">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                        </button>
+                        <input 
+                            type="text"
+                            name="tahap[${itemCount}][nama]"
+                            placeholder="Masukkan nama tahap"
+                            required
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        />
+                        <textarea
+                            name="tahap[${itemCount}][deskripsi]"
+                            placeholder="Deskripsi tahap"
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            rows="2"
+                        ></textarea>
+                    `;
                     tahapContainer.appendChild(tahapItem);
                 }
 
-                // --- BARU: Fungsi untuk menghapus input tahap ---
+                // Fungsi untuk menghapus input tahap
                 function hapusTahap(event) {
-                    if (event.target.closest('.hapus-tahap-btn')) {
-                        const tahapItem = event.target.closest('.tahap-item');
+                    const hapusBtn = event.target.closest('.hapus-tahap-btn');
+                    if (hapusBtn) {
+                        const tahapItem = hapusBtn.closest('.tahap-item');
                         tahapItem.remove();
+                        // Optional: re-index a
                     }
                 }
 
                 // Fungsi untuk menangani submit form
                 async function handleFormSubmit(event) {
-                    event.preventDefault(); // Mencegah form submit secara default
+                    event.preventDefault();
 
                     const formData = new FormData(lombaForm);
                     messageDiv.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Memproses...</div>`;
 
                     try {
-                        const token = localStorage.getItem('authToken'); // Ambil token untuk endpoint yang dilindungi
-                        const response = await axios.post("/api/lomba", formData);
+                        const token = localStorage.getItem('authToken');
+                        const response = await axios.post("/api/lomba", formData, {
+                            headers: {
+                                'Authorization': `Bearer ${token}` // Pastikan token dikirim jika diperlukan
+                            }
+                        });
 
                         if (response.data.success) {
                             messageDiv.innerHTML = `<div class="p-4 bg-green-100 text-green-800 rounded-lg">Lomba berhasil dipublikasikan!</div>`;
+
                             lombaForm.reset();
-                            lokasiOfflineContainer.classList.add('hidden'); // Sembunyikan lagi field offline setelah reset
-                            fetchTags(); // Muat ulang tags
+
+                            // BARU: Reset juga input Choices.js
+                            choicesInstance.clearStore();
+
+                            lokasiOfflineContainer.classList.add('hidden');
+
+                            // Kosongkan container tahap kecuali yang pertama
+                            const allTahap = tahapContainer.querySelectorAll('.tahap-item');
+                            for (let i = 1; i < allTahap.length; i++) {
+                                allTahap[i].remove();
+                            }
+                            // Opsional: Arahkan kembali ke halaman detail atau daftar lomba setelah beberapa saat
+                            setTimeout(() => {
+                                window.location.href = '/dashboard/adminlomba/lomba';
+                            }, 1500);
                         }
                     } catch (error) {
                         let errorMessages = "Terjadi kesalahan. Silakan coba lagi.";
@@ -263,19 +323,13 @@
                 // --- INISIALISASI DAN EVENT LISTENERS ---
                 // ==========================================================
 
-                // 1. Panggil fungsi untuk mengisi dropdown saat halaman dimuat
                 fetchTags();
-
-                // 2. Pasang event listener untuk dropdown lokasi
                 lokasiSelect.addEventListener('change', handleLokasiChange);
-
                 tambahTahapBtn.addEventListener('click', tambahTahap);
                 tahapContainer.addEventListener('click', hapusTahap);
-
-                // 3. Pasang event listener untuk submit form
                 lombaForm.addEventListener("submit", handleFormSubmit);
 
-            }); // <-- Ini adalah penutup dari document.addEventListener
+            });
         </script>
     </main>
 </body>

@@ -19,6 +19,7 @@ class Prestasi extends Model
         'nama_lomba_eksternal',
         'penyelenggara_eksternal',
         'tingkat',
+        'tipe_prestasi',
         'peringkat',
         'tanggal_diraih',
         'sertifikat_path',
