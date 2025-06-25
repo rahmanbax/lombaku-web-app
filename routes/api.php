@@ -84,6 +84,7 @@ Route::get('/lomba/{id}/tahap', [TahapLombaController::class, 'index']);
 Route::get('/lomba/distribusi-pendaftar', [LombaController::class, 'getDistribusiPendaftar']);
 Route::get('/lomba/berlangsung', [LombaController::class, 'getLombaBerlangsung']);
 Route::get('/lomba/terbaru', [LombaController::class, 'getMyRecentLombas']);
+Route::get('/lomba/kemahasiswaan', [LombaController::class, 'getGlobalStats']);
 Route::patch('/lomba/{id}/setujui', [LombaController::class, 'setujuiLomba']);
 Route::patch('/lomba/{id}/tolak', [LombaController::class, 'tolakLomba']);
 Route::put('/penilaian/{id}', [PenilaianController::class, 'update']);

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lomba;
+use App\Models\Prestasi;
 use App\Models\RegistrasiLomba;
 use App\Models\TahapLomba;
 use Illuminate\Support\Facades\Log;
@@ -51,7 +52,7 @@ class LombaController extends Controller
 
             // B. Urutkan berdasarkan prioritas status untuk admin
             //    'belum disetujui' akan selalu muncul paling atas.
-            $query->orderByRaw("FIELD(status, 'belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak')");
+            $query->orderByRaw("FIELD(status, 'ditolak', 'belum disetujui', 'disetujui', 'berlangsung', 'selesai')");
         }
 
         $perPage = $request->input('limit', 10);
@@ -795,5 +796,85 @@ class LombaController extends Controller
             'success' => true,
             'data' => $recentLombas
         ]);
+    }
+
+    public function getGlobalStats()
+    {
+        // === 1. STATISTIK LOMBA (GLOBAL) ===
+        $statusCounts = Lomba::query()
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $lombaStats = [
+            'total' => $statusCounts->sum(),
+            'butuh_approval' => $statusCounts->get('belum disetujui', 0),
+            'berlangsung' => $statusCounts->get('berlangsung', 0),
+            'selesai' => $statusCounts->get('selesai', 0),
+        ];
+
+
+        // === 2. STATISTIK PARTISIPASI MAHASISWA (GLOBAL) ===
+
+        // Jumlah mahasiswa unik yang pernah mendaftar lomba
+        $jumlahTerdaftar = RegistrasiLomba::distinct('id_mahasiswa')->count();
+
+        // Jumlah pendaftaran yang sedang aktif (di lomba yang 'berlangsung')
+        $sedangBerkompetisi = RegistrasiLomba::whereHas('lomba', function ($query) {
+            $query->where('status', 'berlangsung');
+        })->count();
+
+        // Jumlah prestasi yang tercatat dari lomba internal (status disetujui)
+        $jumlahPrestasi = Prestasi::where('lomba_dari', 'internal')
+            ->where('status_verifikasi', 'disetujui')
+            ->count();
+
+        // Jumlah pendaftar yang statusnya 'menunggu' dan memilih dosen pembimbing
+        $butuhPersetujuanDosen = RegistrasiLomba::where('status_verifikasi', 'menunggu')
+            ->whereNotNull('id_dosen')
+            ->count();
+
+        $mahasiswaStats = [
+            'jumlah_terdaftar' => $jumlahTerdaftar,
+            'butuh_persetujuan_dosen' => $butuhPersetujuanDosen,
+            'sedang_berkompetisi' => $sedangBerkompetisi,
+            'prestasi' => $jumlahPrestasi,
+        ];
+
+
+        // === 3. DATA UNTUK CHART ===
+
+        // Data untuk Bar Chart: Sebaran Prodi Pendaftar Lomba
+        $sebaranProdi = DB::table('registrasi_lomba')
+            ->join('users', 'registrasi_lomba.id_mahasiswa', '=', 'users.id_user')
+            ->join('profil_mahasiswa', 'users.id_user', '=', 'profil_mahasiswa.id_user')
+            ->join('program_studi', 'profil_mahasiswa.id_program_studi', '=', 'program_studi.id_program_studi')
+            ->select('program_studi.nama_program_studi', DB::raw('count(DISTINCT registrasi_lomba.id_mahasiswa) as jumlah_mahasiswa'))
+            ->groupBy('program_studi.nama_program_studi')
+            ->orderBy('jumlah_mahasiswa', 'desc')
+            ->get();
+
+        // Data untuk Pie Chart: Sebaran Tingkat Lomba
+        $sebaranTingkatLomba = Lomba::query()
+            ->select('tingkat', DB::raw('count(*) as total'))
+            ->groupBy('tingkat')
+            ->pluck('total', 'tingkat');
+
+        $chartData = [
+            'sebaran_prodi' => $sebaranProdi,
+            'sebaran_tingkat_lomba' => $sebaranTingkatLomba,
+        ];
+
+
+        // === 4. GABUNGKAN SEMUA DATA DALAM SATU RESPONS ===
+        return response()->json([
+            'success' => true,
+            'message' => 'Statistik global berhasil diambil',
+            'data' => [
+                'lomba_stats' => $lombaStats,
+                'mahasiswa_stats' => $mahasiswaStats,
+                'chart_data' => $chartData,
+            ]
+        ], 200);
     }
 }
