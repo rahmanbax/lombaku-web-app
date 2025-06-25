@@ -76,13 +76,25 @@
                 </div>
                 <div class="mb-4">
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+
+                    <!-- [PERUBAIKAN] Satu div pembungkus dengan class="relative" -->
                     <div class="relative">
+
+                        <!-- Ikon gembok, diletakkan di dalam dan diposisikan secara absolut -->
+                        <div class="absolute inset-y-0 left-0 flex items-center -mt-1 ml-3.5 pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+
+                        <!-- Input field dengan padding kiri untuk memberi ruang bagi ikon -->
                         <input type="password" id="password" name="password"
                             class="input-field w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                             placeholder="Minimal 6 karakter" required>
+
+                        <!-- Tombol mata, juga diposisikan secara absolut di dalam div yang sama -->
                         <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" id="togglePassword">
                             <i class="far fa-eye text-gray-400 hover:text-gray-600 cursor-pointer"></i>
                         </button>
+
                     </div>
                 </div>
                 <div class="mb-4">
@@ -134,7 +146,7 @@
                             <option value="" disabled selected>Pilih Jenis Organisasi</option>
                             <!-- PERBAIKAN: value diubah dari angka menjadi string yang sesuai dengan validasi -->
                             <option value="perusahaan" {{ old('jenis_organisasi') == 'perusahaan' ? 'selected' : '' }}>Perusahaan</option>
-                            <option value="organisasi" {{ old('jenis_organisasi') == 'organisasi' ? 'selected' : '' }}>Organisasi</option>
+                            <option value="mahasiswa" {{ old('jenis_organisasi') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
                             <option value="lainnya" {{ old('jenis_organisasi') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
                         </select>
                     </div>
@@ -171,6 +183,9 @@
                 });
             }
 
+            const namaLabel = document.querySelector('label[for="nama"]');
+            const namaInput = document.getElementById('nama');
+
             // PERBAIKAN TOTAL PADA LOGIKA JAVASCRIPT
             const roleSelect = document.getElementById('role');
             const roleSections = {
@@ -181,6 +196,14 @@
 
             function showRelevantFields() {
                 const selectedRole = roleSelect.value;
+
+                if (selectedRole === 'admin_lomba') {
+                    namaLabel.textContent = 'Nama Organisasi';
+                    namaInput.placeholder = 'Masukkan nama organisasi anda';
+                } else {
+                    namaLabel.textContent = 'Nama Lengkap';
+                    namaInput.placeholder = 'Nama lengkap Anda';
+                }
 
                 // Loop melalui semua section
                 for (const role in roleSections) {

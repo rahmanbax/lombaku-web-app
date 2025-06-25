@@ -120,7 +120,6 @@
                             <th class="p-3 text-left font-medium">Status</th>
                             <th class="p-3 text-center font-medium">Pendaftar</th>
                             <th class="p-3 text-left font-medium">Tgl Akhir Daftar</th>
-                            <th class="p-3 text-left font-medium">Penyelenggara</th>
                             <th class="p-3 text-center font-medium">Aksi</th>
                         </tr>
                     </thead>
@@ -133,6 +132,8 @@
                     </tbody>
                 </table>
             </div>
+
+            <div id="pagination-container" class="flex justify-center mt-6"></div>
 
         </section>
     </main>
@@ -184,154 +185,209 @@
             const tableBody = document.getElementById("lomba-table-body");
             const searchInput = document.getElementById("search-lomba-input");
             const filterTabs = document.querySelectorAll(".filter-tab");
+            const paginationContainer = document.getElementById("pagination-container");
             let debounceTimer;
             let currentFilterStatus = ""; // Menyimpan status filter yang sedang aktif
             let currentSearchTerm = ""; // Menyimpan kata kunci pencarian yang sedang aktif
 
             // === Fungsi Utama untuk Fetch dan Render Data ===
-            async function fetchAllLomba(searchTerm = "") {
+            async function fetchAllLomba(url = null) {
                 tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Memuat...</td></tr>`;
 
-                try {
+                // Jika URL tidak diberikan, buat dari filter saat ini.
+                if (!url) {
                     const params = new URLSearchParams({
                         status: currentFilterStatus,
                         search: currentSearchTerm
                     }).toString();
+                    url = `/api/lomba/saya?${params}`;
+                }
 
-                    const url = `/api/lomba/saya?${params}`;
-                    const response = await axios.get(url); // Auth token di-handle oleh middleware di sisi server
-                    const lombas = response.data.data;
+                try {
+                    const response = await axios.get(url);
+                    const paginatedData = response.data.data; // Objek paginasi dari Laravel
 
-                    tableBody.innerHTML = ""; // Kosongkan tabel
+                    // --- Render Tabel dan Paginasi ---
+                    renderLombaTable(paginatedData.data); // 'data' berisi array lomba
+                    renderPagination(paginatedData.links, paginatedData.total > 0); // 'links' berisi info tombol
 
-                    if (lombas.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Tidak ada lomba yang ditemukan.</td></tr>`;
-                        return;
-                    }
-
-                    lombas.data.forEach((lomba) => {
-                        const row = document.createElement("tr");
-                        row.className = "bg-gray-50 hover:bg-gray-100";
-
-                        const penyelenggaraNama = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A");
-
-                        // --- INI ADALAH PERUBAHAN UTAMA UNTUK KOLOM AKSI ---
-                        let actionButtonsHTML = "";
-
-                        // cek status
-                        if (lomba.status === 'belum disetujui' || lomba.status === 'ditolak' || lomba.status === 'disetujui') {
-                            // 3. Jika kondisi terpenuhi, tambahkan tombol Edit
-                            actionButtonsHTML += `
-                                <a href="/dashboard/adminlomba/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>
-                            `;
-                        }
-
-                        // Tombol lihat detail
-                        actionButtonsHTML += `
-                            <a href="/dashboard/adminlomba/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
-                        `;
-
-                        row.innerHTML = `
-                            <td class="p-3 font-semibold">
-                                <a href="/dashboard/admin-lomba/lomba/${lomba.id_lomba}" class="hover:underline">${lomba.nama_lomba}</a>
-                            </td>
-                            <td class="p-3 capitalize">${lomba.tingkat}</td>
-                            <td class="p-3">${getStatusBadge(lomba.status)}</td>
-                            <td class="p-3 text-center">${lomba.pendaftar_diterima}</td>
-                            <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
-                            <td class="p-3">${penyelenggaraNama}</td>
-                            <td class="p-3">
-                                <div class="flex gap-2 justify-end">
-                                    ${actionButtonsHTML}
-                                </div>
-                            </td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
                 } catch (error) {
                     console.error("Error fetching data:", error);
                     tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-red-500">Gagal memuat data.</td></tr>`;
+                    paginationContainer.innerHTML = ''; // Kosongkan paginasi jika error
                 }
             }
 
-            // Fungsi baru untuk mengambil dan menampilkan statistik
-            async function fetchDashboardStats() {
-                try {
-                    // LANGSUNG panggil endpoint statistik, tanpa ID
-                    const response = await axios.get('/api/lomba/stats');
+            function renderLombaTable(lombas) {
+                tableBody.innerHTML = ""; // Kosongkan tabel
+                if (lombas.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Tidak ada lomba yang ditemukan.</td></tr>`;
+                    return;
+                }
 
-                    if (response.data.success) {
-                        const stats = response.data.data;
+                lombas.forEach((lomba) => {
+                    const row = document.createElement("tr");
+                    row.className = "bg-gray-50 hover:bg-gray-100";
+                    const penyelenggaraNama = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A");
+                    let actionButtonsHTML = "";
 
-                        let totalLomba = 0;
-                        for (const status in stats.status_counts) {
-                            const count = stats.status_counts[status] || 0;
-                            const span = document.getElementById(`count-${status.replace(' ', '_')}`);
-                            if (span) {
-                                span.textContent = `(${count})`;
-                                span.classList.remove('hidden');
-                            }
-                            totalLomba += count;
-                        }
-                        const spanSemua = document.getElementById('count-semua');
-                        spanSemua.textContent = `(${totalLomba})`;
-                        spanSemua.classList.remove('hidden');
-                    } else {
-                        // Jika API mengembalikan success: false
-                        throw new Error(response.data.message || 'Gagal mengambil statistik');
+                    if (lomba.status === 'ditolak') {
+                        actionButtonsHTML += `<button data-id="${lomba.id_lomba}" class="hapus-btn w-fit px-2 py-1 text-sm rounded-sm text-red-500 hover:bg-red-100 border border-red-500">Hapus</button>`;
                     }
-                } catch (error) {
-                    console.error('Error fetching dashboard stats:', error);
-                    // Tampilkan tanda strip jika gagal total
-                    const ids = ['stats-total-lomba', 'stats-total-pendaftar', 'stats-butuh-persetujuan', 'stats-belum-dimulai', 'stats-berlangsung', 'stats-selesai'];
-                    ids.forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.textContent = '-';
-                    });
-                }
+                    if (['belum disetujui', 'ditolak', 'disetujui'].includes(lomba.status)) {
+                        actionButtonsHTML += `<a href="/dashboard/adminlomba/lomba/edit/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue-500 hover:bg-blue-100 border border-blue-500">Edit</a>`;
+                    }
+                    actionButtonsHTML += `<a href="/dashboard/adminlomba/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>`;
+
+                    row.innerHTML = `
+                    <td class="p-3 font-semibold"><a href="/dashboard/adminlomba/lomba/${lomba.id_lomba}" class="hover:underline">${lomba.nama_lomba}</a></td>
+                    <td class="p-3 capitalize">${lomba.tingkat}</td>
+                    <td class="p-3">${getStatusBadge(lomba.status)}</td>
+                    <td class="p-3 text-center">${lomba.pendaftar_diterima}</td>
+                    <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
+                    <td class="p-3"><div class="flex gap-2 justify-end">${actionButtonsHTML}</div></td>
+                `;
+                    tableBody.appendChild(row);
+                });
             }
 
-            async function fetchMyDashboardStats() {
+            function renderPagination(links, hasData) {
+                paginationContainer.innerHTML = '';
+                if (!hasData || links.length <= 3) return; // Jangan render jika tidak ada data atau hanya 1 halaman
+
+                links.forEach(link => {
+                    const button = document.createElement('button');
+
+                    // --- [PERUBAHAN UTAMA DI SINI] ---
+                    let buttonContent = '';
+                    let buttonTitle = ''; // Untuk aksesibilitas (tooltip)
+
+                    if (link.label.includes('Previous')) {
+                        // Jika label adalah "Previous", gunakan ikon chevron_left
+                        buttonContent = `<span class="material-symbols-outlined">chevron_left</span>`;
+                        buttonTitle = 'Halaman Sebelumnya';
+                    } else if (link.label.includes('Next')) {
+                        // Jika label adalah "Next", gunakan ikon chevron_right
+                        buttonContent = `<span class="material-symbols-outlined">chevron_right</span>`;
+                        buttonTitle = 'Halaman Berikutnya';
+                    } else {
+                        // Jika bukan keduanya (ini adalah nomor halaman), gunakan label asli
+                        buttonContent = link.label;
+                        buttonTitle = `Pergi ke halaman ${link.label}`;
+                    }
+
+                    button.innerHTML = buttonContent;
+                    button.title = buttonTitle; // Menambahkan tooltip
+                    // ------------------------------------
+
+                    // Styling dan logika lainnya tetap sama, dengan tambahan flex untuk alignment
+                    if (!link.url) { // Tombol Previous/Next yang disabled
+                        button.className = 'w-10 h-10 flex items-center justify-center text-gray-400 bg-white border border-gray-300 mx-1 cursor-not-allowed rounded-full';
+                        button.disabled = true;
+                    } else if (link.active) { // Tombol halaman saat ini
+                        button.className = 'w-10 h-10 flex items-center justify-center text-white bg-blue-500 border border-blue-500 mx-1 rounded-full';
+                        button.disabled = true;
+                    } else { // Tombol halaman lain yang bisa diklik
+                        button.className = 'w-10 h-10 flex items-center justify-center text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 mx-1 rounded-full cursor-pointer';
+                        button.dataset.url = link.url; // Simpan URL untuk diklik
+                    }
+
+                    paginationContainer.appendChild(button);
+                });
+            }
+
+            async function renderDashboardUI() {
                 try {
-                    // Panggil endpoint statistik pribadi yang baru
                     const response = await axios.get('/api/lomba/mystats');
 
                     if (response.data.success) {
                         const stats = response.data.data;
 
-                        // === PENGISIAN DATA SECARA MANUAL ===
+                        // --- 1. Isi Bagian "Ringkasan Umum" (Kartu Atas) ---
+                        // ID untuk bagian ini sudah cocok.
+                        document.getElementById('stats-lomba-aktif').textContent = stats.lomba_aktif ?? 0;
+                        document.getElementById('stats-total-pendaftar').textContent = stats.total_pendaftar ?? 0;
+                        document.getElementById('stats-disetujui').textContent = stats.disetujui ?? 0;
+                        document.getElementById('stats-berlangsung').textContent = stats.berlangsung ?? 0;
+                        document.getElementById('stats-selesai').textContent = stats.selesai ?? 0;
 
-                        // Ambil setiap elemen berdasarkan ID-nya dan isi dengan data yang sesuai
-                        document.getElementById('stats-lomba-aktif').textContent = stats.lomba_aktif;
+                        // --- 2. Isi Bagian "Lomba Anda" (Tombol Filter) ---
+                        // [PERBAIKAN] ID untuk "Menunggu Persetujuan" disesuaikan menjadi 'count-belum_disetujui'
+                        // dan kelas 'hidden' akan dihapus agar angka terlihat.
 
-                        document.getElementById('stats-total-pendaftar').textContent = stats.total_pendaftar;
+                        // Objek untuk memetakan kunci JSON ke ID elemen
+                        const filterMap = {
+                            'semua': stats.total_lomba,
+                            'belum_disetujui': stats.menunggu_persetujuan, // Kunci JSON adalah 'menunggu_persetujuan'
+                            'disetujui': stats.disetujui,
+                            'berlangsung': stats.berlangsung,
+                            'selesai': stats.selesai
+                        };
 
-                        document.getElementById('stats-disetujui').textContent = stats.disetujui;
-
-                        document.getElementById('stats-berlangsung').textContent = stats.berlangsung;
-
-                        document.getElementById('stats-selesai').textContent = stats.selesai;
+                        // Loop melalui map untuk mengisi setiap span
+                        for (const key in filterMap) {
+                            const span = document.getElementById(`count-${key}`);
+                            if (span) {
+                                const count = filterMap[key] ?? 0;
+                                span.textContent = `(${count})`;
+                                span.classList.remove('hidden'); // Tampilkan angka
+                            }
+                        }
 
                     } else {
-                        // Jika API mengembalikan success: false, lempar error untuk ditangkap di blok catch
-                        throw new Error(response.data.message || 'Gagal mengambil statistik pribadi.');
+                        throw new Error(response.data.message || 'Gagal mengambil data dashboard.');
                     }
                 } catch (error) {
-                    console.error('Error fetching my dashboard stats:', error);
+                    console.error('Error rendering dashboard UI:', error);
 
-                    // Jika terjadi error, tampilkan tanda strip pada semua statistik
-                    // Ini tetap menggunakan array untuk efisiensi di blok error handling
-                    const ids = ['stats-lomba-aktif', 'stats-total-pendaftar', 'stats-disetujui', 'stats-berlangsung', 'stats-selesai'];
-                    ids.forEach(id => {
+                    // Blok error handling juga disesuaikan dengan ID yang benar
+                    const cardStatIds = ['stats-lomba-aktif', 'stats-total-pendaftar', 'stats-disetujui', 'stats-berlangsung', 'stats-selesai'];
+                    const filterStatIds = ['count-semua', 'count-belum_disetujui', 'count-disetujui', 'count-berlangsung', 'count-selesai'];
+
+                    cardStatIds.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.textContent = '0';
+                    });
+
+                    filterStatIds.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) {
-                            el.textContent = '-';
+                            el.textContent = '(0)';
+                            el.classList.remove('hidden'); // Pastikan angka (0) tetap terlihat saat error
                         }
                     });
                 }
             }
 
             // === Event Listeners ===
+
+            tableBody.addEventListener('click', async function(event) {
+                const hapusButton = event.target.closest('.hapus-btn');
+                if (!hapusButton) return;
+
+                const lombaId = hapusButton.dataset.id;
+                const lombaRow = hapusButton.closest('tr'); // Cari baris tabel terdekat
+                const lombaNama = lombaRow.querySelector('td:first-child a').textContent.trim();
+
+                // Tampilkan konfirmasi kepada pengguna
+                if (confirm(`Apakah Anda yakin ingin menghapus lomba ${lombaNama} secara permanen? Aksi ini tidak bisa dibatalkan.`)) {
+                    try {
+                        // Kirim request DELETE ke API
+                        const response = await axios.delete(`/api/lomba/${lombaId}`);
+
+                        if (response.data.success) {
+                            alert(response.data.message);
+                            // Refresh daftar lomba untuk menampilkan perubahan
+                            fetchAllLomba();
+                        } else {
+                            throw new Error(response.data.message);
+                        }
+                    } catch (error) {
+                        console.error('Gagal menghapus lomba:', error);
+                        alert('Gagal menghapus lomba. Silakan coba lagi.');
+                    }
+                }
+            });
 
             // Listener untuk tab filter
             filterTabs.forEach(tab => {
@@ -455,12 +511,41 @@
                 }
             }
 
+            paginationContainer.addEventListener('click', function(event) {
+                const button = event.target.closest('button[data-url]');
+                if (button) {
+                    fetchAllLomba(button.dataset.url);
+                }
+            });
+
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    filterTabs.forEach(t => {
+                        t.classList.remove('bg-blue-100', 'text-blue-500', 'border-blue-500');
+                        t.classList.add('text-gray-500', 'border-gray-300', 'hover:bg-gray-100');
+                    });
+                    tab.classList.remove('text-gray-500', 'border-gray-300', 'hover:bg-gray-100');
+                    tab.classList.add('bg-blue-100', 'text-blue-500', 'border-blue-500');
+                    currentFilterStatus = tab.dataset.status;
+                    fetchAllLomba(); // Panggil tanpa URL agar mengambil dari filter saat ini (halaman 1)
+                });
+            });
+
+            searchInput.addEventListener("input", (event) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    currentSearchTerm = event.target.value;
+                    fetchAllLomba(); // Panggil tanpa URL agar mengambil dari filter saat ini (halaman 1)
+                }, 500);
+            });
+
             // Panggil fungsi utama saat halaman dimuat
             fetchAllLomba();
-            fetchDashboardStats();
+            renderDashboardUI();
+            // fetchDashboardStats();
             fetchLombaDitolak();
             fetchButuhPenilaian();
-            fetchMyDashboardStats();
+            // fetchMyDashboardStats();
         });
     </script>
 </body>

@@ -230,6 +230,28 @@
         </div>
     </div>
 
+    <!-- Modal 4: Untuk Detail Tim -->
+    <div id="tim-detail-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-lg shadow-lg rounded-lg bg-white p-6 mx-5 lg:mx-auto">
+            <!-- Header Modal -->
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900">Detail Tim</h3>
+                    <p id="tim-modal-nama" class="text-lg mt-4 font-medium"></p>
+                </div>
+                <button id="close-tim-modal-btn" type="button" class="text-gray-400 hover:text-gray-600 rounded-full p-1 -mt-2 -mr-2">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Konten Modal: Daftar Anggota Tim -->
+            <div id="tim-modal-member-list" class="mt-2 space-y-2">
+                <!-- Daftar anggota akan diisi oleh JS di sini -->
+                <p class="text-center text-gray-500 p-4">Memuat data anggota...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Script dipanggil setelah semua HTML dimuat -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -263,6 +285,12 @@
             const closePrestasiModalBtn = document.getElementById('close-prestasi-modal-btn');
             const batalPrestasiBtn = document.getElementById('batal-prestasi-btn');
             const kirimPrestasiBtn = document.getElementById('kirim-prestasi-btn');
+
+            // [BARU] Elemen untuk Modal Detail Tim
+            const timDetailModal = document.getElementById('tim-detail-modal');
+            const timModalNama = document.getElementById('tim-modal-nama');
+            const timModalMemberList = document.getElementById('tim-modal-member-list');
+            const closeTimModalBtn = document.getElementById('close-tim-modal-btn');
 
             let allRegistrations = []; // Variabel global untuk simpan data peserta
             let totalTahapLomba = 0;
@@ -364,6 +392,17 @@
                         `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 text-nowrap rounded-full">Selesai Dinilai</span>` :
                         `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 text-nowrap rounded-full">Butuh Penilaian</span>`;
 
+                    let timHtml;
+                    if (reg.tim) {
+                        // Jika objek 'reg.tim' ada (tidak null atau undefined), maka ini adalah lomba tim.
+                        // Buat tombol yang bisa diklik untuk membuka modal.
+                        timHtml = `<button class="tim-detail-btn hover:underline cursor-pointer" data-reg-index="${index}">${reg.tim.nama_tim}</button>`;
+                    } else {
+                        // Jika objek 'reg.tim' tidak ada, maka ini adalah pendaftar individu.
+                        // Tampilkan teks "Individu" dengan warna abu-abu agar tidak terlalu menonjol.
+                        timHtml = `<span class="">Individu</span>`;
+                    }
+
 
                     // --- [BAGIAN UTAMA YANG DIUBAH] ---
                     // innerHTML diubah untuk mencocokkan 6 kolom yang Anda minta.
@@ -371,7 +410,7 @@
                     row.innerHTML = `
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa.nama}</td>
             <td class="px-6 py-4">${mahasiswa.profil_mahasiswa?.nim || '-'}</td>
-            <td class="px-6 py-4">${reg.tim?.nama_tim || '-'}</td>
+            <td class="px-6 py-4">${timHtml}</td>
             <td class="px-6 py-4 text-center">${skorRataRataHtml}</td>
             <td class="px-6 py-4 text-center">${statusHtml}</td>
             <td class="px-6 py-4 text-center">
@@ -399,6 +438,33 @@
                     console.error(error); /* ... penanganan error ... */
                 }
             }
+
+            function showTimDetailModal(tim) {
+                timDetailModal.classList.remove('hidden');
+                timModalNama.textContent = tim.nama_tim;
+                timModalMemberList.innerHTML = '';
+
+                // Data anggota sekarang langsung diambil dari 'tim.members'
+                if (tim.members && tim.members.length > 0) {
+                    tim.members.forEach(member => {
+                        const memberDiv = document.createElement('div');
+                        memberDiv.className = 'p-3 bg-gray-100 rounded-lg';
+
+                        const nama = member.nama;
+                        const nim = member.profil_mahasiswa?.nim || 'N/A';
+                        const prodi = member.profil_mahasiswa?.program_studi?.nama_program_studi || 'N/A';
+
+                        memberDiv.innerHTML = `
+                <p class="font-semibold text-gray-800">${nama}</p>
+                <p class="text-sm text-gray-500">${nim} - ${prodi}</p>
+            `;
+                        timModalMemberList.appendChild(memberDiv);
+                    });
+                } else {
+                    timModalMemberList.innerHTML = `<p class="text-center text-gray-500 p-4">Tidak ada anggota ditemukan.</p>`;
+                }
+            }
+
 
             // --- Fungsi untuk membuka Modal 1 (Detail Peserta) ---
             async function showDetailModal(registration) {
@@ -569,6 +635,10 @@
                 penilaianModal.classList.add('hidden');
             }
 
+            function hideTimDetailModal() {
+                timDetailModal.classList.add('hidden');
+            }
+
             async function refreshDataAfterSubmit() {
                 hidePenilaianModal(); // Tutup modal form penilaian
                 hideDetailModal(); // Tutup juga modal detail peserta
@@ -605,10 +675,21 @@
             // --- Event Listeners ---
             pesertaTableBody.addEventListener('click', function(event) {
                 const detailButton = event.target.closest('.detail-btn');
+                const timDetailButton = event.target.closest('.tim-detail-btn');
                 if (detailButton) {
                     const index = detailButton.dataset.index;
                     const registration = allRegistrations[index];
                     if (registration) showDetailModal(registration);
+                }
+                if (timDetailButton) {
+                    // Ambil index registrasi dari tombol
+                    const regIndex = timDetailButton.dataset.regIndex;
+                    // Dapatkan objek registrasi lengkap dari array
+                    const registration = allRegistrations[regIndex];
+                    // Panggil fungsi dengan objek 'tim' dari registrasi tersebut
+                    if (registration && registration.tim) {
+                        showTimDetailModal(registration.tim);
+                    }
                 }
             });
 
@@ -767,6 +848,7 @@
             batalPenilaianBtn.addEventListener('click', hidePenilaianModal);
             closePrestasiModalBtn.addEventListener('click', hidePrestasiModal);
             batalPrestasiBtn.addEventListener('click', hidePrestasiModal);
+            closeTimModalBtn.addEventListener('click', hideTimDetailModal);
 
 
             // Panggil fungsi utama saat halaman dimuat

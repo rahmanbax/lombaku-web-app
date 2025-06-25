@@ -12,6 +12,7 @@ use App\Models\Lomba;
 use App\Models\RegistrasiLomba;
 use App\Models\TahapLomba;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class LombaController extends Controller
 {
@@ -83,20 +84,22 @@ class LombaController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_lomba'    => 'required|string|max:255',
             'deskripsi'     => 'required|string',
-            'deskripsi_pengumpulan'     => 'required|string',
-            'lokasi'     => 'required|in:online,offline',
+            'deskripsi_pengumpulan' => 'required|string',
+            'lokasi'        => 'required|in:online,offline',
             'lokasi_offline' => 'nullable|string|max:255|required_if:lokasi,offline',
             'tingkat'       => 'required|in:nasional,internasional,internal',
-            'tanggal_akhir_registrasi' => 'required|date',
-            'tanggal_mulai_lomba' => 'required|date|after_or_equal:tanggal_akhir_registrasi',
-            'tanggal_selesai_lomba' => 'required|date|after_or_equal:tanggal_mulai_lomba',
+            'tanggal_akhir_registrasi' => 'required|date|after_or_equal:today',
+            'tanggal_mulai_lomba'      => 'required|date|after_or_equal:tanggal_akhir_registrasi',
+            'tanggal_selesai_lomba'    => 'required|date|after_or_equal:tanggal_mulai_lomba',
             'penyelenggara' => 'nullable|string|max:255',
             'foto_lomba'    => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tags'          => 'required|array',
-            'tags.*'        => 'exists:tags,id_tag', // Memastikan setiap tag ID ada di tabel tags
-            'tahap'         => 'required|array|min:1', // <-- VALIDASI BARU
-            'tahap.*.nama'        => 'required|string|max:100',
-            'tahap.*.deskripsi'   => 'nullable|string'
+            'tags.*'        => 'exists:tags,id_tag',
+            'tahap'         => 'required|array|min:1',
+            'tahap.*.nama'  => 'required|string|max:100',
+            'tahap.*.deskripsi' => 'nullable|string'
+        ], [
+            'tanggal_akhir_registrasi.after_or_equal' => 'Tanggal akhir registrasi tidak boleh tanggal yang sudah lewat.',
         ]);
 
         if ($validator->fails()) {
@@ -107,79 +110,81 @@ class LombaController extends Controller
             ], 422);
         }
 
-        // Upload gambar
-        $image = $request->file('foto_lomba');
+        $image_path = null; // Inisialisasi path gambar
 
-        // 1. Buat nama file yang unik untuk menghindari penimpaan file dengan nama yang sama.
-        //    Contoh: 1678886400.jpg
-        $imageName = 'lomba' . time() . '.' . $image->getClientOriginalExtension();
+        try {
+            DB::beginTransaction();
 
-        // 2. Tentukan folder tujuan di dalam direktori 'public'.
-        //    helper public_path() akan memberikan path absolut ke folder public Anda.
-        $destinationPath = public_path('/images/lomba');
+            // --- [PERUBAHAN] Logika Penyimpanan Gambar ---
+            if ($request->hasFile('foto_lomba')) {
+                $file = $request->file('foto_lomba');
 
-        // 3. Pindahkan file yang di-upload ke folder tujuan dengan nama baru.
-        $image->move($destinationPath, $imageName);
+                // Buat nama file yang unik berdasarkan waktu dan nama asli file
+                // Ini aman karena tidak bergantung pada ID yang belum ada
+                $fileName = 'lomba_' . time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
 
-        // 4. Simpan path relatif dari folder public untuk disimpan ke database.
-        //    Hasilnya akan menjadi string seperti: 'images/lomba/1678886400.jpg'
-        $image_path = 'images/lomba/' . $imageName;
+                // Simpan file ke storage/app/public/foto_lomba
+                // Metode storeAs() akan mengembalikan path relatif dari folder 'storage/app/public'
+                $image_path = $file->storeAs('foto_lomba', $fileName, 'public');
+            }
+            // ---------------------------------------------
 
-        // Dapatkan ID user yang sedang login (sebagai pembuat)
-        // Pastikan route ini dilindungi oleh middleware 'auth:api' atau 'auth:sanctum'
-        $id_pembuat = Auth::id();
+            $penyelenggaraNama = $request->filled('penyelenggara')
+                ? $request->penyelenggara
+                : $user->nama;
 
-        // Buat lomba
-        $lomba = Lomba::create([
-            'nama_lomba'    => $request->nama_lomba,
-            'deskripsi'     => $request->deskripsi,
-            'deskripsi_pengumpulan'     => $request->deskripsi,
-            'lokasi'        => $request->lokasi,
-            'lokasi_offline' => $request->lokasi === 'offline' ? $request->lokasi_offline : null,
-            'tingkat'       => $request->tingkat,
-            'status'        => 'belum disetujui',
-            'penyelenggara' => $request->penyelenggara, // Bisa diisi atau dibiarkan kosong
-            'tanggal_akhir_registrasi' => $request->tanggal_akhir_registrasi,
-            'tanggal_mulai_lomba' => $request->tanggal_mulai_lomba,
-            'tanggal_selesai_lomba' => $request->tanggal_selesai_lomba,
-            'foto_lomba'    => $image_path,
-            'id_pembuat'    => $id_pembuat,
-        ]);
-
-        Log::info('Lomba created by user ID: ' . $id_pembuat, [
-            'lomba_id' => $lomba->id_lomba,
-            'nama_lomba' => $lomba->nama_lomba,
-            'penyelenggara' => $lomba['penyelenggara'],
-            'lokasi' => $request->lokasi,
-            'lokasi_offline' => $request->lokasi_offline
-        ]);
-
-        if ($request->filled('penyelenggara')) { // filled() lebih baik dari has() karena juga mengecek string kosong
-            $lomba['penyelenggara'] = $request->penyelenggara;
-        } else {
-            // Pastikan kolom 'nama' ada di model User Anda
-            $lomba['penyelenggara'] = $user->nama;
-        }
-
-        // Lampirkan tags ke lomba yang baru dibuat
-        $lomba->tags()->attach($request->tags);
-
-        foreach ($request->tahap as $index => $dataTahap) {
-            TahapLomba::create([
-                'id_lomba' => $lomba->id_lomba,
-                'nama_tahap' => $dataTahap['nama'],
-                'deskripsi' => $dataTahap['deskripsi'] ?? null,
-                'urutan' => $index + 1,
+            // Buat lomba dengan path gambar dari storage
+            $lomba = Lomba::create([
+                'nama_lomba'    => $request->nama_lomba,
+                'deskripsi'     => $request->deskripsi,
+                'deskripsi_pengumpulan' => $request->deskripsi_pengumpulan,
+                'lokasi'        => $request->lokasi,
+                'lokasi_offline' => $request->lokasi === 'offline' ? $request->lokasi_offline : null,
+                'tingkat'       => $request->tingkat,
+                'status'        => 'belum disetujui',
+                'penyelenggara' => $penyelenggaraNama,
+                'tanggal_akhir_registrasi' => $request->tanggal_akhir_registrasi,
+                'tanggal_mulai_lomba' => $request->tanggal_mulai_lomba,
+                'tanggal_selesai_lomba' => $request->tanggal_selesai_lomba,
+                'foto_lomba'    => $image_path, // Simpan path dari storage
+                'id_pembuat'    => $user->id_user,
             ]);
+
+            $lomba->tags()->attach($request->tags);
+
+            foreach ($request->tahap as $index => $dataTahap) {
+                TahapLomba::create([
+                    'id_lomba' => $lomba->id_lomba,
+                    'nama_tahap' => $dataTahap['nama'],
+                    'deskripsi' => $dataTahap['deskripsi'] ?? null,
+                    'urutan' => $index + 1,
+                ]);
+            }
+
+            DB::commit();
+
+            Log::info('Lomba berhasil dibuat oleh user ID: ' . $user->id_user, ['lomba_id' => $lomba->id_lomba]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lomba Berhasil Dibuat',
+                'data' => Lomba::with('tags', 'tahaps')->find($lomba->id_lomba)
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // [PERBAIKAN] Hapus file yang sudah ter-upload jika terjadi error
+            if ($image_path && Storage::disk('public')->exists($image_path)) {
+                Storage::disk('public')->delete($image_path);
+            }
+
+            Log::error('Gagal membuat lomba: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server saat membuat lomba.'
+            ], 500);
         }
-
-        Log::info('Lomba berhasil dibuat:', $lomba->toArray());
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lomba Berhasil Dibuat',
-            'data' => Lomba::with('tags')->find($lomba->id_lomba) // Kirim kembali data lomba dengan tags
-        ], 201);
     }
 
     /**
@@ -333,23 +338,39 @@ class LombaController extends Controller
         }
 
         // Opsi: Otorisasi
-        // if ($lomba->id_pembuat !== auth()->id()) {
-        //     return response()->json(['success' => false, 'message' => 'Tidak diizinkan'], 403);
-        // }
+        if ($lomba->id_pembuat !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Tidak diizinkan'], 403);
+        }
 
-        // Hapus file gambar dari storage
-        Storage::disk('public')->delete($lomba->foto_lomba);
+        // [PERUBAHAN] Gunakan transaction untuk keamanan
+        DB::beginTransaction();
+        try {
+            // Hapus relasi di tabel pivot terlebih dahulu
+            $lomba->tags()->detach();
 
-        // Hapus relasi di tabel pivot terlebih dahulu
-        $lomba->tags()->detach();
+            // [TAMBAHAN] Hapus semua record yang bergantung pada lomba ini
+            $lomba->registrasi()->delete(); // Hapus semua pendaftaran
+            $lomba->tahaps()->delete();  // Hapus semua tahaps
 
-        // Hapus lomba
-        $lomba->delete();
+            // Hapus file gambar dari storage
+            if ($lomba->foto_lomba && Storage::disk('public')->exists($lomba->foto_lomba)) {
+                Storage::disk('public')->delete($lomba->foto_lomba);
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lomba Berhasil Dihapus'
-        ], 200);
+            // Terakhir, hapus lomba itu sendiri
+            $lomba->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lomba dan berhasil dihapus.'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menghapus lomba: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus lomba.'], 500);
+        }
     }
 
     /**
@@ -393,7 +414,7 @@ class LombaController extends Controller
                     }
                 ]);
             },
-            'tim',
+            'tim.members.profilMahasiswa.programStudi',
             'dosenPembimbing',
             'penilaian.tahap',
             'penilaian.penilai',
@@ -559,7 +580,7 @@ class LombaController extends Controller
         // === TAMBAHAN KODE: SORTING PRIORITAS UNTUK ADMIN ===
         // ==========================================================
         // Urutkan berdasarkan prioritas status. 'belum disetujui' akan selalu di atas.
-        $query->orderByRaw("FIELD(status, 'belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak')");
+        $query->orderByRaw("FIELD(status, 'ditolak', 'belum disetujui', 'disetujui', 'berlangsung', 'selesai')");
         // ==========================================================
         // === AKHIR TAMBAHAN KODE ===
         // ==========================================================
@@ -680,9 +701,10 @@ class LombaController extends Controller
         $lombaAktif = $statusCounts->get('disetujui', 0) + $statusCounts->get('berlangsung', 0);
 
         // 'Total Pendaftar' dihitung dari semua lomba yang dibuat oleh user ini
-        $totalPendaftar = RegistrasiLomba::whereHas('lomba', function ($query) use ($userId) {
-            $query->where('id_pembuat', $userId);
-        })->count();
+        $totalPendaftar = RegistrasiLomba::where('status_verifikasi', 'diterima')
+            ->whereHas('lomba', function ($query) use ($userId) {
+                $query->where('id_pembuat', $userId);
+            })->count();
 
         // 4. Siapkan data untuk respons JSON
         $data = [
