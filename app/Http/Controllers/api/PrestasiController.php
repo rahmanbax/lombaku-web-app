@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Lomba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Prestasi;
 use App\Models\RegistrasiLomba;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -60,14 +62,12 @@ class PrestasiController extends Controller
 
     public function berikan(Request $request)
     {
-        // 1. Validasi input dari form admin
+        // 1. Validasi input (tetap sama)
         $validator = Validator::make($request->all(), [
-            // Validasi input baru
             'id_user'             => 'required|exists:users,id_user',
             'id_lomba'            => [
                 'required',
                 'exists:lomba,id_lomba',
-                // Validasi unique pada kombinasi id_user dan id_lomba
                 Rule::unique('prestasi')->where(function ($query) use ($request) {
                     return $query->where('id_user', $request->id_user);
                 }),
@@ -84,32 +84,74 @@ class PrestasiController extends Controller
             return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $validator->errors()], 422);
         }
 
-        // 2. Handle File Upload (tetap sama, tapi nama file bisa disesuaikan)
-        $sertifikatPath = null;
-        if ($request->hasFile('sertifikat')) {
-            $file = $request->file('sertifikat');
-            $fileName = 'sertifikat_lomba_' . $request->id_lomba . '_user_' . $request->id_user . '_' . time() . '.' . $file->getClientOriginalExtension();
-            // Simpan file dan dapatkan path-nya
-            $sertifikatPath = $file->storeAs('sertifikat', $fileName, 'public');
+        // <-- [PERUBAHAN] Mulai Database Transaction -->
+        DB::beginTransaction();
+
+        try {
+            // 2. Handle File Upload (tetap sama)
+            $sertifikatPath = null;
+            if ($request->hasFile('sertifikat')) {
+                $file = $request->file('sertifikat');
+                $fileName = 'sertifikat_lomba_' . $request->id_lomba . '_user_' . $request->id_user . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $sertifikatPath = $file->storeAs('sertifikat', $fileName, 'public');
+            }
+
+            // 3. Simpan ke Database (tetap sama)
+            $prestasi = Prestasi::create([
+                'id_user'             => $request->id_user,
+                'id_lomba'            => $request->id_lomba,
+                'peringkat'           => $request->peringkat,
+                'tipe_prestasi'       => $request->tipe_prestasi,
+                'tanggal_diraih'      => $request->tanggal_diraih,
+                'sertifikat_path'     => $sertifikatPath,
+                'status_verifikasi'   => 'disetujui',
+                'lomba_dari'          => 'internal' // Pastikan ini diset
+            ]);
+
+            // <-- [PERUBAHAN] Logika untuk update status lomba -->
+            $lombaId = $request->id_lomba;
+            $lomba = Lomba::find($lombaId);
+
+            if ($lomba) {
+                // Hitung total pendaftar yang statusnya 'diterima'
+                $totalPendaftarDiterima = $lomba->registrasi()
+                    ->where('status_verifikasi', 'diterima')
+                    ->count();
+
+                // Hitung total peserta yang sudah diberi prestasi di lomba ini
+                $totalPenerimaPrestasi = Prestasi::where('id_lomba', $lombaId)->count();
+
+                // Cek apakah semua pendaftar yang diterima sudah diberi prestasi
+                if ($totalPendaftarDiterima > 0 && $totalPendaftarDiterima === $totalPenerimaPrestasi) {
+                    // Jika ya, ubah status lomba menjadi 'selesai'
+                    $lomba->status = 'selesai';
+                    $lomba->save();
+                }
+            }
+
+            // <-- [PERUBAHAN] Commit transaction jika semua berhasil -->
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Prestasi berhasil diberikan.',
+                'data'    => $prestasi
+            ], 201);
+        } catch (\Exception $e) {
+            // <-- [PERUBAHAN] Rollback transaction jika terjadi kesalahan -->
+            DB::rollBack();
+
+            // Hapus file yang mungkin sudah ter-upload jika terjadi error
+            if (isset($sertifikatPath) && Storage::disk('public')->exists($sertifikatPath)) {
+                Storage::disk('public')->delete($sertifikatPath);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memproses permintaan.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // 3. Simpan ke Database
-        $prestasi = Prestasi::create([
-            // Menggunakan data langsung dari request
-            'id_user'             => $request->id_user,
-            'id_lomba'            => $request->id_lomba,
-            'peringkat'           => $request->peringkat,
-            'tipe_prestasi'       => $request->tipe_prestasi,
-            'tanggal_diraih'      => $request->tanggal_diraih,
-            'sertifikat_path'     => $sertifikatPath,
-            'status_verifikasi'   => 'disetujui',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Prestasi berhasil diberikan.',
-            'data'    => $prestasi
-        ], 201);
     }
 
     public function update(Request $request, Prestasi $prestasi)

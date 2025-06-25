@@ -538,6 +538,10 @@ class LombaController extends Controller
             ->with(['tags', 'pembuat'])
             ->withCount('registrasi');
 
+        $query->withCount(['registrasi as pendaftar_diterima' => function ($query) {
+            $query->where('status_verifikasi', 'diterima');
+        }]);
+
         if ($request->filled('search')) { // Gunakan filled() untuk Cek jika parameter ada dan tidak kosong
             $searchTerm = $request->search;
             $query->where('nama_lomba', 'like', '%' . $searchTerm . '%');

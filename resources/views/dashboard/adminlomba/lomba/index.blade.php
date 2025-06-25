@@ -237,7 +237,7 @@
                             </td>
                             <td class="p-3 capitalize">${lomba.tingkat}</td>
                             <td class="p-3">${getStatusBadge(lomba.status)}</td>
-                            <td class="p-3 text-center">${lomba.registrasi_count}</td>
+                            <td class="p-3 text-center">${lomba.pendaftar_diterima}</td>
                             <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
                             <td class="p-3">${penyelenggaraNama}</td>
                             <td class="p-3">
