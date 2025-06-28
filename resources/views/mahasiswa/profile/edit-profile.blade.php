@@ -51,7 +51,6 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div><label for="tanggal_lahir" class="form-label">Tanggal Lahir</label><input type="date" id="tanggal_lahir" name="tanggal_lahir" class="w-full p-2 border rounded-md form-input"><p id="error-tanggal_lahir" class="error-message"></p></div>
                     <div><label for="jenis_kelamin" class="form-label">Jenis Kelamin</label><select id="jenis_kelamin" name="jenis_kelamin" class="w-full p-2 border rounded-md form-input"><option value="">Pilih Jenis Kelamin</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select><p id="error-jenis_kelamin" class="error-message"></p></div>
-                    <div class="md:col-span-2"><label for="alamat_lengkap" class="form-label">Alamat Lengkap</label><textarea id="alamat_lengkap" name="alamat_lengkap" rows="3" class="w-full p-2 border rounded-md form-input"></textarea></div>
                 </div>
                 
                 <div class="border-t border-gray-200 mt-8 pt-6 flex justify-end items-center gap-4">
@@ -79,7 +78,6 @@
             document.getElementById('nim').value = profile.nim || '';
             document.getElementById('tanggal_lahir').value = profile.tanggal_lahir ? profile.tanggal_lahir.split('T')[0] : '';
             document.getElementById('jenis_kelamin').value = profile.jenis_kelamin || '';
-            document.getElementById('alamat_lengkap').value = profile.alamat_lengkap || '';
 
             // Set preview foto profil awal
             if (profile.user.foto_profile) {

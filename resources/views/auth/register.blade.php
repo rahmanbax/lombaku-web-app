@@ -60,12 +60,7 @@
                         <option value="admin_lomba" {{ old('role') == 'admin_lomba' ? 'selected' : '' }}>Admin Lomba</option>
                     </select>
                 </div>
-
-                <!-- Common Fields for All Roles -->
-                <div class="mb-4">
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input type="text" id="username" name="username" value="{{ old('username') }}" class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 " placeholder="Username unik Anda" required>
-                </div>
+                
                 <div class="mb-4">
                     <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
                     <input type="text" id="nama" name="nama" value="{{ old('nama') }}" class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Nama lengkap Anda" required>

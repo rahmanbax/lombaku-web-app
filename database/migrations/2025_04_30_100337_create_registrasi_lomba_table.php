@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('link_pengumpulan');
             //status verifikasi
             $table->enum('status_verifikasi', ['menunggu', 'diterima', 'ditolak'])->default('menunggu');
+            // catatan_penolakan
+            $table->text('catatan_penolakan')->nullable();
 
             // foreign key ke id mahasiswa
             $table->unsignedBigInteger('id_mahasiswa');

@@ -50,7 +50,7 @@
                 <p id="stats-total-lomba" class="text-3xl font-bold text-gray-900 mt-1">-</p>
             </div>
             <div class="border border-gray-200 p-4 rounded-lg">
-                <h3 class="text-sm font-medium text-gray-500">Prestasi Terverifikasi</h3>
+                <h3 class="text-sm font-medium text-gray-500">Jumlah Prestasi</h3>
                 <p id="stats-prestasi" class="text-3xl font-bold text-gray-900 mt-1">-</p>
             </div>
             <div class="p-4 rounded-lg border border-gray-200">
@@ -93,7 +93,7 @@
 
         <!-- BAGIAN 4: DAFTAR PRESTASI TERVERIFIKASI -->
         <section class="mt-10">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Lemari Prestasi (Terverifikasi)</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Daftar Prestasi</h2>
             <div class="bg-white rounded-lg overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
@@ -117,6 +117,25 @@
         </section>
 
     </main>
+
+    <!-- Modal untuk Detail Tim -->
+    <div id="team-detail-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md shadow-lg rounded-lg bg-white p-6 mx-5 lg:mx-auto">
+            <!-- Header Modal -->
+            <div class="flex justify-between items-start">
+                <h3 id="team-modal-title" class="text-xl font-semibold text-gray-900">Detail Tim</h3>
+                <button id="close-team-modal-btn" type="button" class="text-gray-400 hover:text-gray-600 rounded-full p-1 -mt-2 -mr-2">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Konten Modal: Daftar Anggota -->
+            <div id="team-member-list" class="mt-4 space-y-3 max-h-80 overflow-y-auto pr-2">
+                <!-- Daftar anggota akan diisi oleh JavaScript di sini -->
+                <p class="text-center text-gray-500 p-4">Memuat data anggota...</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Pastikan axios sudah diimpor, biasanya melalui resources/js/bootstrap.js
@@ -148,10 +167,15 @@
             }
         });
 
+        const teamDetailModal = document.getElementById('team-detail-modal');
+        const closeTeamModalBtn = document.getElementById('close-team-modal-btn');
+        const teamModalTitle = document.getElementById('team-modal-title');
+        const teamMemberList = document.getElementById('team-member-list');
+
         // --- Fungsi-fungsi untuk Render Tampilan ---
 
         function renderProfilHeader(mahasiswa) {
-            document.getElementById('mahasiswa-foto').src = mahasiswa.profil_mahasiswa?.foto_profil ? `/${mahasiswa.profil_mahasiswa.foto_profil}` : '' + mahasiswa.nim;
+            document.getElementById('mahasiswa-foto').src = mahasiswa?.foto_profile ? `/${mahasiswa.foto_profile}` : '' + mahasiswa.nim;
             document.getElementById('mahasiswa-foto').alt = `Foto Profil ${mahasiswa.nama}`;
             document.getElementById('mahasiswa-nama').textContent = mahasiswa.nama;
             document.getElementById('mahasiswa-nim').textContent = mahasiswa.profil_mahasiswa?.nim || 'NIM tidak tersedia';
@@ -205,11 +229,17 @@
                         detailHtml = '<span>-</span>';
                 }
 
+                const timHtml = reg.tim ?
+                    `<button class="view-team-btn hover:underline" data-team='${JSON.stringify(reg.tim)}'>
+                   ${reg.tim.nama_tim}
+               </button>` :
+                    'Individu';
+
                 const row = `
                 <tr class="${rowClass}">
                     <td class="p-3 font-medium"><a class="hover:underline" href="/dashboard/kemahasiswaan/lomba/${reg.id_lomba}">${reg.lomba.nama_lomba}</a></td>
                     <td class="p-3">${reg.lomba.tingkat}</td>
-                    <td class="p-3">${reg.tim ? reg.tim.nama_tim : 'Individu'}</td>
+                    <td class="p-3">${timHtml}</td>
                     <td class="p-3">${reg.dosen_pembimbing?.nama || 'Tidak ada'}</td>
                     <td class="p-3">${statusHtml}</td>
                     <td class="p-3 text-gray-500 text-xs">${detailHtml}</td>
@@ -224,13 +254,13 @@
             tbody.innerHTML = '';
 
             if (prestasiList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada prestasi terverifikasi.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada prestasi.</td></tr>';
                 return;
             }
 
             prestasiList.forEach(pres => {
                 const row = `
-                <tr class="bg-gray-50">
+                <tr class="bg-gray-50 hover:bg-gray-100">
                     <td class="p-3 font-medium">${pres.lomba?.nama_lomba || pres.nama_lomba_eksternal}</td>
                     <td class="p-3">${pres.peringkat}</td>
                     <td class="p-3">${new Date(pres.tanggal_diraih).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
@@ -244,6 +274,49 @@
                 tbody.innerHTML += row;
             });
         }
+
+        function openTeamModal(teamData) {
+            teamModalTitle.textContent = `${teamData.nama_tim}`;
+            teamMemberList.innerHTML = ''; // Kosongkan daftar sebelumnya
+
+            if (!teamData.members || teamData.members.length === 0) {
+                teamMemberList.innerHTML = '<p class="text-center text-gray-500">Tidak ada data anggota untuk tim ini.</p>';
+            } else {
+                // [PERBAIKAN] Ganti 'member_tim' menjadi 'members'
+                teamData.members.forEach(member => {
+                    // Ambil NIM dari profil_mahasiswa jika ada
+                    const nim = member.profil_mahasiswa?.nim || 'NIM tidak ada';
+
+                    const memberHtml = `
+                <div class="flex items-center gap-3 p-3 rounded-md bg-gray-100">
+                    <img src="${member.foto_profile ? `/${member.foto_profile}` : 'https://i.pravatar.cc/40'}" alt="Foto ${member.nama}" class="w-10 h-10 rounded-full object-cover bg-gray-200">
+                    <div>
+                        <p class="font-medium text-gray-800">${member.nama}</p>
+                        <p class="text-xs text-gray-500">${nim}</p>
+                    </div>
+                </div>
+            `;
+                    teamMemberList.innerHTML += memberHtml;
+                });
+            }
+
+            teamDetailModal.classList.remove('hidden');
+        }
+
+        function closeTeamModal() {
+            teamDetailModal.classList.add('hidden');
+        }
+
+        document.getElementById('riwayat-lomba-tbody').addEventListener('click', function(event) {
+            const teamButton = event.target.closest('.view-team-btn');
+            if (teamButton) {
+                // Ambil data JSON dari atribut dan parse kembali menjadi objek
+                const teamData = JSON.parse(teamButton.dataset.team);
+                openTeamModal(teamData);
+            }
+        });
+
+        closeTeamModalBtn.addEventListener('click', closeTeamModal);
     </script>
 
 </body>

@@ -23,7 +23,6 @@
                 <div class="flex flex-col items-center mb-6 text-center">
                     <div id="profile-avatar" class="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold mb-4 skeleton">
                     </div>
-                    <h2 id="profile-username" class="text-xl font-bold text-gray-800">{{ Auth::user()->username }}</h2>
                 </div>
                 <div id="sidebar-nav" class="space-y-2">
                     <button class="w-full flex items-center space-x-3 p-3 bg-blue-50 text-blue-600 rounded-lg font-medium"><i class="fas fa-user w-5"></i><span>Profil Saya</span></button>
@@ -49,7 +48,6 @@
                     <div><label class="text-gray-500 text-sm">Tanggal Lahir</label><div id="profile-tgl-lahir" class="font-medium text-gray-800">...</div></div>
                     <div><label class="text-gray-500 text-sm">Jenis Kelamin</label><div id="profile-jenis-kelamin" class="font-medium text-gray-800">...</div></div>
                     <div><label class="text-gray-500 text-sm">Nomor Telepon</label><div id="profile-notelp" class="font-medium text-gray-800">...</div></div>
-                    <div class="md:col-span-2"><label class="text-gray-500 text-sm">Alamat Lengkap</label><div id="profile-alamat" class="font-medium text-gray-800">...</div></div>
                 </div>
             </div>
         </div>
@@ -91,7 +89,6 @@
                         document.getElementById('profile-tgl-lahir').textContent = formatDate(profileData.tanggal_lahir);
                         document.getElementById('profile-jenis-kelamin').textContent = profileData.jenis_kelamin || '-';
                         document.getElementById('profile-notelp').textContent = userData.notelp || '-';
-                        document.getElementById('profile-alamat').textContent = profileData.alamat_lengkap || '-';
                         
                         const avatarContainer = document.getElementById('profile-avatar');
                         avatarContainer.classList.remove('skeleton'); // Hapus skeleton setelah data dimuat

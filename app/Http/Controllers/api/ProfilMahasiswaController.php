@@ -55,7 +55,6 @@ class ProfilMahasiswaController extends Controller
             'notelp' => 'nullable|string|max:15',
             'tanggal_lahir' => 'nullable|date',
             'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-            'alamat_lengkap' => 'nullable|string|max:255',
             'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi untuk foto
         ]);
 
@@ -89,7 +88,6 @@ class ProfilMahasiswaController extends Controller
             $profilMahasiswa->id_program_studi = $request->id_program_studi;
             $profilMahasiswa->tanggal_lahir = $request->tanggal_lahir;
             $profilMahasiswa->jenis_kelamin = $request->jenis_kelamin;
-            $profilMahasiswa->alamat_lengkap = $request->alamat_lengkap;
             $profilMahasiswa->save();
 
             DB::commit();

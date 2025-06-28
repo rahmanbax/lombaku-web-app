@@ -23,6 +23,7 @@ class LombaController extends Controller
      */
     public function index(Request $request)
     {
+        
         // Mulai query builder dengan eager loading
         $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
 
@@ -52,7 +53,7 @@ class LombaController extends Controller
 
             // B. Urutkan berdasarkan prioritas status untuk admin
             //    'belum disetujui' akan selalu muncul paling atas.
-            $query->orderByRaw("FIELD(status, 'ditolak', 'belum disetujui', 'disetujui', 'berlangsung', 'selesai')");
+            $query->orderByRaw("FIELD(status, 'belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak')");
         }
 
         $perPage = $request->input('limit', 10);
@@ -365,7 +366,7 @@ class LombaController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Lomba dan berhasil dihapus.'
+                'message' => 'Lomba berhasil dihapus.'
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();

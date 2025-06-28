@@ -21,7 +21,6 @@ class AuthController extends Controller
         Log::info('--- Proses registrasi dimulai ---', ['request_data' => $request->all()]);
 
         $rules = [
-            'username' => 'required|string|unique:users,username|max:30',
             'password' => 'required|string|min:6',
             'nama' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
@@ -57,7 +56,6 @@ class AuthController extends Controller
                 Log::info('Memulai DB Transaction.');
 
                 $user = User::create([
-                    'username' => $request->username,
                     'password' => Hash::make($request->password),
                     'nama' => $request->nama,
                     'email' => $request->email,

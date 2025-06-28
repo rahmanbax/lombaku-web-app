@@ -44,7 +44,6 @@ class MahasiswaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'username'          => 'required|string|unique:users,username',
             'password'          => 'required|string|min:8|confirmed',
             'nama'              => 'required|string|max:255',
             'email'             => 'required|email|unique:users,email',
@@ -64,7 +63,6 @@ class MahasiswaController extends Controller
 
             // 1. Buat User baru
             $user = User::create([
-                'username'          => $request->username,
                 'password'          => Hash::make($request->password),
                 'nama'              => $request->nama,
                 'email'             => $request->email,
@@ -140,7 +138,6 @@ class MahasiswaController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'username'          => 'sometimes|required|string|unique:users,username,' . $id . ',id_user',
             'nama'              => 'sometimes|required|string|max:255',
             'email'             => 'sometimes|required|email|unique:users,email,' . $id . ',id_user',
             'notelp'            => 'nullable|string',
@@ -156,7 +153,7 @@ class MahasiswaController extends Controller
         try {
             DB::beginTransaction();
 
-            $mahasiswa->update($request->only(['username', 'nama', 'email', 'notelp', 'id_program_studi']));
+            $mahasiswa->update($request->only(['nama', 'email', 'notelp', 'id_program_studi']));
 
             if ($request->hasFile('foto_profil')) {
                 // Hapus foto lama jika ada
@@ -220,9 +217,10 @@ class MahasiswaController extends Controller
         return Excel::download(new MahasiswaExport, $fileName);
     }
 
-    public function getDashboardStats()
+    public function getDashboardStats(Request $request) // <-- Tambahkan Request $request
     {
         // 1. Mengambil Statistik Kartu (Cards)
+        // Statistik tetap menghitung total, tidak terpengaruh oleh pencarian.
         $stats = [
             'total_mahasiswa' => User::where('role', 'mahasiswa')->count(),
             'total_prestasi' => Prestasi::where('status_verifikasi', 'disetujui')->count(),
@@ -237,24 +235,42 @@ class MahasiswaController extends Controller
             })->count(),
         ];
 
-        $mahasiswa = User::where('role', 'mahasiswa')
-            ->with('profilMahasiswa.programStudi')
-            ->withCount([
-                // Menghitung SEMUA lomba yang pernah didaftarkan
-                'registrasiLomba as total_lomba_diikuti',
+        // [PERUBAHAN UTAMA DI SINI]
+        // 2. Mengambil Daftar Mahasiswa dengan Paginasi dan Pencarian
 
-                // Menghitung PRESTASI yang statusnya sudah disetujui
+        // Mulai query builder untuk User
+        $mahasiswaQuery = User::query()->where('role', 'mahasiswa');
+
+        // Terapkan pencarian jika ada parameter 'search' di URL
+        if ($request->has('search') && $request->input('search') != '') {
+            $searchTerm = $request->input('search');
+
+            $mahasiswaQuery->where(function ($query) use ($searchTerm) {
+                // Cari di kolom 'nama' pada tabel 'users'
+                $query->where('nama', 'LIKE', "%{$searchTerm}%")
+                    // Atau cari di kolom 'nim' pada tabel 'profil_mahasiswa' melalui relasi
+                    ->orWhereHas('profilMahasiswa', function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('nim', 'LIKE', "%{$searchTerm}%");
+                    });
+            });
+        }
+
+        // Lanjutkan query dengan withCount, orderBy, dan paginate
+        $mahasiswa = $mahasiswaQuery->with('profilMahasiswa.programStudi')
+            ->withCount([
+                'registrasiLomba as total_lomba_diikuti',
                 'prestasi' => function ($query) {
                     $query->where('status_verifikasi', 'disetujui');
                 },
-
-                // [TAMBAHAN] Menghitung REGISTRASI LOMBA yang statusnya masih 'menunggu'
                 'registrasiLomba as menunggu_persetujuan_count' => function ($query) {
                     $query->where('status_verifikasi', 'menunggu');
                 }
             ])
             ->orderBy('nama', 'asc')
-            ->get();
+            ->paginate(10)
+            // [PENTING] Menambahkan query string ke link paginasi
+            ->withQueryString();
+
 
         // 3. Mengembalikan data sebagai JSON
         return response()->json([
@@ -289,15 +305,22 @@ class MahasiswaController extends Controller
         $mahasiswa->load([
             'profilMahasiswa.programStudi',
             'registrasiLomba' => function ($query) {
-                $query->latest('created_at');
+                // Untuk setiap registrasi, kita langsung load relasi yang dibutuhkan
+                $query->with([
+                    'lomba',
+                    'tim.members.profilMahasiswa', // <-- Ini akan memuat tim, lalu member, lalu detail user dari member
+                    'dosenPembimbing'
+                ])->latest('created_at');
             },
             'prestasi' => function ($query) {
-                $query->where('status_verifikasi', 'disetujui')->latest('tanggal_diraih');
+                $query->where('status_verifikasi', 'disetujui')
+                    ->with('lomba') // Load juga relasi lomba di dalam prestasi
+                    ->latest('tanggal_diraih');
             }
         ]);
 
-        $mahasiswa->registrasiLomba->load('lomba', 'tim', 'dosenPembimbing');
-        $mahasiswa->prestasi->load('lomba');
+        // $mahasiswa->registrasiLomba->load('lomba', 'tim', 'dosenPembimbing');
+        // $mahasiswa->prestasi->load('lomba');
 
         // 4. Hitung statistik
         $stats = [
