@@ -9,6 +9,10 @@ use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\Api\AdminProdiController;
 use App\Http\Controllers\API\DosenController;
 use App\Http\Controllers\API\HasilLombaController;
+use App\Http\Controllers\API\MahasiswaController;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
+
 // ==========================================================
 // Rute Dosen
 // ==========================================================
@@ -37,24 +41,24 @@ Route::get('/adminprodi/daftar-lomba', function () {
 })->name('admin_prodi.lomba.index');
 
 Route::get('/adminprodi/lomba/{id}', function ($id) {
-    return view('admin.detail-lomba', ['id' => $id]); 
+    return view('admin.detail-lomba', ['id' => $id]);
 })->name('admin_prodi.lomba.show');
 
 Route::get('/adminprodi/verifikasi-prestasi', function () {
     return view('admin.verifikasi-prestasi');
 })->name('admin_prodi.prestasi.verifikasi');
 
-Route::get('/adminprodi/riwayat-pendaftaran', function() {
+Route::get('/adminprodi/riwayat-pendaftaran', function () {
     return view('admin.riwayat-pendaftaran');
 })->name('admin_prodi.registrasi.history');
 
-Route::get('/adminprodi/arsip-lomba', function() {
+Route::get('/adminprodi/arsip-lomba', function () {
     return view('admin.arsip-lomba');
 })->name('admin_prodi.lomba.arsip');
 
 // Data JSON untuk Dashboard Admin Prodi
 Route::get('/dashboard/admin-prodi-data', [AdminProdiController::class, 'index'])
-     ->name('dashboard.admin_prodi.data');
+    ->name('dashboard.admin_prodi.data');
 // ==========================================================
 
 // ==========================================================
@@ -178,3 +182,19 @@ Route::middleware('auth')->group(function () {
         return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
     });
 });
+
+// rute lihat sertifikat
+Route::get('/sertifikat/{filename}', function ($filename) {
+    $path = storage_path('app/public/sertifikat/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    return Response::file($path);
+});
+
+
+// Rute untuk download file XLSX
+Route::get('/kemahasiswaan/mahasiswa/export', [MahasiswaController::class, 'exportXlsx'])
+    ->name('kemahasiswaan.mahasiswa.export');

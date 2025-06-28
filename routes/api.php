@@ -91,6 +91,10 @@ Route::put('/penilaian/{id}', [PenilaianController::class, 'update']);
 Route::put('/prestasi/{prestasi}', [PrestasiController::class, 'update']);
 Route::post('/prestasi/berikan', [PrestasiController::class, 'berikan']);
 Route::post('/penilaian', [PenilaianController::class, 'store']);
+Route::get('/mahasiswa/stats', [MahasiswaController::class, 'getDashboardStats']);
+Route::get('/mahasiswa/{nim}/detail', [MahasiswaController::class, 'showDetail']);
 Route::apiResource('lomba', LombaController::class);
 Route::apiResource('tags', TagController::class)->only(['index']);
 Route::apiResource('mahasiswa', MahasiswaController::class);
+
+

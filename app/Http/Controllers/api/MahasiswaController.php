@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exports\MahasiswaExport;
 use App\Http\Controllers\Controller;
+use App\Models\Prestasi;
 use App\Models\User;
 use App\Models\ProfilMahasiswa;
+use App\Models\RegistrasiLomba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MahasiswaController extends Controller
 {
@@ -17,21 +21,21 @@ class MahasiswaController extends Controller
      * Menampilkan daftar semua mahasiswa.
      * GET /api/mahasiswa
      */
-        public function index()
-        {
-            // Ambil semua user dengan role 'mahasiswa' dan eager load relasi profil & prodi
-            $mahasiswas = User::where('role', 'mahasiswa')
-                // Eager load relasi profilMahasiswa, dan DI DALAM profilMahasiswa, load relasi programStudi
-                ->with('profilMahasiswa.programStudi') // <-- PERUBAHAN DI SINI
-                ->latest()
-                ->get();
+    public function index()
+    {
+        // Ambil semua user dengan role 'mahasiswa' dan eager load relasi profil & prodi
+        $mahasiswas = User::where('role', 'mahasiswa')
+            // Eager load relasi profilMahasiswa, dan DI DALAM profilMahasiswa, load relasi programStudi
+            ->with('profilMahasiswa.programStudi') // <-- PERUBAHAN DI SINI
+            ->latest()
+            ->get();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Daftar Mahasiswa Berhasil Diambil',
-                'data' => $mahasiswas
-            ], 200);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar Mahasiswa Berhasil Diambil',
+            'data' => $mahasiswas
+        ], 200);
+    }
 
     /**
      * Menyimpan mahasiswa baru (membuat User dan ProfilMahasiswa).
@@ -205,5 +209,110 @@ class MahasiswaController extends Controller
         $mahasiswa->delete();
 
         return response()->json(['success' => true, 'message' => 'Mahasiswa berhasil dihapus'], 200);
+    }
+
+    public function exportXlsx()
+    {
+        // Tentukan nama file yang akan di-download
+        $fileName = 'daftar-mahasiswa-' . now()->format('Y-m-d') . '.xlsx';
+
+        // Panggil library untuk men-download file menggunakan Export Class kita
+        return Excel::download(new MahasiswaExport, $fileName);
+    }
+
+    public function getDashboardStats()
+    {
+        // 1. Mengambil Statistik Kartu (Cards)
+        $stats = [
+            'total_mahasiswa' => User::where('role', 'mahasiswa')->count(),
+            'total_prestasi' => Prestasi::where('status_verifikasi', 'disetujui')->count(),
+            'tahap_pendaftaran' => RegistrasiLomba::where('status_verifikasi', 'menunggu')->count(),
+            'butuh_persetujuan_pembimbing' => RegistrasiLomba::whereNotNull('id_dosen')
+                ->where('status_verifikasi', 'menunggu')->count(),
+            'sedang_berlangsung' => RegistrasiLomba::whereHas('lomba', function ($query) {
+                $query->where('status', 'berlangsung');
+            })->count(),
+            'selesai' => RegistrasiLomba::whereHas('lomba', function ($query) {
+                $query->where('status', 'selesai');
+            })->count(),
+        ];
+
+        $mahasiswa = User::where('role', 'mahasiswa')
+            ->with('profilMahasiswa.programStudi')
+            ->withCount([
+                // Menghitung SEMUA lomba yang pernah didaftarkan
+                'registrasiLomba as total_lomba_diikuti',
+
+                // Menghitung PRESTASI yang statusnya sudah disetujui
+                'prestasi' => function ($query) {
+                    $query->where('status_verifikasi', 'disetujui');
+                },
+
+                // [TAMBAHAN] Menghitung REGISTRASI LOMBA yang statusnya masih 'menunggu'
+                'registrasiLomba as menunggu_persetujuan_count' => function ($query) {
+                    $query->where('status_verifikasi', 'menunggu');
+                }
+            ])
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        // 3. Mengembalikan data sebagai JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Data Dashboard Berhasil Diambil',
+            'data' => [
+                'stats' => $stats,
+                'mahasiswa' => $mahasiswa,
+            ]
+        ], 200);
+    }
+
+    public function showDetail($nim)
+    {
+        // 1. Temukan profil mahasiswa berdasarkan NIM.
+        // firstOrFail() akan otomatis menghasilkan 404 Not Found jika NIM tidak ada.
+        $profilMahasiswa = ProfilMahasiswa::where('nim', $nim)->firstOrFail();
+
+        // 2. Ambil model User yang berelasi dengan profil tersebut.
+        $mahasiswa = $profilMahasiswa->user;
+
+        // Jika user tidak ditemukan (kasus data tidak konsisten), kembalikan error.
+        if (!$mahasiswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data User untuk NIM ini tidak ditemukan.'
+            ], 404);
+        }
+
+        // 3. Eager load semua relasi yang dibutuhkan untuk halaman detail.
+        // Sama seperti sebelumnya, kita load relasinya ke objek $mahasiswa.
+        $mahasiswa->load([
+            'profilMahasiswa.programStudi',
+            'registrasiLomba' => function ($query) {
+                $query->latest('created_at');
+            },
+            'prestasi' => function ($query) {
+                $query->where('status_verifikasi', 'disetujui')->latest('tanggal_diraih');
+            }
+        ]);
+
+        $mahasiswa->registrasiLomba->load('lomba', 'tim', 'dosenPembimbing');
+        $mahasiswa->prestasi->load('lomba');
+
+        // 4. Hitung statistik
+        $stats = [
+            'total_lomba_diikuti' => $mahasiswa->registrasiLomba->count(),
+            'prestasi_terverifikasi' => $mahasiswa->prestasi->count(),
+            'menunggu_persetujuan' => $mahasiswa->registrasiLomba->where('status_verifikasi', 'menunggu')->count(),
+            'lomba_berlangsung' => $mahasiswa->registrasiLomba->where('lomba.status', 'berlangsung')->count(),
+        ];
+
+        $mahasiswa->stats = $stats;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail mahasiswa berhasil diambil',
+            'data' => $mahasiswa
+        ], 200);
     }
 }
