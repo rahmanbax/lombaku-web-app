@@ -9,6 +9,8 @@ use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\Api\AdminProdiController;
 use App\Http\Controllers\API\DosenController;
 use App\Http\Controllers\API\HasilLombaController;
+use App\Models\ProgramStudi;
+
 // ==========================================================
 // Rute Dosen
 // ==========================================================
@@ -96,9 +98,25 @@ Route::get('/hasil-lomba/{registrasi}', [HasilLombaController::class, 'show'])
 // ==========================================================
 // Rute Autentikasi
 // ==========================================================
+// Route::get('/register', function () {
+//     return view('auth.register');
+// })->name('register');
+// Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+// Route::get('/login', function () {
+//     return view('auth.login');
+// })->name('login');
+// Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/register', function () {
-    return view('auth.register');
+    // 1. Ambil semua data program studi dari database, urutkan berdasarkan nama
+    $programStudis = ProgramStudi::orderBy('nama_program_studi', 'asc')->get();
+
+    // 2. Kirim data tersebut ke view dengan nama variabel 'programStudis'
+    return view('auth.register', ['programStudis' => $programStudis]);
 })->name('register');
+// PERUBAHAN SELESAI DI SINI
+
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
 Route::get('/login', function () {
@@ -106,7 +124,6 @@ Route::get('/login', function () {
 })->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 // ==========================================================
 // Rute Profil & Detail Lomba
 // ==========================================================

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +11,32 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background-color: #f9fafb; }
-        .skeleton { background-color: #e5e7eb; border-radius: 0.25rem; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .skeleton {
+            background-color: #e5e7eb;
+            border-radius: 0.25rem;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <x-public-header-nav />
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -38,25 +60,38 @@
                 </div>
                 <h2 class="text-xl font-bold text-gray-800 mb-6">Informasi Akademik</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
-                    <div><label class="text-gray-500 text-sm">Nama Lengkap</label><div id="profile-nama" class="font-medium text-gray-800">...</div></div>
-                    <div><label class="text-gray-500 text-sm">NIM</label><div id="profile-nim" class="font-medium text-gray-800">...</div></div>
-                    <div><label class="text-gray-500 text-sm">Program Studi</label><div id="profile-prodi" class="font-medium text-gray-800">...</div></div>
-                    <div><label class="text-gray-500 text-sm">Email</label><div id="profile-email" class="font-medium text-gray-800">...</div></div>
+                    <div><label class="text-gray-500 text-sm">Nama Lengkap</label>
+                        <div id="profile-nama" class="font-medium text-gray-800">...</div>
+                    </div>
+                    <div><label class="text-gray-500 text-sm">NIM</label>
+                        <div id="profile-nim" class="font-medium text-gray-800">...</div>
+                    </div>
+                    <div><label class="text-gray-500 text-sm">Program Studi</label>
+                        <div id="profile-prodi" class="font-medium text-gray-800">...</div>
+                    </div>
+                    <div><label class="text-gray-500 text-sm">Email</label>
+                        <div id="profile-email" class="font-medium text-gray-800">...</div>
+                    </div>
                 </div>
                 <div class="border-t border-gray-200 my-8"></div>
                 <h2 class="text-xl font-bold text-gray-800 mb-6">Informasi Personal</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div><label class="text-gray-500 text-sm">Tanggal Lahir</label><div id="profile-tgl-lahir" class="font-medium text-gray-800">...</div></div>
-                    <div><label class="text-gray-500 text-sm">Jenis Kelamin</label><div id="profile-jenis-kelamin" class="font-medium text-gray-800">...</div></div>
-                    <div><label class="text-gray-500 text-sm">Nomor Telepon</label><div id="profile-notelp" class="font-medium text-gray-800">...</div></div>
-                    <div class="md:col-span-2"><label class="text-gray-500 text-sm">Alamat Lengkap</label><div id="profile-alamat" class="font-medium text-gray-800">...</div></div>
+                    <div><label class="text-gray-500 text-sm">Tanggal Lahir</label>
+                        <div id="profile-tgl-lahir" class="font-medium text-gray-800">...</div>
+                    </div>
+                    <div><label class="text-gray-500 text-sm">Jenis Kelamin</label>
+                        <div id="profile-jenis-kelamin" class="font-medium text-gray-800">...</div>
+                    </div>
+                    <div><label class="text-gray-500 text-sm">Nomor Telepon</label>
+                        <div id="profile-notelp" class="font-medium text-gray-800">...</div>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
     </div>
-    
- <footer class="bg-gray-800 text-white mt-20">
+
+    <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
                 <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
@@ -75,7 +110,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             const formatDate = (dateString) => {
                 if (!dateString) return '-';
-                return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                return new Date(dateString).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
             };
             async function loadAndRenderProfile() {
                 try {
@@ -91,11 +130,11 @@
                         document.getElementById('profile-tgl-lahir').textContent = formatDate(profileData.tanggal_lahir);
                         document.getElementById('profile-jenis-kelamin').textContent = profileData.jenis_kelamin || '-';
                         document.getElementById('profile-notelp').textContent = userData.notelp || '-';
-                        document.getElementById('profile-alamat').textContent = profileData.alamat_lengkap || '-';
-                        
+
+
                         const avatarContainer = document.getElementById('profile-avatar');
                         avatarContainer.classList.remove('skeleton'); // Hapus skeleton setelah data dimuat
-                        
+
                         // === PERBAIKAN UTAMA DI SINI ===
                         if (userData.foto_profile) {
                             avatarContainer.innerHTML = `<img src="/storage/${userData.foto_profile}" alt="Foto Profil" class="w-24 h-24 rounded-full object-cover">`;
@@ -103,7 +142,9 @@
                             avatarContainer.innerHTML = `<span>${userData.nama ? userData.nama.charAt(0).toUpperCase() : '?'}</span>`;
                             avatarContainer.classList.add('bg-blue-500', 'text-white');
                         }
-                    } else { throw new Error(response.data.message || 'Data profil tidak ditemukan.'); }
+                    } else {
+                        throw new Error(response.data.message || 'Data profil tidak ditemukan.');
+                    }
                 } catch (error) {
                     console.error('Gagal memuat profil:', error);
                     document.getElementById('main-profile-content').innerHTML = `<p class="text-red-500 text-center">Gagal memuat data profil. Silakan coba lagi.</p>`;
@@ -113,4 +154,5 @@
         });
     </script>
 </body>
+
 </html>
