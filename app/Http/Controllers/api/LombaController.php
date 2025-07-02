@@ -21,9 +21,8 @@ class LombaController extends Controller
      * Menampilkan semua data lomba.
      * GET /api/lomba
      */
-    public function index(Request $request)
+   public function index(Request $request)
     {
-
         // Mulai query builder dengan eager loading
         $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
 
@@ -32,11 +31,11 @@ class LombaController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_lomba', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
+                  ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
             });
         }
 
-        // 2. Fungsionalitas Filter
+        // 2. Fungsionalitas Filter Umum
         if ($request->has('tingkat')) {
             $query->where('tingkat', $request->tingkat);
         }
@@ -44,37 +43,69 @@ class LombaController extends Controller
             $query->where('lokasi', $request->lokasi);
         }
 
-        if (Auth::check() && in_array(Auth::user()->role, ['admin_lomba', 'kemahasiswaan'])) {
+        // ==========================================================
+        // === INI BAGIAN YANG DIPERBAIKI: Logika Filter Status ========
+        // ==========================================================
+        $isAdmin = Auth::check() && in_array(Auth::user()->role, ['admin_lomba', 'kemahasiswaan']);
 
-            // A. Filter berdasarkan status jika ada di request
+        if ($isAdmin) {
+            // Logika untuk Admin: Bisa memfilter berdasarkan status apa pun dari request
             if ($request->filled('status')) {
                 $query->where('status', $request->query('status'));
             }
-
-            // B. Urutkan berdasarkan prioritas status untuk admin
-            //    'belum disetujui' akan selalu muncul paling atas.
+            // Urutkan berdasarkan prioritas status untuk admin
             $query->orderByRaw("FIELD(status, 'belum disetujui', 'disetujui', 'berlangsung', 'selesai', 'ditolak')");
-        }
+        } else {
+            // Logika untuk Pengguna Publik (Termasuk halaman welcome)
+            // Tentukan status mana yang boleh dilihat publik
+            $publiclyVisibleStatuses = ['disetujui', 'berlangsung', 'selesai'];
 
-        $perPage = $request->input('limit', 10);
+            // Jika ada request status spesifik dari frontend (misal: halaman welcome)
+            if ($request->has('status') && is_array($request->status)) {
+                // Ambil irisan antara status yang diminta dan status yang diizinkan (untuk keamanan)
+                $safeStatuses = array_intersect($request->status, $publiclyVisibleStatuses);
+                
+                if (!empty($safeStatuses)) {
+                    $query->whereIn('status', $safeStatuses);
+                } else {
+                    // Jika status yang diminta tidak ada yang valid, jangan tampilkan apa-apa
+                    $query->whereRaw('1 = 0');
+                }
+            } else {
+                // Default untuk halaman publik lain (jika tidak ada filter status)
+                // Hanya tampilkan lomba dengan status yang aman untuk publik
+                $query->whereIn('status', $publiclyVisibleStatuses);
+            }
+        }
+        // ==========================================================
+        // === AKHIR DARI PERBAIKAN =================================
+        // ==========================================================
+
         if ($request->has('tags') && is_array($request->tags) && count($request->tags) > 0) {
             $tagIds = $request->tags;
-            // Gunakan whereHas untuk memfilter lomba yang memiliki setidaknya satu dari tag yang dipilih
             $query->whereHas('tags', function ($tagQuery) use ($tagIds) {
                 $tagQuery->whereIn('tags.id_tag', $tagIds);
             });
         }
-        // Ganti get() dengan paginate()
-        // Metode latest() tetap digunakan untuk mengurutkan
+        
+        $perPage = $request->input('limit', 10);
         $lombas = $query->latest()->paginate($perPage);
-        // ==========================================================
+        
+        // Tambahkan URL gambar ke setiap item lomba dalam koleksi paginasi
+        $lombas->getCollection()->transform(function ($lomba) {
+            $lomba->foto_lomba_url = $lomba->foto_lomba 
+                ? Storage::url($lomba->foto_lomba)
+                : null; // Atau berikan URL default jika perlu: asset('images/default-lomba.jpg')
+            return $lomba;
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Daftar Lomba Berhasil Diambil ',
+            'message' => 'Daftar Lomba Berhasil Diambil',
             'data' => $lombas
         ], 200);
     }
+
     /**
      * Menyimpan lomba baru ke database.
      * POST /api/lomba
@@ -112,36 +143,28 @@ class LombaController extends Controller
             ], 422);
         }
 
-        $image_path = null; // Inisialisasi path gambar
+        $image_path = null;
 
         try {
             DB::beginTransaction();
 
-            // --- [PERUBAHAN] Logika Penyimpanan Gambar ---
             if ($request->hasFile('foto_lomba')) {
                 $file = $request->file('foto_lomba');
-
-                // Buat nama file yang unik berdasarkan waktu dan nama asli file
-                // Ini aman karena tidak bergantung pada ID yang belum ada
                 $fileName = 'lomba_' . time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-
-                // Simpan file ke storage/app/public/foto_lomba
-                // Metode storeAs() akan mengembalikan path relatif dari folder 'storage/app/public'
+                
+                // Simpan file ke storage
                 $image_path = $file->storeAs('foto_lomba', $fileName, 'public');
             }
-            // ---------------------------------------------
 
             $penyelenggaraNama = $request->filled('penyelenggara')
                 ? $request->penyelenggara
                 : $user->nama;
 
             $statusLomba = 'belum disetujui';
-
             if ($user && $user->role === 'kemahasiswaan') {
                 $statusLomba = 'disetujui';
             }
 
-            // Buat lomba dengan path gambar dari storage
             $lomba = Lomba::create([
                 'nama_lomba'    => $request->nama_lomba,
                 'deskripsi'     => $request->deskripsi,
@@ -154,7 +177,7 @@ class LombaController extends Controller
                 'tanggal_akhir_registrasi' => $request->tanggal_akhir_registrasi,
                 'tanggal_mulai_lomba' => $request->tanggal_mulai_lomba,
                 'tanggal_selesai_lomba' => $request->tanggal_selesai_lomba,
-                'foto_lomba'    => $image_path, // Simpan path dari storage
+                'foto_lomba'    => $image_path,
                 'id_pembuat'    => $user->id_user,
             ]);
 
@@ -173,6 +196,11 @@ class LombaController extends Controller
 
             Log::info('Lomba berhasil dibuat oleh user ID: ' . $user->id_user, ['lomba_id' => $lomba->id_lomba]);
 
+            // PERBAIKAN: Tambahkan URL gambar ke response
+            $lomba->foto_lomba_url = $lomba->foto_lomba 
+                ? Storage::url($lomba->foto_lomba)
+                : asset('images/default-lomba.jpg');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Lomba Berhasil Dibuat',
@@ -181,7 +209,6 @@ class LombaController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // [PERBAIKAN] Hapus file yang sudah ter-upload jika terjadi error
             if ($image_path && Storage::disk('public')->exists($image_path)) {
                 Storage::disk('public')->delete($image_path);
             }
@@ -210,18 +237,17 @@ class LombaController extends Controller
             ], 404);
         }
 
-        // --- INI BAGIAN YANG DIPERBAIKI ---
         $isBookmarked = false;
-        // Sekarang kita gunakan Auth::guard('sanctum')->check() untuk secara eksplisit
-        // memeriksa apakah request API ini membawa token otentikasi yang valid.
         if (Auth::guard('sanctum')->check()) {
-            // Kode ini hanya akan berjalan jika user login DAN request API-nya terotentikasi.
             $user = Auth::guard('sanctum')->user();
             $isBookmarked = $user->bookmarkedLombas()->where('lomba.id_lomba', $id)->exists();
         }
 
-        // Tambahkan properti baru ke objek lomba
+        // PERBAIKAN: Tambahkan URL gambar ke response
         $lomba->is_bookmarked = $isBookmarked;
+        $lomba->foto_lomba_url = $lomba->foto_lomba 
+            ? Storage::url($lomba->foto_lomba)
+            : asset('images/default-lomba.jpg');
 
         return response()->json([
             'success' => true,
@@ -244,11 +270,6 @@ class LombaController extends Controller
             return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
         }
 
-        // Opsi: Tambahkan otorisasi untuk memastikan hanya pembuat yang bisa mengedit
-        // if ($lomba->id_pembuat !== auth()->id()) {
-        //     return response()->json(['success' => false, 'message' => 'Tidak diizinkan'], 403);
-        // }
-
         $validator = Validator::make($request->all(), [
             'nama_lomba'    => 'sometimes|required|string|max:255',
             'deskripsi'     => 'sometimes|required|string',
@@ -264,7 +285,7 @@ class LombaController extends Controller
             'tags'          => 'sometimes|required|array',
             'tags.*'        => 'exists:tags,id_tag',
             'tahap'               => 'sometimes|required|array|min:1',
-            'tahap.*.id'          => 'nullable|integer|exists:tahap_lomba,id_tahap', // ID boleh null (untuk tahap baru)
+            'tahap.*.id'          => 'nullable|integer|exists:tahap_lomba,id_tahap',
             'tahap.*.nama'        => 'required|string|max:100',
             'tahap.*.deskripsi'   => 'nullable|string',
         ]);
@@ -273,7 +294,6 @@ class LombaController extends Controller
             return response()->json(['success' => false, 'message' => 'Validasi Gagal', 'errors' => $validator->errors()], 422);
         }
 
-        // Mengambil data yang tervalidasi
         $validatedData = $validator->validated();
 
         if ($lomba->status === 'ditolak') {
@@ -286,33 +306,31 @@ class LombaController extends Controller
 
         if ($request->hasFile('foto_lomba')) {
             // Hapus gambar lama
-            Storage::disk('public')->delete($lomba->foto_lomba);
+            if ($lomba->foto_lomba && Storage::disk('public')->exists($lomba->foto_lomba)) {
+                Storage::disk('public')->delete($lomba->foto_lomba);
+            }
 
-            // Upload gambar baru
-            $image = $request->file('foto_lomba');
-            $validatedData['foto_lomba'] = $image->store('assets/lomba', 'public');
+            $file = $request->file('foto_lomba');
+            $fileName = 'lomba_' . time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+            $image_path = $file->storeAs('foto_lomba', $fileName, 'public');
+            $validatedData['foto_lomba'] = $image_path;
         }
 
-        // Update lomba dengan data yang divalidasi
         $lomba->update($validatedData);
 
         if ($request->has('tahap')) {
             $incomingTahaps = collect($request->tahap);
-            $incomingTahapIds = $incomingTahaps->pluck('id')->filter()->all(); // Ambil semua ID yang dikirim
+            $incomingTahapIds = $incomingTahaps->pluck('id')->filter()->all();
 
-            // 1. Hapus tahap yang tidak ada lagi di request
             $lomba->tahaps()->whereNotIn('id_tahap', $incomingTahapIds)->delete();
 
-            // 2. Update atau Buat tahap baru
             foreach ($incomingTahaps as $index => $tahapData) {
                 TahapLomba::updateOrCreate(
                     [
-                        // Kondisi untuk mencari: ID Lomba dan ID Tahap (jika ada)
                         'id_lomba' => $lomba->id_lomba,
                         'id_tahap' => $tahapData['id'] ?? null,
                     ],
                     [
-                        // Data untuk diupdate atau dibuat
                         'nama_tahap' => $tahapData['nama'],
                         'deskripsi' => $tahapData['deskripsi'] ?? null,
                         'urutan' => $index + 1,
@@ -321,10 +339,14 @@ class LombaController extends Controller
             }
         }
 
-        // Sinkronisasi tags, sync() akan menghapus tag lama dan menambah tag baru
         if ($request->has('tags')) {
             $lomba->tags()->sync($request->tags);
         }
+
+        // PERBAIKAN: Tambahkan URL gambar ke response
+        $lomba->foto_lomba_url = $lomba->foto_lomba 
+            ? Storage::url($lomba->foto_lomba)
+            : asset('images/default-lomba.jpg');
 
         return response()->json([
             'success' => true,

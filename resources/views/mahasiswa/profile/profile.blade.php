@@ -49,7 +49,7 @@
                 <div id="sidebar-nav" class="space-y-2">
                     <button class="w-full flex items-center space-x-3 p-3 bg-blue-50 text-blue-600 rounded-lg font-medium"><i class="fas fa-user w-5"></i><span>Profil Saya</span></button>
                     <a href="{{ route('status') }}" class="w-full flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg text-gray-700"><i class="fas fa-trophy w-5"></i><span>Riwayat Kegiatan</span></a>
-                    <a href="{{ route('simpanlomba') }}" class="w-full flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg text-gray-700"><i class="fas fa-heart w-5"></i><span>Lomba Disimpan</span></a>
+                    <a href="{{ route('bookmark') }}" class="w-full flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg text-gray-700"><i class="fas fa-heart w-5"></i><span>Lomba Disimpan</span></a>
                 </div>
             </div>
             <div id="main-profile-content" class="w-full md:w-3/4 bg-white rounded-xl shadow-md p-8">

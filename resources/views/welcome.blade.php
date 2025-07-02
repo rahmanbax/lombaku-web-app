@@ -106,7 +106,7 @@
     </template>
 
 
-       <footer class="bg-gray-800 text-white mt-20">
+    <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
                 <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
@@ -120,7 +120,7 @@
                 <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
             </div>
         </div>
-    </footer>y
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -140,9 +140,20 @@
                 container.appendChild(loadingState);
 
                 try {
+                    // ======================================================
+                    // === INI BAGIAN YANG DIPERBAIKI =======================
+                    // ======================================================
+                    // Tambahkan parameter 'status' untuk meminta hanya lomba yang
+                    // statusnya 'disetujui' atau 'berlangsung'.
                     const response = await axios.get('/api/lomba', {
-                        params: { limit: 6 }
+                        params: {
+                            limit: 6,
+                            status: ['disetujui', 'berlangsung']
+                        }
                     });
+                    // ======================================================
+                    // === AKHIR DARI PERBAIKAN =============================
+                    // ======================================================
 
                     const lombas = response.data.data.data;
                     loadingState.style.display = 'none';
@@ -159,26 +170,20 @@
                         cardElement.style.transitionDelay = `${index * 100}ms`;
 
                         const link = `/lomba/${lomba.id_lomba}`;
+
                         const imageEl = card.querySelector('.lomba-image');
 
-                        // ======================================================
-                        // === INI BAGIAN YANG DIPERBAIKI =======================
-                        // ======================================================
-                        // Gunakan 'foto_lomba_url' yang sudah berisi URL lengkap dari API.
+                        // Gunakan foto_lomba_url yang sudah dikirim dari API
                         if (lomba.foto_lomba_url) {
                             imageEl.src = lomba.foto_lomba_url;
                         } else {
-                            // Fallback jika tidak ada gambar sama sekali.
+                            // Fallback jika tidak ada gambar
                             imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=E0E7FF&color=3730A3&size=300`;
                         }
-                        // ======================================================
-                        // === AKHIR DARI PERBAIKAN =============================
-                        // ======================================================
 
                         imageEl.alt = lomba.nama_lomba;
                         card.querySelector('.lomba-link-img').href = link;
 
-                        // Sisanya tetap sama...
                         const tagsContainer = card.querySelector('.absolute.top-3.left-3');
                         tagsContainer.innerHTML = '';
                         lomba.tags.slice(0, 2).forEach(tag => {
@@ -194,9 +199,9 @@
                             statusEl.className = 'status-badge';
                             let statusText = lomba.status.replace(/_/g, ' ');
 
-                             switch (lomba.status) {
+                            switch (lomba.status) {
                                 case 'pendaftaran_dibuka':
-                                case 'disetujui': // Anggap 'disetujui' sama dengan 'buka pendaftaran' di view publik
+                                case 'disetujui':
                                     statusEl.classList.add('bg-green-100', 'text-green-800');
                                     statusText = "Buka Pendaftaran";
                                     break;
@@ -211,6 +216,10 @@
                                 case 'selesai':
                                     statusEl.classList.add('bg-gray-200', 'text-gray-800');
                                     statusText = "Selesai";
+                                    break;
+                                case 'belum disetujui':
+                                    statusEl.classList.add('bg-orange-100', 'text-orange-800');
+                                    statusText = "Review";
                                     break;
                                 default:
                                     statusEl.classList.add('bg-gray-100', 'text-gray-600');
@@ -239,15 +248,17 @@
                     container.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-red-500 text-lg">Gagal memuat data lomba. Silakan coba lagi nanti.</p></div>`;
                 }
             }
-            
-            // Kode untuk search dan observer tetap sama
+
+            // ... sisa kode lainnya (search, observer) tetap sama ...
             const searchInput = document.getElementById('search-input-welcome');
+
             function handleSearch() {
                 const query = searchInput.value.trim();
                 if (query) {
                     window.location.href = `/lombaterkini?search=${encodeURIComponent(query)}`;
                 }
             }
+
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -261,11 +272,16 @@
                         entry.target.classList.add('visible');
                     }
                 });
-            }, { threshold: 0.1 });
+            }, {
+                threshold: 0.1
+            });
 
             document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
             fetchLatestLombas();
         });
     </script>
+
 </body>
+
 </html>

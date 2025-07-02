@@ -19,10 +19,8 @@
             display: flex;
         }
 
-        /* Style untuk tombol bookmark aktif */
         .bookmarked {
             background-color: #3b82f6 !important;
-            /* blue-500 */
             color: white !important;
             border-color: #3b82f6 !important;
         }
@@ -110,176 +108,179 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-20">
-        <div class="container mx-auto px-4 py-12">
-            <div class="max-w-3xl mx-auto text-center mb-8">
-                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
-                    Daftar sebagai Admin Lomba
-                </button>
-            </div>
-        </div>
-        <div class="bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
-            </div>
-        </div>
+        {{-- Konten Footer --}}
     </footer>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- Referensi Elemen DOM ---
-            const loadingOverlay = document.getElementById('loading-overlay');
-            const mainContent = document.getElementById('main-content');
-            const bookmarkBtn = document.getElementById('bookmark-btn');
-            const daftarBtn = document.getElementById('daftar-btn');
 
-            // --- Mendapatkan ID Lomba dari URL ---
-            const pathParts = window.location.pathname.split('/');
-            const lombaId = pathParts[pathParts.length - 1];
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... (kode Anda yang lain untuk mengambil elemen DOM)
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const mainContent = document.getElementById('main-content');
+        const bookmarkBtn = document.getElementById('bookmark-btn');
+        const daftarBtn = document.getElementById('daftar-btn');
+        const pathParts = window.location.pathname.split('/');
+        const lombaId = pathParts[pathParts.length - 1];
 
-            // Helper untuk format tanggal
-            function formatDate(dateString) {
-                if (!dateString) return '-';
-                const date = new Date(dateString);
-                return date.toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+        // ... (fungsi formatDate() Anda)
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // ... (fungsi loadLombaData() Anda)
+        // Fungsi ini sudah benar karena mengambil status is_bookmarked dari API LombaController@show
+        async function loadLombaData() {
+            if (!lombaId || isNaN(lombaId)) {
+                showError('ID Lomba tidak valid.');
+                return;
             }
-
-            // --- FUNGSI UTAMA UNTUK MENGAMBIL DATA ---
-            async function loadLombaData() {
-                if (!lombaId || isNaN(lombaId)) {
-                    showError('ID Lomba tidak valid.');
-                    return;
-                }
-                try {
-                    const response = await axios.get(`/api/lomba/${lombaId}`);
-                    if (response.data.success) {
-                        renderPage(response.data.data);
-                    } else {
-                        showError(response.data.message || 'Lomba tidak ditemukan.');
-                    }
-                } catch (error) {
-                    console.error('Error fetching lomba data:', error);
-                    showError('Gagal memuat data lomba. Coba muat ulang halaman.');
-                } finally {
-                    loadingOverlay.style.display = 'none';
-                    mainContent.classList.remove('opacity-0');
-                }
-            }
-
-            // --- FUNGSI UNTUK MERENDER KONTEN KE HALAMAN ---
-            function renderPage(lomba) {
-                document.title = `${lomba.nama_lomba} - Lombaku`;
-                document.getElementById('lomba-image').src = `{{ url('/') }}/${lomba.foto_lomba}`;
-                document.getElementById('lomba-nama').textContent = lomba.nama_lomba;
-                document.getElementById('penyelenggara-nama').textContent = `Diselenggarakan oleh ${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui')}`;
-                document.getElementById('lomba-tingkat').textContent = lomba.tingkat;
-                document.getElementById('lomba-lokasi').textContent = lomba.lokasi;
-                document.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
-                document.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
-                document.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
-
-                // Render tags
-                const tagsContainer = document.getElementById('lomba-tags');
-                tagsContainer.innerHTML = '';
-                lomba.tags.forEach(tag => {
-                    const tagEl = document.createElement('span');
-                    tagEl.className = 'bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full';
-                    tagEl.textContent = tag.nama_tag;
-                    tagsContainer.appendChild(tagEl);
-                });
-
-                // Update status tombol bookmark
-                updateBookmarkButton(lomba.is_bookmarked);
-
-                // Atur status tombol daftar
-                const today = new Date();
-                const registrationEndDate = new Date(lomba.tanggal_akhir_registrasi);
-                today.setHours(0, 0, 0, 0);
-                daftarBtn.addEventListener('click', function() {
-                    // Cukup arahkan ke URL registrasi yang sesuai
-                    window.location.href = `/lomba/${lombaId}/registrasi`;
-                });
-
-                if (lomba.status !== 'disetujui' && lomba.status !== 'berlangsung' || registrationEndDate < today) {
-                    daftarBtn.disabled = true;
-                    daftarBtn.textContent = 'Pendaftaran Ditutup';
+            try {
+                // Panggilan API ini akan mengembalikan data lomba termasuk 'is_bookmarked'
+                const response = await axios.get(`/api/lomba/${lombaId}`);
+                if (response.data.success) {
+                    renderPage(response.data.data);
                 } else {
-                    daftarBtn.disabled = false;
+                    showError(response.data.message || 'Lomba tidak ditemukan.');
                 }
-            }
-
-            // --- FUNGSI UNTUK MENGELOLA TOMBOL BOOKMARK ---
-            function updateBookmarkButton(isBookmarked) {
-                const icon = bookmarkBtn.querySelector('i');
-                const text = bookmarkBtn.querySelector('span');
-
-                if (isBookmarked) {
-                    bookmarkBtn.classList.add('bookmarked');
-                    icon.className = 'fas fa-bookmark mr-2'; // Ikon terisi
-                    text.textContent = 'Tersimpan';
+            } catch (error) {
+                console.error('Error fetching lomba data:', error);
+                if (error.response && error.response.status === 401) {
+                     showError('Sesi Anda telah berakhir. Silakan <a href="/login" class="text-blue-600 hover:underline">login kembali</a> untuk melihat detail lomba.');
                 } else {
-                    bookmarkBtn.classList.remove('bookmarked');
-                    icon.className = 'far fa-bookmark mr-2'; // Ikon outline
-                    text.textContent = 'Simpan Lomba';
+                     showError('Gagal memuat data lomba. Coba muat ulang halaman.');
                 }
-                bookmarkBtn.dataset.bookmarked = isBookmarked;
+            } finally {
+                loadingOverlay.style.display = 'none';
+                mainContent.classList.remove('opacity-0');
+            }
+        }
+
+        // ... (fungsi renderPage() Anda)
+        // Fungsi ini sudah benar, terutama pada baris updateBookmarkButton(lomba.is_bookmarked);
+        function renderPage(lomba) {
+            document.title = `${lomba.nama_lomba} - Lombaku`;
+
+            const imageEl = document.getElementById('lomba-image');
+            if (lomba.foto_lomba_url) {
+                imageEl.src = lomba.foto_lomba_url;
+            } else {
+                imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=EBF4FF&color=1D4ED8&size=400`;
             }
 
-            // --- FUNGSI YANG DIPANGGIL SAAT TOMBOL BOOKMARK DIKLIK ---
-            async function toggleBookmark() {
-                const isCurrentlyBookmarked = bookmarkBtn.dataset.bookmarked === 'true';
+            document.getElementById('lomba-nama').textContent = lomba.nama_lomba;
+            document.getElementById('penyelenggara-nama').textContent = `Diselenggarakan oleh ${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui')}`;
+            document.getElementById('lomba-tingkat').textContent = lomba.tingkat;
+            document.getElementById('lomba-lokasi').textContent = lomba.lokasi;
+            document.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
+            document.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
+            document.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
 
-                // Langsung ubah tampilan tombol (Optimistic UI)
-                updateBookmarkButton(!isCurrentlyBookmarked);
-                bookmarkBtn.disabled = true; // Nonaktifkan tombol selama proses request
+            const tagsContainer = document.getElementById('lomba-tags');
+            tagsContainer.innerHTML = '';
+            lomba.tags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.className = 'bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full';
+                tagEl.textContent = tag.nama_tag;
+                tagsContainer.appendChild(tagEl);
+            });
 
-                try {
-                    let response;
-                    if (isCurrentlyBookmarked) {
-                        // Hapus bookmark
-                        response = await axios.delete(`/api/bookmarks/${lombaId}`);
-                    } else {
-                        // Tambah bookmark
-                        response = await axios.post('/api/bookmarks', {
-                            id_lomba: lombaId
-                        });
-                    }
+            // Bagian penting: Mengatur status awal tombol bookmark
+            updateBookmarkButton(lomba.is_bookmarked);
 
-                    // Tampilkan alert dengan pesan dari API jika request sukses
-                    if (response.data && response.data.message) {
-                        alert(response.data.message);
-                    }
+            const today = new Date();
+            const registrationEndDate = new Date(lomba.tanggal_akhir_registrasi);
+            today.setHours(0, 0, 0, 0);
 
-                } catch (error) {
-                    console.error('Error toggling bookmark:', error);
-                    // Jika gagal, kembalikan tampilan tombol ke state semula
-                    updateBookmarkButton(isCurrentlyBookmarked);
+            daftarBtn.addEventListener('click', function() {
+                window.location.href = `/lomba/${lombaId}/registrasi`;
+            });
 
-                    if (error.response && error.response.status === 401) {
-                        alert('Anda harus login untuk menyimpan lomba.');
-                    } else {
-                        alert('Gagal mengubah status bookmark. Silakan coba lagi.');
-                    }
-                } finally {
-                    bookmarkBtn.disabled = false; // Aktifkan kembali tombol setelah selesai
+            if (lomba.status !== 'disetujui' && lomba.status !== 'berlangsung' || registrationEndDate < today) {
+                daftarBtn.disabled = true;
+                daftarBtn.textContent = 'Pendaftaran Ditutup';
+            } else {
+                daftarBtn.disabled = false;
+            }
+        }
+        
+        // ... (fungsi updateBookmarkButton() Anda, ini sudah benar)
+        function updateBookmarkButton(isBookmarked) {
+            const icon = bookmarkBtn.querySelector('i');
+            const text = bookmarkBtn.querySelector('span');
+
+            if (isBookmarked) {
+                bookmarkBtn.classList.add('bookmarked', 'bg-blue-500', 'text-white', 'border-blue-500');
+                bookmarkBtn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                icon.className = 'fas fa-bookmark mr-2';
+                text.textContent = 'Tersimpan';
+            } else {
+                bookmarkBtn.classList.remove('bookmarked', 'bg-blue-500', 'text-white', 'border-blue-500');
+                bookmarkBtn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                icon.className = 'far fa-bookmark mr-2';
+                text.textContent = 'Simpan Lomba';
+            }
+            bookmarkBtn.dataset.bookmarked = isBookmarked;
+        }
+
+        // Ini adalah fungsi inti yang sudah Anda buat, dan ini sudah benar!
+        async function toggleBookmark() {
+            const isCurrentlyBookmarked = bookmarkBtn.dataset.bookmarked === 'true';
+            
+            // Optimistic UI Update: Langsung ubah tampilan tombol tanpa menunggu response API
+            updateBookmarkButton(!isCurrentlyBookmarked); 
+            bookmarkBtn.disabled = true;
+
+            try {
+                let response;
+                if (isCurrentlyBookmarked) {
+                    // Jika sudah di-bookmark, kirim request DELETE untuk menghapus
+                    response = await axios.delete(`/api/bookmarks/${lombaId}`);
+                } else {
+                    // Jika belum, kirim request POST untuk menambahkan
+                    response = await axios.post('/api/bookmarks', { id_lomba: lombaId });
                 }
+                
+                // Tampilkan pesan sukses dari API
+                if (response.data && response.data.message) {
+                    // Anda bisa menggunakan library notifikasi yang lebih canggih (seperti Toastify)
+                    // tapi alert sudah cukup untuk fungsionalitas dasar.
+                    // alert(response.data.message); 
+                    // Kita tidak perlu alert agar user experience lebih mulus
+                }
+
+            } catch (error) {
+                console.error('Error toggling bookmark:', error);
+                
+                // Rollback UI: Kembalikan tampilan tombol ke state semula jika API gagal
+                updateBookmarkButton(isCurrentlyBookmarked); 
+
+                if (error.response && error.response.status === 401) {
+                    alert('Anda harus login untuk menyimpan lomba.');
+                    window.location.href = '/login';
+                } else {
+                    alert('Gagal mengubah status bookmark. Silakan coba lagi.');
+                }
+            } finally {
+                bookmarkBtn.disabled = false;
             }
+        }
+        
+        bookmarkBtn.addEventListener('click', toggleBookmark);
 
-            // --- TAMBAHKAN EVENT LISTENER KE TOMBOL BOOKMARK ---
-            bookmarkBtn.addEventListener('click', toggleBookmark);
-
-            function showError(message) {
-                const container = document.getElementById('lomba-detail-container');
-                container.innerHTML = `<div class="text-center py-20 col-span-full"><p class="text-red-500 text-lg">${message}</p></div>`;
-            }
-
-            // Panggil fungsi utama saat halaman dimuat
-            loadLombaData();
-        });
-    </script>
+        function showError(message) {
+            const container = document.getElementById('lomba-detail-container');
+            // Menggunakan innerHTML agar bisa merender tag <a> pada pesan error
+            container.innerHTML = `<div class="text-center py-20 col-span-full"><p class="text-red-500 text-lg">${message}</p></div>`;
+        }
+        
+        loadLombaData();
+    });
+</script>
 </body>
 
 </html>

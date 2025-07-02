@@ -92,7 +92,7 @@
                 </button>
                 <div class="dropdown-menu mt-2 w-56 bg-white rounded-md shadow-xl z-50 border border-gray-100 md:absolute md:left-0">
                     <a href="{{ route('status')}}" class="dropdown-item block px-4 py-2 text-gray-700">Riwayat Kegiatan</a>
-                    <a href="{{ route('simpanlomba') }}" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Disimpan</a>
+                    <a href="{{ route('bookmark') }}" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Disimpan</a>
                     <a href="{{ route('rekognisi.create') }}" class="dropdown-item block px-4 py-2 text-gray-700">Ajukan Rekognisi Prestasi</a>
                     
                     {{-- === INILAH PERBAIKANNYA === --}}

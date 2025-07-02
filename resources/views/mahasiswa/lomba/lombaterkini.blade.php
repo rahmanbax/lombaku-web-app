@@ -54,7 +54,6 @@
         <div class="border-t pt-6">
              <h3 class="text-center font-semibold text-gray-700 mb-4">Filter Berdasarkan Kategori</h3>
              <div id="category-filter-container" class="flex flex-wrap justify-center gap-3 min-h-[3rem] items-center">
-                 <!-- Loading state untuk kategori -->
                  <i id="category-loading" class="fas fa-spinner fa-spin text-blue-500"></i>
              </div>
         </div>
@@ -75,7 +74,10 @@
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5">
             <div class="relative">
                 <img class="lomba-image w-full h-48 object-cover" src="" alt="Foto Lomba">
-                <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
+                <!-- ====================================================== -->
+                <!-- === PERBAIKAN: Baris di bawah ini dihapus ========== -->
+                <!-- <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div> -->
+                <!-- ====================================================== -->
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-start mb-3">
@@ -109,19 +111,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-20">
-        <div class="container mx-auto px-4 py-12">
-            <div class="max-w-3xl mx-auto text-center mb-8">
-                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
-                    Daftar sebagai Admin Lomba
-                </button>
-            </div>
-        </div>
-        <div class="bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
-            </div>
-        </div>
+        {{-- Konten Footer --}}
     </footer>
 
 <script>
@@ -135,8 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const quickFiltersContainer = document.getElementById('quick-filters');
     const categoryFilterContainer = document.getElementById('category-filter-container');
     const categoryLoading = document.getElementById('category-loading');
-    const baseUrl = window.location.origin;
-
+    
     let currentQuickFilter = {};
     let currentSearch = '';
     let selectedTagIds = new Set();
@@ -170,9 +159,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const params = new URLSearchParams({ page, search: currentSearch, ...currentQuickFilter });
         selectedTagIds.forEach(tagId => params.append('tags[]', tagId));
 
+        params.append('status[]', 'disetujui');
+        params.append('status[]', 'berlangsung');
+
         try {
             const response = await axios.get(`/api/lomba?${params.toString()}`);
-            // --- PERBAIKAN: Akses objek paginasi yang ada di dalam properti 'data' ---
             const paginationObject = response.data.data;
             renderLombas(paginationObject);
             renderPagination(paginationObject);
@@ -186,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderLombas(paginationObject) {
         lombaGrid.innerHTML = '';
-        // --- PERBAIKAN: Sekarang kita akses array lomba dari properti 'data' di dalam objek paginasi ---
         const lombas = paginationObject.data;
 
         if (lombas.length === 0) {
@@ -196,15 +186,22 @@ document.addEventListener('DOMContentLoaded', function() {
         
         lombas.forEach(lomba => {
             const card = template.content.cloneNode(true);
-            card.querySelector('.lomba-image').src = `${baseUrl}/${lomba.foto_lomba}`;
-            card.querySelector('.lomba-image').alt = lomba.nama_lomba;
+            
+            const imageEl = card.querySelector('.lomba-image');
+            if (lomba.foto_lomba_url) {
+                imageEl.src = lomba.foto_lomba_url;
+            } else {
+                imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=EBF4FF&color=1D4ED8&size=300`;
+            }
+            imageEl.alt = lomba.nama_lomba;
+
             card.querySelector('.lomba-tingkat').textContent = lomba.tingkat;
             card.querySelector('.lomba-lokasi').textContent = lomba.lokasi;
             card.querySelector('.lomba-status').textContent = lomba.status.replace(/_/g, ' ');
             card.querySelector('.lomba-nama').textContent = lomba.nama_lomba;
             card.querySelector('.lomba-tanggal').textContent = 's/d ' + formatDate(lomba.tanggal_akhir_registrasi);
             card.querySelector('.lomba-penyelenggara').textContent = lomba.penyelenggara || 'N/A';
-            card.querySelector('.lomba-link').href = `${baseUrl}/lomba/${lomba.id_lomba}`;
+            card.querySelector('.lomba-link').href = `/lomba/${lomba.id_lomba}`;
             
             const tagsContainer = card.querySelector('.lomba-tags');
             tagsContainer.innerHTML = '';
@@ -278,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchLombas(1);
     });
 
+    // Panggilan Inisialisasi
     fetchAndRenderCategories();
     fetchLombas();
 });

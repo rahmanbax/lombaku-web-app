@@ -85,9 +85,9 @@ Route::get('lombaterkini', function () {
     return view('mahasiswa.lomba.lombaterkini');
 })->name('lombaterkini');
 
-Route::get('/simpanlomba', function () {
-    return view('mahasiswa.lomba.simpanlomba');
-})->name('simpanlomba')->middleware('auth');
+Route::get('/bookmark', function () {
+    return view('mahasiswa.lomba.bookmark');
+})->name('bookmark')->middleware('auth');
 
 // Rute untuk halaman daftar hasil lomba
 Route::get('/hasil-lomba', [HasilLombaController::class, 'index'])
