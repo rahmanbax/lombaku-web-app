@@ -107,14 +107,20 @@
                     </div>
                     <div>
                         <label for="id_program_studi_mhs" class="block text-sm font-medium text-gray-700 mb-2">Program Studi</label>
-                        <!-- PERBAIKAN: name diubah dari "program_studi" menjadi "id_program_studi" -->
+                        {{-- PERUBAHAN DIMULAI DI SINI --}}
                         <select id="id_program_studi_mhs" name="id_program_studi"
                             class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                             <option value="" disabled selected>Pilih Program Studi</option>
-                            <option value="1" {{ old('id_program_studi') == '1' ? 'selected' : '' }}>D3 Sistem Informasi</option>
-                            <option value="2" {{ old('id_program_studi') == '2' ? 'selected' : '' }}>D3 Sistem Informasi Akuntansi</option>
-                            <option value="3" {{ old('id_program_studi') == '3' ? 'selected' : '' }}>D3 Rekayasa Perangkat Lunak</option>
+                            {{-- Loop melalui variabel $programStudis yang dikirim dari controller/route --}}
+                            @foreach($programStudis as $prodi)
+                            <option
+                                value="{{ $prodi->id_program_studi }}"
+                                {{ old('id_program_studi') == $prodi->id_program_studi ? 'selected' : '' }}>
+                                {{ $prodi->nama_program_studi }}
+                            </option>
+                            @endforeach
                         </select>
+                        {{-- PERUBAHAN SELESAI DI SINI --}}
                     </div>
                 </div>
 
