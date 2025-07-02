@@ -197,6 +197,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
         return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
     });
+
+    Route::get('/dashboard/adminlomba/profile', function () {
+        return view('dashboard.adminlomba.editprofile');
+    });
 });
 
 // rute lihat sertifikat

@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\API\BookmarkController;
 use App\Http\Controllers\API\DosenController;
-use App\Http\Controllers\API\HasilLombaController;
 use App\Http\Controllers\api\LombaController;
 use App\Http\Controllers\api\TagController;
 use App\Http\Controllers\api\MahasiswaController;
@@ -14,6 +13,7 @@ use App\Http\Controllers\API\PenilaianController;
 use App\Http\Controllers\API\ProfilMahasiswaController;
 use App\Http\Controllers\api\ProgramStudiController;
 use App\Http\Controllers\API\PrestasiController;
+use App\Http\Controllers\Api\ProfilAdminLombaController;
 use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\API\RiwayatController;
 use App\Http\Controllers\api\TahapLombaController;
@@ -96,5 +96,7 @@ Route::get('/mahasiswa/{nim}/detail', [MahasiswaController::class, 'showDetail']
 Route::apiResource('lomba', LombaController::class);
 Route::apiResource('tags', TagController::class)->only(['index']);
 Route::apiResource('mahasiswa', MahasiswaController::class);
+Route::get('/profil', [ProfilAdminLombaController::class, 'show']);
+Route::post('/profil', [ProfilAdminLombaController::class, 'update']);
 
 

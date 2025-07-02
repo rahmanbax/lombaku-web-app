@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="flex gap-2 mt-3 bg-gray-100 w-full p-3 rounded-lg">
-                    <img id="penyelenggara-foto" src="{{ asset('images/default-profile.png') }}" alt="foto penyelenggara" class="w-12 h-12 rounded-full object-cover">
+                    <img id="penyelenggara-foto" alt="foto penyelenggara" class="w-12 h-12 rounded-full object-cover">
                     <div>
                         <p class="text-xs text-black/60">Penyelenggara</p>
                         <h1 id="penyelenggara-nama" class="font-semibold mt-1"></h1>
@@ -84,7 +84,10 @@
                 </div>
 
                 <h2 class="font-bold mt-6 text-xl">Deskripsi</h2>
-                <p id="lomba-deskripsi" class="mt-2 text-gray-700 leading-relaxed"></p>
+                <div id="lomba-deskripsi-container">
+                    <p id="lomba-deskripsi"></p>
+                    <button id="toggle-deskripsi" class="text-blue-700 cursor-pointer mt-2">Lihat Selengkapnya</button>
+                </div>
             </div>
         </template>
 
@@ -309,8 +312,28 @@
                 const container = document.getElementById('lomba-detail-container');
                 const template = document.getElementById('lomba-detail-template');
                 const clone = template.content.cloneNode(true);
+                const maxLength = 250; // batas karakter sebelum dipotong
+                const deskripsiPenuh = lomba.deskripsi;
+                const deskripsiPendek = deskripsiPenuh.length > maxLength ?
+                    deskripsiPenuh.substring(0, maxLength) + '...' :
+                    deskripsiPenuh;
 
-                clone.getElementById('lomba-image').src = `/${lomba.foto_lomba}`;
+                const deskripsiEl = clone.getElementById('lomba-deskripsi');
+                const tombolToggle = clone.getElementById('toggle-deskripsi');
+
+                // Default: tampilkan deskripsi pendek
+                deskripsiEl.innerHTML = deskripsiPendek.replace(/\n/g, '<br>');
+                tombolToggle.style.display = deskripsiPenuh.length > maxLength ? 'inline' : 'none';
+
+                let expanded = false;
+
+                tombolToggle.addEventListener('click', () => {
+                    expanded = !expanded;
+                    deskripsiEl.innerHTML = (expanded ? deskripsiPenuh : deskripsiPendek).replace(/\n/g, '<br>');
+                    tombolToggle.textContent = expanded ? 'Sembunyikan' : 'Lihat Selengkapnya';
+                });
+
+                clone.getElementById('lomba-image').src = `/storage/${lomba.foto_lomba}`;
                 clone.getElementById('lomba-nama').textContent = lomba.nama_lomba;
                 clone.getElementById('lomba-tingkat').textContent = lomba.tingkat;
                 clone.getElementById('jenis-lomba').textContent = lomba.jenis_lomba;
@@ -322,9 +345,8 @@
                 clone.getElementById('lomba-tanggal-selesai').textContent = formatDate(lomba.tanggal_selesai_lomba);
                 clone.getElementById('penyelenggara-nama').textContent = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui');
                 if (lomba.pembuat.foto_profile) {
-                    clone.getElementById('penyelenggara-foto').src = `/${lomba.pembuat.foto_profile}`;
+                    clone.getElementById('penyelenggara-foto').src = `/storage/${lomba.pembuat.foto_profile}`;
                 }
-                clone.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
 
                 if (lomba.lokasi === 'online') {
                     clone.getElementById('detail-lokasi-container').remove();

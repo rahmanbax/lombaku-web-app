@@ -31,10 +31,9 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'username',
+        'email',
         'password',
         'nama',
-        'email',
         'notelp',
         'foto_profile',
         'role',
@@ -93,5 +92,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Lomba::class, 'lomba_bookmarks', 'id_user', 'id_lomba')
                     ->withTimestamps();
+    }
+
+    //profil admin lomba
+    public function profilAdminLomba()
+    {
+        return $this->hasOne(ProfilAdminLomba::class, 'id_user', 'id_user');
     }
 }

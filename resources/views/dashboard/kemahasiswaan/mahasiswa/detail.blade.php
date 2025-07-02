@@ -175,7 +175,7 @@
         // --- Fungsi-fungsi untuk Render Tampilan ---
 
         function renderProfilHeader(mahasiswa) {
-            document.getElementById('mahasiswa-foto').src = mahasiswa?.foto_profile ? `/${mahasiswa.foto_profile}` : '' + mahasiswa.nim;
+            document.getElementById('mahasiswa-foto').src = mahasiswa?.foto_profile ? `/storage/${mahasiswa.foto_profile}` : '' + mahasiswa.nim;
             document.getElementById('mahasiswa-foto').alt = `Foto Profil ${mahasiswa.nama}`;
             document.getElementById('mahasiswa-nama').textContent = mahasiswa.nama;
             document.getElementById('mahasiswa-nim').textContent = mahasiswa.profil_mahasiswa?.nim || 'NIM tidak tersedia';

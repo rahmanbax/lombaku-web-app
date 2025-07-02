@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_lomba');
             $table->string('foto_lomba');
             $table->string('nama_lomba');
-            $table->string('deskripsi');
+            $table->text('deskripsi');
             $table->string('deskripsi_pengumpulan');
             $table->enum('jenis_lomba', ['individu', 'kelompok'])->default('individu');
             $table->enum('lokasi', ['online', 'offline'])->default('online');

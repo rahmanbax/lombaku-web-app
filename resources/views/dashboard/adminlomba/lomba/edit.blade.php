@@ -48,7 +48,7 @@
                 <!-- Deskripsi Lomba -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="deskripsi" class="text-black/60 font-semibold">Deskripsi Lomba</label>
-                    <textarea name="deskripsi" id="deskripsi" required placeholder="Masukkan Deskripsi Lomba" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 h-30"></textarea>
+                    <textarea name="deskripsi" rows="3" id="deskripsi" required placeholder="Masukkan Deskripsi Lomba" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
 
                 <!-- PERUBAHAN 2: Ganti select tags biasa dengan yang akan dipakai Choices.js -->
@@ -115,7 +115,7 @@
 
                 <!-- Deskripsi Pengumpulan (Struktur sama dengan 'buat') -->
                 <div class="col-span-4 lg:col-span-12 w-full">
-                    <label for="deskripsi_pengumpulan" class="text-black/60 font-semibold">Deskripsi Pengumpulan Lomba (Link)</label>
+                    <label for="deskripsi_pengumpulan" class="text-black/60 font-semibold">Deskripsi Pengumpulan Lomba</label>
                     <textarea name="deskripsi_pengumpulan" id="deskripsi_pengumpulan" required placeholder="Masukkan Deskripsi Pengumpulan Lomba" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
 
@@ -190,7 +190,7 @@
                     // Tampilkan foto saat ini
                     const currentFoto = document.getElementById('current-foto');
                     if (lomba.foto_lomba) {
-                        currentFoto.src = `/${lomba.foto_lomba}`;
+                        currentFoto.src = `/storage/${lomba.foto_lomba}`;
                     } else {
                         currentFoto.style.display = 'none';
                     }

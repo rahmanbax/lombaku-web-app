@@ -28,9 +28,6 @@ return new class extends Migration
             // --- Kolom-kolom baru yang Anda tambahkan ---
             $table->date('tanggal_lahir')->nullable();
             $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
-        
-        
-
 
             $table->timestamps();
         });
