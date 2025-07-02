@@ -222,7 +222,7 @@
                         break;
                     case 'ditolak':
                         statusHtml = `<span class="px-2 py-1 rounded-md text-xs font-semibold text-red-800 bg-red-200">Ditolak</span>`;
-                        detailHtml = reg.alasan_penolakan || 'Pendaftaran ditolak';
+                        detailHtml = reg.catatan_penolakan || 'Pendaftaran ditolak';
                         break;
                     default:
                         statusHtml = '<span>-</span>';
@@ -289,7 +289,7 @@
 
                     const memberHtml = `
                 <div class="flex items-center gap-3 p-3 rounded-md bg-gray-100">
-                    <img src="${member.foto_profile ? `/${member.foto_profile}` : 'https://i.pravatar.cc/40'}" alt="Foto ${member.nama}" class="w-10 h-10 rounded-full object-cover bg-gray-200">
+                    <img src="${member.foto_profile ? `/storage/${member.foto_profile}` : 'https://i.pravatar.cc/40'}" alt="Foto ${member.nama}" class="w-10 h-10 rounded-full object-cover bg-gray-200">
                     <div>
                         <p class="font-medium text-gray-800">${member.nama}</p>
                         <p class="text-xs text-gray-500">${nim}</p>

@@ -44,6 +44,7 @@ class Lomba extends Model
         'tanggal_selesai_lomba',
         'penyelenggara',
         'id_pembuat',
+        'butuh_pembimbing', // Tambahkan ini untuk menyimpan status butuh pembimbing
     ];
 
     /**

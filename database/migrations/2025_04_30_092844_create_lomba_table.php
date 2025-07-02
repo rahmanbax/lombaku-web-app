@@ -28,6 +28,8 @@ return new class extends Migration
             $table->date('tanggal_selesai_lomba');
             $table->string('penyelenggara')->nullable();
 
+            // Kolom baru untuk mengecek kebutuhan pembimbing
+            $table->boolean('butuh_pembimbing')->default(false);
 
             // foreign key ke id_pembuat
             $table->unsignedBigInteger('id_pembuat');

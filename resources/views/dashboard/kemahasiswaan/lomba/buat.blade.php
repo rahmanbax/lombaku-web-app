@@ -57,6 +57,23 @@
                     </select>
                 </div>
 
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label class="text-black/60 font-semibold">Dosen Pembimbing</label>
+                    <div class="flex items-center gap-6 mt-2">
+                        <!-- Opsi 'Tidak' (default) -->
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="butuh_pembimbing" value="0" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300" checked>
+                            <span>Tidak</span>
+                        </label>
+                        <!-- Opsi 'Ya' -->
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="butuh_pembimbing" value="1" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <span>Ya, Wajib</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Jika 'Ya', maka mahasiswa wajib memilih dosen pembimbing saat mendaftar.</p>
+                </div>
+
                 <!-- Lokasi -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="lokasi" class="text-black/60 font-semibold">Lokasi</label>
@@ -71,9 +88,9 @@
                     <label for="lokasi_offline" class="text-black/60 font-semibold">Alamat Lokasi Offline</label>
                     <input type="text" name="lokasi_offline" id="lokasi_offline" placeholder="Contoh: Gedung Serbaguna Lt. 3, Kampus A" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-                
+
                 <!-- Penyelenggara -->
-                 <div class="col-span-4 lg:col-span-12 w-full">
+                <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="penyelenggara" class="text-black/60 font-semibold">Penyelenggara</label>
                     <input type="text" name="penyelenggara" id="penyelenggara" placeholder="Masukkan Nama Penyelenggara" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
@@ -88,7 +105,7 @@
                         <option value="internal">Internal</option>
                     </select>
                 </div>
-                
+
                 <!-- [DIPERBARUI] Layout Tanggal menjadi 3 kolom di layar besar -->
                 <div class="col-span-4 lg:col-span-4 w-full">
                     <label for="tanggal_akhir_registrasi" class="text-black/60 font-semibold">Akhir Pendaftaran</label>
@@ -155,15 +172,26 @@
 
                 // --- Fungsi untuk mengambil Tags ---
                 async function fetchTags() {
-                    choicesInstance.setChoices([{ label: 'Memuat tag...', value: '', disabled: true }], 'value', 'label', true);
+                    choicesInstance.setChoices([{
+                        label: 'Memuat tag...',
+                        value: '',
+                        disabled: true
+                    }], 'value', 'label', true);
                     try {
                         const response = await axios.get("/api/tags");
                         if (response.data.success) {
-                            const formattedTags = response.data.data.map(tag => ({ value: tag.id_tag, label: tag.nama_tag }));
+                            const formattedTags = response.data.data.map(tag => ({
+                                value: tag.id_tag,
+                                label: tag.nama_tag
+                            }));
                             choicesInstance.setChoices(formattedTags, 'value', 'label', true);
                         }
                     } catch (error) {
-                        choicesInstance.setChoices([{ label: 'Gagal memuat tag', value: '', disabled: true }], 'value', 'label', true);
+                        choicesInstance.setChoices([{
+                            label: 'Gagal memuat tag',
+                            value: '',
+                            disabled: true
+                        }], 'value', 'label', true);
                         console.error("Error fetching tags:", error);
                     }
                 }

@@ -130,7 +130,8 @@ class LombaController extends Controller
             'tags.*'        => 'exists:tags,id_tag',
             'tahap'         => 'required|array|min:1',
             'tahap.*.nama'  => 'required|string|max:100',
-            'tahap.*.deskripsi' => 'nullable|string'
+            'tahap.*.deskripsi' => 'nullable|string',
+            'butuh_pembimbing' => 'required|boolean'
         ], [
             'tanggal_akhir_registrasi.after_or_equal' => 'Tanggal akhir registrasi tidak boleh tanggal yang sudah lewat.',
         ]);
@@ -179,6 +180,7 @@ class LombaController extends Controller
                 'tanggal_selesai_lomba' => $request->tanggal_selesai_lomba,
                 'foto_lomba'    => $image_path,
                 'id_pembuat'    => $user->id_user,
+                'butuh_pembimbing' => $request->butuh_pembimbing,
             ]);
 
             $lomba->tags()->attach($request->tags);
@@ -288,6 +290,7 @@ class LombaController extends Controller
             'tahap.*.id'          => 'nullable|integer|exists:tahap_lomba,id_tahap',
             'tahap.*.nama'        => 'required|string|max:100',
             'tahap.*.deskripsi'   => 'nullable|string',
+            'butuh_pembimbing' => 'sometimes|required|boolean'
         ]);
 
         if ($validator->fails()) {

@@ -376,7 +376,7 @@
                         'Individu';
 
                     row.innerHTML = `
-                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa?.nama || '-'}</td>
+                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap hover:underline"><a href="/dashboard/kemahasiswaan/mahasiswa/${profil?.nim}">${mahasiswa?.nama || '-'}</a></td>
                         <td class="px-6 py-4">${profil?.nim || '-'}</td>
                         <td class="px-6 py-4">${profil?.program_studi?.nama_program_studi || '-'}</td>
                         <td class="px-6 py-4">${timHtml}</td>
@@ -428,7 +428,7 @@
                         const nim = member.profil_mahasiswa?.nim || 'N/A';
                         const memberHtml = `
                 <div class="flex items-center gap-3 p-2 rounded-md bg-gray-100">
-                    <img src="${member.foto_profile ? `/${member.foto_profile}` : 'https://i.pravatar.cc/40'}" alt="Foto ${member.nama}" class="w-10 h-10 rounded-full object-cover bg-gray-200">
+                    <img src="${member.foto_profile ? `/storage/${member.foto_profile}` : 'https://i.pravatar.cc/40'}" alt="Foto ${member.nama}" class="w-10 h-10 rounded-full object-cover bg-gray-200">
                     <div>
                         <p class="font-medium text-gray-800">${member.nama}</p>
                         <p class="text-xs text-gray-500">${nim}</p>

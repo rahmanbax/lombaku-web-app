@@ -75,7 +75,7 @@ class DatabaseSeeder extends Seeder
             // Admins & Staff (ID 1-3)
             ['id_user' => 1, 'foto_profile' => 'foto_profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Kemahasiswaan', 'notelp' => '081100000001', 'email' => 'kemahasiswaan@kampus.ac.id', 'role' => 'kemahasiswaan', 'created_at' => now(), 'updated_at' => now()],
             ['id_user' => 2, 'foto_profile' => 'foto_profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Admin Prodi Informatika', 'notelp' => '081100000002', 'email' => 'admin.if@kampus.ac.id', 'role' => 'admin_prodi', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 3, 'foto_profile' => 'foto_profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Admin Lombapedia', 'notelp' => '081100000003', 'email' => 'contact@lombapedia.com', 'role' => 'admin_lomba', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 3, 'foto_profile' => 'foto_profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Lombapedia', 'notelp' => '081100000003', 'email' => 'contact@lombapedia.com', 'role' => 'admin_lomba', 'created_at' => now(), 'updated_at' => now()],
 
             // Dosen (ID 4-5)
             ['id_user' => 4, 'foto_profile' => 'foto_profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Budi Santoso, M.Kom.', 'notelp' => '081211112222', 'email' => 'budi.s@kampus.ac.id', 'role' => 'dosen', 'created_at' => now(), 'updated_at' => now()],
@@ -191,6 +191,7 @@ class DatabaseSeeder extends Seeder
             Panitia Pelaksana',
                 'deskripsi_pengumpulan' => 'Link Drive berisi proposal dan video demo', // <-- INI PERBAIKANNYA
                 'jenis_lomba' => 'kelompok',
+                'butuh_pembimbing' => false,
                 'lokasi' => 'online',
                 'lokasi_offline' => null,
                 'tingkat' => 'internal',
@@ -226,7 +227,7 @@ class DatabaseSeeder extends Seeder
             📞 Contact Person  
             •⁠  ⁠Nugraheni: Https://wa.me/6288238053977
             •⁠  ⁠Nadia: Https://wa.me/6285801778594
-            ', 'deskripsi_pengumpulan' => 'Submit your photo according to the contest guidelines.', 'jenis_lomba' => 'individu', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'internasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-08-16', 'tanggal_mulai_lomba' => '2025-07-01', 'tanggal_selesai_lomba' => '2025-09-16', 'penyelenggara' => null, 'id_pembuat' => 20, 'created_at' => now(), 'updated_at' => now()],
+            ', 'deskripsi_pengumpulan' => 'Submit your photo according to the contest guidelines.', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => true, 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'internasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-08-16', 'tanggal_mulai_lomba' => '2025-07-01', 'tanggal_selesai_lomba' => '2025-09-16', 'penyelenggara' => null, 'id_pembuat' => 20, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 3] Sevenpreneur Business Plan Competition - Berlangsung
             ['id_lomba' => 3, 'foto_lomba' => 'foto_lomba/sevenpreneur-business-plan-competition-82.jpeg', 'nama_lomba' => 'Sevenpreneur Business Plan Competition 2025', 'deskripsi' => "✨ Sevenpreneur Business Plan Competition 2025 ✨
@@ -255,7 +256,7 @@ class DatabaseSeeder extends Seeder
             Siap jadi entrepreneur masa depan? Yuk join!
 
             Contact Person (WhatsApp):
-            - Dellyza - +6281384565433", 'deskripsi_pengumpulan' => 'Link proposal anda', 'jenis_lomba' => 'kelompok', 'lokasi' => 'offline', 'lokasi_offline' => 'Kuningan City Grand Ballroom, Jakarta Selatan', 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-09', 'tanggal_mulai_lomba' => '2025-06-09', 'tanggal_selesai_lomba' => '2025-07-26', 'penyelenggara' => null, 'id_pembuat' => 21, 'created_at' => now(), 'updated_at' => now()],
+            - Dellyza - +6281384565433", 'deskripsi_pengumpulan' => 'Link proposal anda', 'jenis_lomba' => 'kelompok', 'butuh_pembimbing' => true, 'lokasi' => 'offline', 'lokasi_offline' => 'Kuningan City Grand Ballroom, Jakarta Selatan', 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-09', 'tanggal_mulai_lomba' => '2025-06-09', 'tanggal_selesai_lomba' => '2025-07-26', 'penyelenggara' => null, 'id_pembuat' => 21, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 4] Kompetisi Desain Ilustrasi XLSMART 2025 - Disetujui (belum mulai)
             ['id_lomba' => 4, 'foto_lomba' => 'foto_lomba/kompetisi-desain-ilustrasi-xlsmart-2025-4.png', 'nama_lomba' => 'Kompetisi Desain Ilustrasi XLSMART 2025', 'deskripsi' => '🎨🤖 KOMPETISI DESAIN NASIONAL XLSMART 2025
@@ -287,7 +288,7 @@ class DatabaseSeeder extends Seeder
             📲 Follow:
             @smartfrenworld @XLSMART
             Ayo buktikan ekspresi digitalmu! 🚀✨
-            ', 'deskripsi_pengumpulan' => 'Pendaftaran dan pengumpulan karya melalui: https://bit.ly/kompetisidesainxlsmart', 'jenis_lomba' => 'individu', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'disetujui', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-08-10', 'tanggal_mulai_lomba' => '2025-07-01', 'tanggal_selesai_lomba' => '2025-08-22', 'penyelenggara' => null, 'id_pembuat' => 22, 'created_at' => now(), 'updated_at' => now()],
+            ', 'deskripsi_pengumpulan' => 'Pendaftaran dan pengumpulan karya melalui: https://bit.ly/kompetisidesainxlsmart', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => true, 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'disetujui', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-08-10', 'tanggal_mulai_lomba' => '2025-07-01', 'tanggal_selesai_lomba' => '2025-08-22', 'penyelenggara' => null, 'id_pembuat' => 22, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 5] Cita Rasa Kita - Belum Disetujui
             ['id_lomba' => 5, 'foto_lomba' => 'foto_lomba/cita-rasa-kita-kreativitas-di-setiap-gigitan-9.png', 'nama_lomba' => 'Cita Rasa Kita: Kreativitas di Setiap Gigitan', 'deskripsi' => '📣 "Cita Rasa Kita: Kreativitas di Setiap Gigitan"
@@ -310,7 +311,7 @@ class DatabaseSeeder extends Seeder
 
             📌 Follow & tag temanmu di @Kubivent_ untuk info lebih lanjut.
             ✨ Tunjukkan kreativitasmu dan jadi bagian dari kompetisi ini!
-            ', 'deskripsi_pengumpulan' => 'Upload karya melalui form pendaftaran.', 'jenis_lomba' => 'individu', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'belum disetujui', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-07', 'tanggal_mulai_lomba' => '2025-06-25', 'tanggal_selesai_lomba' => '2025-07-07', 'penyelenggara' => null, 'id_pembuat' => 23, 'created_at' => now(), 'updated_at' => now()],
+            ', 'deskripsi_pengumpulan' => 'Upload karya melalui form pendaftaran.', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => false, 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'belum disetujui', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-07', 'tanggal_mulai_lomba' => '2025-06-25', 'tanggal_selesai_lomba' => '2025-07-07', 'penyelenggara' => null, 'id_pembuat' => 23, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 6] Pasanggiri Nasyid Jawa Barat 2025 - Ditolak
             ['id_lomba' => 6, 'foto_lomba' => 'foto_lomba/pasanggiri-nasyid-jawabarat-2025-9.jpeg', 'nama_lomba' => 'Pasanggiri Nasyid Jawa Barat 2025', 'deskripsi' => '🎶 Pasanggiri Nasyid 2025 Audisi Bandung 🎤
@@ -339,7 +340,7 @@ class DatabaseSeeder extends Seeder
             📱 Dhei: +62 882-2248-7379
             📱 Arifin: +62 882-2218-9008
 
-            Jangan sampai ketinggalan! Daftarkan diri kamu sekarang dan buktikan bakat nasyidmu! 🎤✨.', 'deskripsi_pengumpulan' => 'Tampil langsung saat audisi.', 'jenis_lomba' => 'individu', 'lokasi' => 'offline', 'lokasi_offline' => 'Kamikamu Coffee, Bandung', 'tingkat' => 'nasional', 'status' => 'ditolak', 'alasan_penolakan' => 'Tingkat kompetisi regional (Jawa Barat), belum dapat dikategorikan sebagai tingkat Nasional.', 'tanggal_akhir_registrasi' => '2025-07-10', 'tanggal_mulai_lomba' => '2025-06-28', 'tanggal_selesai_lomba' => '2025-07-12', 'penyelenggara' => null, 'id_pembuat' => 24, 'created_at' => now(), 'updated_at' => now()],
+            Jangan sampai ketinggalan! Daftarkan diri kamu sekarang dan buktikan bakat nasyidmu! 🎤✨.', 'deskripsi_pengumpulan' => 'Tampil langsung saat audisi.', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => true, 'lokasi' => 'offline', 'lokasi_offline' => 'Kamikamu Coffee, Bandung', 'tingkat' => 'nasional', 'status' => 'ditolak', 'alasan_penolakan' => 'Tingkat kompetisi regional (Jawa Barat), belum dapat dikategorikan sebagai tingkat Nasional.', 'tanggal_akhir_registrasi' => '2025-07-10', 'tanggal_mulai_lomba' => '2025-06-28', 'tanggal_selesai_lomba' => '2025-07-12', 'penyelenggara' => null, 'id_pembuat' => 24, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 7] IMSCOBI 2025 - Selesai (contoh data lampau)
             ['id_lomba' => 7, 'foto_lomba' => 'foto_lomba/imscobi-2025-4.png', 'nama_lomba' => 'IMSCOBI 2025', 'deskripsi' => '🌟 [ OPEN REGISTRATION IMSCOBI 2025 ] 🌟
@@ -368,7 +369,7 @@ class DatabaseSeeder extends Seeder
             ☎ Contact Person:
             👳🏻‍♂ M. Assidiq Herbowo (081366579899 / massiddiqherbowo19)
             🧕🏻 Tamara Adn Setiawan (082312392753 / 110505tam)
-            ', 'deskripsi_pengumpulan' => 'Informasi pengumpulan dapat diakses melalui linktr.ee/imscobi2025', 'jenis_lomba' => 'kelompok', 'lokasi' => 'offline', 'lokasi_offline' => 'Lokasi Acara IMSCOBI', 'tingkat' => 'nasional', 'status' => 'selesai', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => Carbon::now()->subMonths(2)->day(23), 'tanggal_mulai_lomba' => Carbon::now()->subMonths(3)->day(29), 'tanggal_selesai_lomba' => Carbon::now()->subMonths(2)->day(23), 'penyelenggara' => null, 'id_pembuat' => 25, 'created_at' => now(), 'updated_at' => now()],
+            ', 'deskripsi_pengumpulan' => 'Informasi pengumpulan dapat diakses melalui linktr.ee/imscobi2025', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => true, 'lokasi' => 'offline', 'lokasi_offline' => 'Lokasi Acara IMSCOBI', 'tingkat' => 'nasional', 'status' => 'selesai', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-04-28', 'tanggal_mulai_lomba' => '2025-04-29', 'tanggal_selesai_lomba' => '2025-05-23', 'penyelenggara' => null, 'id_pembuat' => 25, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 8] KIP-K ART FESTIVAL - Berlangsung
             ['id_lomba' => 8, 'foto_lomba' => 'foto_lomba/kipk-art-festival--51.jpeg', 'nama_lomba' => 'KIP-K ART FESTIVAL 2025', 'deskripsi' => '‼️ OPEN SUBMISSION ‼️
@@ -378,19 +379,6 @@ class DatabaseSeeder extends Seeder
 
             Airlangga University Bidikmisi/KIP-K Organization (AUBMO) sedang mengadakan KIP-K ART FESTIVAL 2025 🏆✨
             Sebuah kompetisi nasional dengan tema “Harmoni Kreasi Generasi Masa Kini”
-
-            🏅 BIDANG LOMBA
-            - Tari 💃🏻
-            - Menyanyi 🎙️
-            - Videografi 📹 
-
-            📆 TIMELINE KEGIATAN
-            - Pendaftaran: 
-            Batch 1: 1–15 Juli 2025
-            Batch 2: 16–28 Juli 2025
-            - Pengumpulan Karya: 1–28 Juli 2025
-            - Penjurian: 29–30 Juli 2025
-            - Pengumuman: 2 Agustus 2025
 
             WAJIB MEMBACA GUIDEBOOK‼️
             https://drive.google.com/file/d/13KqbfoRjtRBy5tgaXyW1ATOKOzK7qbYk/view?usp=drivesdk
@@ -402,7 +390,7 @@ class DatabaseSeeder extends Seeder
             📸: @arbiventaubmo
                     @bidikmisikipkunair
 
-            ╞•════ ༶ ❅ ༶ ════•╡', 'deskripsi_pengumpulan' => 'Pengumpulan karya sesuai dengan guidebook.', 'jenis_lomba' => 'individu', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-28', 'tanggal_mulai_lomba' => '2025-07-01', 'tanggal_selesai_lomba' => '2025-08-02', 'penyelenggara' => null, 'id_pembuat' => 25, 'created_at' => now(), 'updated_at' => now()],
+            ╞•════ ༶ ❅ ༶ ════•╡', 'deskripsi_pengumpulan' => 'Pengumpulan karya sesuai dengan guidebook.', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => true, 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-28', 'tanggal_mulai_lomba' => '2025-07-01', 'tanggal_selesai_lomba' => '2025-08-02', 'penyelenggara' => null, 'id_pembuat' => 25, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 9] Innovation Paper Competition - Berlangsung
             ['id_lomba' => 9, 'foto_lomba' => 'foto_lomba/innovation-paper-competition-38.jpeg', 'nama_lomba' => 'Innovation Paper Competition', 'deskripsi' => 'Otoritas Jasa Keuangan proudly present :
@@ -435,7 +423,7 @@ class DatabaseSeeder extends Seeder
             ☎️Narahubung:
             Fitri: 085255041340
             Satriyo: 081294495000
-            ', 'deskripsi_pengumpulan' => 'Pengumpulan paper melalui: bit.ly/OJK-RGS-InnovationPaperCompetition', 'jenis_lomba' => 'individu', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-15', 'tanggal_mulai_lomba' => '2025-06-01', 'tanggal_selesai_lomba' => '2025-08-19', 'penyelenggara' => null, 'id_pembuat' => 26, 'created_at' => now(), 'updated_at' => now()],
+            ', 'deskripsi_pengumpulan' => 'Pengumpulan paper melalui: bit.ly/OJK-RGS-InnovationPaperCompetition', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => true, 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-15', 'tanggal_mulai_lomba' => '2025-06-01', 'tanggal_selesai_lomba' => '2025-08-19', 'penyelenggara' => null, 'id_pembuat' => 26, 'created_at' => now(), 'updated_at' => now()],
 
             // [ID 10] MONALESA VOL.4 - Berlangsung
             ['id_lomba' => 10, 'foto_lomba' => 'foto_lomba/monalesa-vol4-84.jpeg', 'nama_lomba' => 'MONALESA VOL.4', 'deskripsi' => '📢 MONALESA IS CALLING!
@@ -460,28 +448,130 @@ class DatabaseSeeder extends Seeder
             📍 Info lengkap bisa kamu dapatkan langsung dari contact person kami.
 
             Jangan cuma jadi penonton—jadi pelaku perubahan lewat karya yang berdampak.
-            ', 'deskripsi_pengumpulan' => 'Pengumpulan karya sesuai dengan kategori lomba masing-masing.', 'jenis_lomba' => 'individu', 'lokasi' => 'offline', 'lokasi_offline' => 'Magelang', 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-20', 'tanggal_mulai_lomba' => '2025-06-14', 'tanggal_selesai_lomba' => '2025-07-20', 'penyelenggara' => null, 'id_pembuat' => 27, 'created_at' => now(), 'updated_at' => now()],
+            ', 'deskripsi_pengumpulan' => 'Pengumpulan karya sesuai dengan kategori lomba masing-masing.', 'jenis_lomba' => 'individu', 'butuh_pembimbing' => false, 'lokasi' => 'offline', 'lokasi_offline' => 'Magelang', 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => '2025-07-20', 'tanggal_mulai_lomba' => '2025-06-14', 'tanggal_selesai_lomba' => '2025-07-20', 'penyelenggara' => null, 'id_pembuat' => 27, 'created_at' => now(), 'updated_at' => now()],
+
+            // [LOMBA ID: 11] - LOMBA BERLANGSUNG
+            [
+                'id_lomba' => 11,
+                'foto_lomba' => 'foto_lomba/codefest2025.png',
+                'nama_lomba' => 'Coding Fest 2025',
+                'deskripsi' => 'Lomba coding untuk mendemonstrasikan use case lomba yang sedang berlangsung.',
+                'deskripsi_pengumpulan' => 'Kumpulkan link repository GitHub Anda.',
+                'jenis_lomba' => 'kelompok',
+                'butuh_pembimbing' => false,
+                'lokasi' => 'online',
+                'lokasi_offline' => null,
+                'tingkat' => 'nasional',
+                'status' => 'berlangsung',
+                'alasan_penolakan' => null,
+                'tanggal_akhir_registrasi' => now()->subDays(5),
+                'tanggal_mulai_lomba' => now()->subDays(2),
+                'tanggal_selesai_lomba' => now()->addDays(10),
+                'penyelenggara' => 'Lombapedia',
+                'id_pembuat' => 3,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            // [LOMBA ID: 12] - LOMBA SELESAI
+            [
+                'id_lomba' => 12,
+                'foto_lomba' => 'foto_lomba/designchallenge2025.jpeg',
+                'nama_lomba' => 'Design Challenge 2025',
+                'deskripsi' => 'Bagikan ide-ide kreatif Anda dengan mengikuti Kompetisi Desain Syal UNDP Indonesia! Kirimkan desain Anda',
+                'deskripsi_pengumpulan' => 'Kumpulkan link prototype Figma Anda.',
+                'jenis_lomba' => 'individu',
+                'butuh_pembimbing' => false,
+                'lokasi' => 'online',
+                'lokasi_offline' => null,
+                'tingkat' => 'nasional',
+                'status' => 'selesai',
+                'alasan_penolakan' => null,
+                'tanggal_akhir_registrasi' => now()->subMonths(2),
+                'tanggal_mulai_lomba' => now()->subMonths(2)->addWeek(),
+                'tanggal_selesai_lomba' => now()->subMonth(),
+                'penyelenggara' => 'Lombapedia',
+                'id_pembuat' => 3,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            // [LOMBA ID: 13] - LOMBA DITOLAK
+            [
+                'id_lomba' => 13,
+                'foto_lomba' => 'foto_lomba/code-challenge-20.png',
+                'nama_lomba' => 'C.O.D.E Challenge',
+                'deskripsi' => '🚨 SIAP-SIAP! 🚨
+                Ajang bergengsi C.O.D.E Challenge2025 resmi dibuka!
+                Dengan tema “Explore, Build, Impact”, kompetisi ini mengajak kamu untuk menciptakan solusi digital yang berdampak nyata bagi masyarakat! 💡🌍
+
+                🔍 Pilih tantanganmu:
+                🔐 CTF– unjuk skill keamanan siber
+                🤖 AI – rancang inovasi dengan kecerdasan buatan
+                🌱 Innovator Pitch (LKTI) – solusi teknologi untuk kehidupan yang lebih baik
+
+                ✨ Nggak cuma lomba, ini juga ajang untuk berjejaring, belajar, dan menunjukkan karya terbaikmu di dunia teknologi!
+
+                ✅Terbuka untuk pelajar SMA/SMK & mahasiswa dari seluruh Indonesia!
+
+                📌Cek Informasi detailnya di link berikut:
+                📚https://linktr.ee/guidebookcodex
+                🔎https://codex.himatisi-tus.com/',
+                'deskripsi_pengumpulan' => 'Kumpulkan apa saja.',
+                'jenis_lomba' => 'individu',
+                'butuh_pembimbing' => true,
+                'lokasi' => 'online',
+                'lokasi_offline' => null,
+                'tingkat' => 'internal',
+                'status' => 'ditolak',
+                'alasan_penolakan' => 'Deskripsi lomba dan mekanisme penilaian tidak jelas. Silakan perbaiki dan ajukan kembali.', // <-- ALASAN PENOLAKAN
+                'tanggal_akhir_registrasi' => now()->addMonth(),
+                'tanggal_mulai_lomba' => now()->addMonth()->addWeek(),
+                'tanggal_selesai_lomba' => now()->addMonths(2),
+                'penyelenggara' => 'Lombapedia',
+                'id_pembuat' => 3,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
         ]);
 
 
         // =================================================================
-        // 5. TAHAP_LOMBA (DATA BARU SESUAI LOMBA)
+        // 5. TAHAP_LOMBA (DIPERBAIKI)
         // =================================================================
-        $this->command->info('Seeding Tahap Lomba...');
+        $this->command->info('Seeding Tahap Lomba (Ensuring every competition has at least one stage)...');
         DB::table('tahap_lomba')->insert([
-            // Lomba 1: SECOMP25
-            ['id_lomba' => 1, 'nama_tahap' => 'Pendaftaran & Pengumpulan', 'urutan' => 1, 'deskripsi' => 'Peserta mendaftar dan mengumpulkan karya sesuai bidang lomba.', 'created_at' => now(), 'updated_at' => now()],
-            ['id_lomba' => 1, 'nama_tahap' => 'Penjurian Final', 'urutan' => 2, 'deskripsi' => 'Presentasi final di depan juri.', 'created_at' => now(), 'updated_at' => now()],
-            // Lomba 2: HEALPIC 2025
-            ['id_lomba' => 2, 'nama_tahap' => 'Registration & Submission', 'urutan' => 1, 'deskripsi' => 'Registration and photo submission period.', 'created_at' => now(), 'updated_at' => now()],
-            ['id_lomba' => 2, 'nama_tahap' => 'Finalists Announcement', 'urutan' => 2, 'deskripsi' => 'Announcement of the selected finalists.', 'created_at' => now(), 'updated_at' => now()],
-            ['id_lomba' => 2, 'nama_tahap' => 'Awarding Ceremony', 'urutan' => 3, 'deskripsi' => 'Winner announcement and awarding.', 'created_at' => now(), 'updated_at' => now()],
-            // Lomba 3: Sevenpreneur
-            ['id_lomba' => 3, 'nama_tahap' => 'Pendaftaran & Submit Proposal', 'urutan' => 1, 'deskripsi' => 'Peserta mendaftar dan mengirimkan proposal bisnis.', 'created_at' => now(), 'updated_at' => now()],
-            ['id_lomba' => 3, 'nama_tahap' => 'Grand Final Pitching', 'urutan' => 2, 'deskripsi' => 'Finalis melakukan pitching di depan para juri.', 'created_at' => now(), 'updated_at' => now()],
-            // Lomba 9: OJK Paper Competition
-            ['id_lomba' => 9, 'nama_tahap' => 'Pendaftaran dan Pengumpulan Paper', 'urutan' => 1, 'deskripsi' => 'Periode pendaftaran dan pengumpulan paper.', 'created_at' => now(), 'updated_at' => now()],
-            ['id_lomba' => 9, 'nama_tahap' => 'Presentasi Finalis', 'urutan' => 2, 'deskripsi' => 'Finalis mempresentasikan papernya.', 'created_at' => now(), 'updated_at' => now()],
+            // Lomba 1: SECOMP25 (2 tahap)
+            ['id_tahap' => 1, 'id_lomba' => 1, 'nama_tahap' => 'Pendaftaran & Pengumpulan', 'urutan' => 1],
+            ['id_tahap' => 2, 'id_lomba' => 1, 'nama_tahap' => 'Penjurian Final', 'urutan' => 2],
+            // Lomba 2: HEALPIC 2025 (3 tahap)
+            ['id_tahap' => 3, 'id_lomba' => 2, 'nama_tahap' => 'Registration & Submission', 'urutan' => 1],
+            ['id_tahap' => 4, 'id_lomba' => 2, 'nama_tahap' => 'Finalists Announcement', 'urutan' => 2],
+            ['id_tahap' => 5, 'id_lomba' => 2, 'nama_tahap' => 'Awarding Ceremony', 'urutan' => 3],
+            // Lomba 3: Sevenpreneur (2 tahap)
+            ['id_tahap' => 6, 'id_lomba' => 3, 'nama_tahap' => 'Pendaftaran & Submit Proposal', 'urutan' => 1],
+            ['id_tahap' => 7, 'id_lomba' => 3, 'nama_tahap' => 'Grand Final Pitching', 'urutan' => 2],
+            // Lomba 4: XLSMART (2 tahap)
+            ['id_tahap' => 8, 'id_lomba' => 4, 'nama_tahap' => 'Pengumpulan Karya', 'urutan' => 1],
+            ['id_tahap' => 9, 'id_lomba' => 4, 'nama_tahap' => 'Penjurian Final', 'urutan' => 2],
+            // Lomba 5: Cita Rasa Kita (1 tahap)
+            ['id_tahap' => 10, 'id_lomba' => 5, 'nama_tahap' => 'Penilaian Poster', 'urutan' => 1],
+            // Lomba 6: Pasanggiri Nasyid (1 tahap)
+            ['id_tahap' => 11, 'id_lomba' => 6, 'nama_tahap' => 'Audisi Langsung', 'urutan' => 1],
+            // Lomba 7: IMSCOBI 2025 (2 tahap)
+            ['id_tahap' => 12, 'id_lomba' => 7, 'nama_tahap' => 'Seleksi Paper', 'urutan' => 1],
+            ['id_tahap' => 13, 'id_lomba' => 7, 'nama_tahap' => 'Presentasi Final', 'urutan' => 2],
+            // Lomba 8: KIP-K ART FESTIVAL (1 tahap)
+            ['id_tahap' => 14, 'id_lomba' => 8, 'nama_tahap' => 'Penilaian Karya Seni', 'urutan' => 1],
+            // Lomba 9: OJK Paper Competition (2 tahap)
+            ['id_tahap' => 15, 'id_lomba' => 9, 'nama_tahap' => 'Pengumpulan Paper', 'urutan' => 1],
+            ['id_tahap' => 16, 'id_lomba' => 9, 'nama_tahap' => 'Presentasi Finalis', 'urutan' => 2],
+            // Lomba 10: MONALESA VOL.4 (1 tahap)
+            ['id_tahap' => 17, 'id_lomba' => 10, 'nama_tahap' => 'Seleksi Karya & Penampilan', 'urutan' => 1],
+
+            // Tahap untuk Lomba Berlangsung (ID 11)
+            ['id_tahap' => 18, 'id_lomba' => 11, 'nama_tahap' => 'Babak Penyisihan', 'urutan' => 1],
+            ['id_tahap' => 19, 'id_lomba' => 11, 'nama_tahap' => 'Babak Final', 'urutan' => 2],
+            // Tahap untuk Lomba Selesai (ID 12)
+            ['id_tahap' => 20, 'id_lomba' => 12, 'nama_tahap' => 'Seleksi Karya', 'urutan' => 1],
         ]);
 
         // =================================================================
@@ -525,6 +615,10 @@ class DatabaseSeeder extends Seeder
             // Lomba 10: MONALESA VOL.4
             ['id_lomba' => 10, 'id_tag' => 13, 'created_at' => now(), 'updated_at' => now()], // Photography
             ['id_lomba' => 10, 'id_tag' => 18, 'created_at' => now(), 'updated_at' => now()], // Public Speaking
+
+            ['id_lomba' => 11, 'id_tag' => 1, 'created_at' => now(), 'updated_at' => now()], // Programming
+            ['id_lomba' => 12, 'id_tag' => 2, 'created_at' => now(), 'updated_at' => now()], // UI/UX
+            ['id_lomba' => 12, 'id_tag' => 28, 'created_at' => now(), 'updated_at' => now()], // Desain
         ]);
 
         // =================================================================
@@ -549,18 +643,117 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // =================================================================
-        // 8. REGISTRASI_LOMBA (Perlu penyesuaian manual jika ingin data konsisten)
+        // 8. REGISTRASI_LOMBA (DIPERBANYAK & DIPERBAIKI)
         // =================================================================
-        $this->command->info('Skipping Registrasi Lomba seeding. Please adjust manually for data consistency with new competitions.');
+        $this->command->info('Seeding Registrasi Lomba...');
+        DB::table('registrasi_lomba')->insert([
+            // --- DATA LAMA YANG DISESUAIKAN ---
+            ['id_registrasi_lomba' => 1, 'link_pengumpulan' => 'https://github.com/tim-koding-keren/secomp25', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 6, 'id_lomba' => 1, 'id_tim' => 1, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 2, 'link_pengumpulan' => 'https://drive.google.com/indah-healpic-photo', 'status_verifikasi' => 'menunggu', 'catatan_penolakan' => null, 'id_mahasiswa' => 12, 'id_lomba' => 2, 'id_tim' => null, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 3, 'link_pengumpulan' => 'https://docs.google.com/data-diggers-bplan', 'status_verifikasi' => 'ditolak', 'catatan_penolakan' => 'Proposal bisnis belum matang. Silakan revisi bagian analisis pasar.', 'id_mahasiswa' => 9, 'id_lomba' => 3, 'id_tim' => 3, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 4, 'link_pengumpulan' => 'https://drive.google.com/sri-wahyuni-paper', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 18, 'id_lomba' => 9, 'id_tim' => null, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 5, 'link_pengumpulan' => 'https://linktr.ee/putra-imscobi', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 15, 'id_lomba' => 7, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+
+            // --- DATA BARU (6-12) ---
+            ['id_registrasi_lomba' => 6, 'link_pengumpulan' => 'https://drive.google.com/rina-xlsmart-design', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 8, 'id_lomba' => 4, 'id_tim' => null, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 7, 'link_pengumpulan' => 'https://github.com/tim-cybersec/secomp25', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 11, 'id_lomba' => 1, 'id_tim' => 2, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 8, 'link_pengumpulan' => 'https://drive.google.com/dewi-art-festival', 'status_verifikasi' => 'menunggu', 'catatan_penolakan' => null, 'id_mahasiswa' => 10, 'id_lomba' => 8, 'id_tim' => null, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 9, 'link_pengumpulan' => 'https://drive.google.com/fajar-nugroho-paper', 'status_verifikasi' => 'ditolak', 'catatan_penolakan' => 'Pendaftaran sudah ditutup saat pengajuan.', 'id_mahasiswa' => 11, 'id_lomba' => 9, 'id_tim' => null, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 10, 'link_pengumpulan' => 'https://behance.net/sitiaminah-poster', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 7, 'id_lomba' => 5, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 11, 'link_pengumpulan' => 'https://youtube.com/risky-aditya-monalesa', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 17, 'id_lomba' => 10, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 12, 'link_pengumpulan' => 'https://drive.google.com/guntur-bplan', 'status_verifikasi' => 'menunggu', 'catatan_penolakan' => null, 'id_mahasiswa' => 13, 'id_lomba' => 3, 'id_tim' => null, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+
+            // 5 Peserta untuk Lomba BERLANGSUNG (ID 11) - [PERBAIKAN] Menambahkan 'catatan_penolakan'
+            ['id_registrasi_lomba' => 13, 'link_pengumpulan' => 'https://github.com/andi/coding-fest', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 6, 'id_lomba' => 11, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 14, 'link_pengumpulan' => 'https://github.com/siti/coding-fest', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 7, 'id_lomba' => 11, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 15, 'link_pengumpulan' => 'https://github.com/eko/coding-fest', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 9, 'id_lomba' => 11, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 16, 'link_pengumpulan' => 'https://github.com/fajar/coding-fest', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 11, 'id_lomba' => 11, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 17, 'link_pengumpulan' => 'https://github.com/guntur/coding-fest', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 13, 'id_lomba' => 11, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+
+            // 10 Peserta untuk Lomba SELESAI (ID 12) - [PERBAIKAN] Menambahkan 'catatan_penolakan'
+            ['id_registrasi_lomba' => 18, 'link_pengumpulan' => 'https://figma.com/rina/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 8, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 19, 'link_pengumpulan' => 'https://figma.com/dewi/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 10, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 20, 'link_pengumpulan' => 'https://figma.com/indah/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 12, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 21, 'link_pengumpulan' => 'https://figma.com/lestari/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 14, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 22, 'link_pengumpulan' => 'https://figma.com/putra/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 15, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 23, 'link_pengumpulan' => 'https://figma.com/nadia/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 16, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 24, 'link_pengumpulan' => 'https://figma.com/risky/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 17, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 25, 'link_pengumpulan' => 'https://figma.com/sri/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 18, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 26, 'link_pengumpulan' => 'https://figma.com/andi/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 6, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id_registrasi_lomba' => 27, 'link_pengumpulan' => 'https://figma.com/siti/design-chal', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 7, 'id_lomba' => 12, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
+        ]);
 
         // =================================================================
-        // 9. PENILAIAN_PESERTA (Perlu penyesuaian manual)
+        // 9. PENILAIAN_PESERTA (DIPERBANYAK)
         // =================================================================
-        $this->command->info('Skipping Penilaian Peserta seeding. Please adjust manually.');
+        $this->command->info('Seeding Penilaian Peserta...');
+        DB::table('penilaian_peserta')->insert([
+            // Penilaian untuk Registrasi 1 (SECOMP25), tahap 1. Tahap 2 belum dinilai.
+            ['id_penilaian' => 1, 'id_registrasi_lomba' => 1, 'id_tahap' => 1, 'id_penilai' => 19, 'nilai' => 88, 'catatan' => 'Proposal sangat detail.'],
+            // Penilaian untuk Registrasi 5 (IMSCOBI), SEMUA TAHAP DINILAI agar bisa diberi prestasi.
+            ['id_penilaian' => 2, 'id_registrasi_lomba' => 5, 'id_tahap' => 12, 'id_penilai' => 25, 'nilai' => 90, 'catatan' => 'Paper ilmiah yang baik.'],
+            ['id_penilaian' => 3, 'id_registrasi_lomba' => 5, 'id_tahap' => 13, 'id_penilai' => 25, 'nilai' => 95, 'catatan' => 'Presentasi final meyakinkan.'],
+            // Penilaian untuk Registrasi 6 (XLSMART), SEMUA TAHAP DINILAI agar bisa diberi prestasi.
+            ['id_penilaian' => 4, 'id_registrasi_lomba' => 6, 'id_tahap' => 8, 'id_penilai' => 22, 'nilai' => 93, 'catatan' => 'Karya sangat original.'],
+            ['id_penilaian' => 5, 'id_registrasi_lomba' => 6, 'id_tahap' => 9, 'id_penilai' => 22, 'nilai' => 91, 'catatan' => 'Eksekusi teknis rapi.'],
+            // Penilaian untuk Registrasi 4 (OJK Paper), meskipun ditolak, mungkin sudah dinilai tahap 1.
+            ['id_penilaian' => 6, 'id_registrasi_lomba' => 4, 'id_tahap' => 15, 'id_penilai' => 26, 'nilai' => 70, 'catatan' => 'Paper tidak memenuhi standar minimum.'],
+            // Penilaian untuk Registrasi 10 (Cita Rasa Kita), 1 tahap, sudah dinilai
+            ['id_penilaian' => 7, 'id_registrasi_lomba' => 10, 'id_tahap' => 10, 'id_penilai' => 23, 'nilai' => 85, 'catatan' => 'Desain poster menarik dan informatif.'],
+            // Penilaian untuk Registrasi 11 (MONALESA), 1 tahap, sudah dinilai
+            ['id_penilaian' => 8, 'id_registrasi_lomba' => 11, 'id_tahap' => 17, 'id_penilai' => 27, 'nilai' => 89, 'catatan' => 'Penyampaian berita sangat baik.'],
+
+            // Penilaian untuk Lomba Berlangsung (ID 11), tahap 1 sudah dinilai, tahap 2 belum
+            ['id_penilaian' => 9, 'id_registrasi_lomba' => 13, 'id_tahap' => 18, 'id_penilai' => 3, 'nilai' => 90, 'catatan' => 'Kode bersih dan efisien.'],
+            ['id_penilaian' => 10, 'id_registrasi_lomba' => 14, 'id_tahap' => 18, 'id_penilai' => 3, 'nilai' => 85, 'catatan' => 'Algoritma menarik.'],
+            ['id_penilaian' => 11, 'id_registrasi_lomba' => 15, 'id_tahap' => 18, 'id_penilai' => 3, 'nilai' => 82, 'catatan' => 'Perlu optimasi query.'],
+
+            // Penilaian untuk Lomba Selesai (ID 12), semua peserta sudah dinilai
+            ['id_penilaian' => 12, 'id_registrasi_lomba' => 18, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 95, 'catatan' => 'Desain paling inovatif.'], // Rina
+            ['id_penilaian' => 13, 'id_registrasi_lomba' => 19, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 92, 'catatan' => 'User flow sangat jelas.'], // Dewi
+            ['id_penilaian' => 14, 'id_registrasi_lomba' => 20, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 90, 'catatan' => 'Palet warna sangat baik.'], // Indah
+
+            // [PERBAIKAN] Menambahkan 'catatan' => null
+            ['id_penilaian' => 15, 'id_registrasi_lomba' => 21, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 88, 'catatan' => null],
+            ['id_penilaian' => 16, 'id_registrasi_lomba' => 22, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 85, 'catatan' => null],
+            ['id_penilaian' => 17, 'id_registrasi_lomba' => 23, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 84, 'catatan' => null],
+            ['id_penilaian' => 18, 'id_registrasi_lomba' => 24, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 83, 'catatan' => null],
+            ['id_penilaian' => 19, 'id_registrasi_lomba' => 25, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 81, 'catatan' => null],
+            ['id_penilaian' => 20, 'id_registrasi_lomba' => 26, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 80, 'catatan' => null],
+            ['id_penilaian' => 21, 'id_registrasi_lomba' => 27, 'id_tahap' => 20, 'id_penilai' => 3, 'nilai' => 78, 'catatan' => null],
+        ]);
 
         // =================================================================
-        // 10. PRESTASI (Perlu penyesuaian manual)
+        // 10. PRESTASI (DIPERBANYAK)
         // =================================================================
-        $this->command->info('Skipping Prestasi seeding. Please adjust manually.');
+        $this->command->info('Seeding Prestasi...');
+        DB::table('prestasi')->insert([
+            // --- PRESTASI INTERNAL (VALID BERDASARKAN ATURAN) ---
+            ['id_user' => 15, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 7, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Juara 1', 'tanggal_diraih' => '2025-05-30', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => 'Data dicatat otomatis dari sistem.'],
+            ['id_user' => 8, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 4, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Juara 2', 'tanggal_diraih' => '2025-08-25', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => 'Pemenang kategori Desain Ilustrasi.'],
+            ['id_user' => 7, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 5, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Best Poster', 'tanggal_diraih' => '2025-07-10', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => ''],
+            ['id_user' => 17, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 10, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Juara Favorit', 'tanggal_diraih' => '2025-07-22', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => ''],
+
+            // --- PRESTASI EKSTERNAL ---
+            ['id_user' => 6, 'lomba_dari' => 'eksternal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => null, 'nama_lomba_eksternal' => 'National Coding Challenge 2024', 'penyelenggara_eksternal' => 'Tech Dev Indonesia', 'tingkat' => 'nasional', 'peringkat' => 'Juara 3', 'tanggal_diraih' => '2024-11-10', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'menunggu', 'id_verifikator' => null, 'catatan_verifikasi' => null],
+            ['id_user' => 11, 'lomba_dari' => 'eksternal', 'tipe_prestasi' => 'peserta', 'id_lomba' => null, 'nama_lomba_eksternal' => 'Workshop Keamanan Siber', 'penyelenggara_eksternal' => 'Cyber Community', 'tingkat' => 'nasional', 'peringkat' => 'Peserta Workshop', 'tanggal_diraih' => '2025-01-15', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'ditolak', 'id_verifikator' => 1, 'catatan_verifikasi' => 'Sertifikat workshop tidak dapat dikategorikan sebagai prestasi lomba.'],
+            ['id_user' => 10, 'lomba_dari' => 'eksternal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => null, 'nama_lomba_eksternal' => 'International Data Science Olympiad', 'penyelenggara_eksternal' => 'Global Data Org', 'tingkat' => 'internasional', 'peringkat' => 'Bronze Medal', 'tanggal_diraih' => '2024-10-05', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => 'Valid.'],
+            ['id_user' => 14, 'lomba_dari' => 'eksternal', 'tipe_prestasi' => 'peserta', 'id_lomba' => null, 'nama_lomba_eksternal' => 'ASEAN Business Case Competition', 'penyelenggara_eksternal' => 'ASEAN Youth Council', 'tingkat' => 'internasional', 'peringkat' => 'Top 10 Finalist', 'tanggal_diraih' => '2025-02-20', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => 'Pencapaian yang baik.'],
+            ['id_user' => 16, 'lomba_dari' => 'eksternal', 'tipe_prestasi' => 'peserta', 'id_lomba' => null, 'nama_lomba_eksternal' => 'Lomba Karya Tulis Ilmiah Nasional', 'penyelenggara_eksternal' => 'Universitas Nasional', 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => '2025-03-15', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'menunggu', 'id_verifikator' => null, 'catatan_verifikasi' => null],
+            ['id_user' => 18, 'lomba_dari' => 'eksternal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => null, 'nama_lomba_eksternal' => 'Lomba Debat Bahasa Inggris', 'penyelenggara_eksternal' => 'English Debate Society', 'tingkat' => 'nasional', 'peringkat' => 'Best Speaker', 'tanggal_diraih' => '2024-09-30', 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 1, 'catatan_verifikasi' => 'Sertifikat telah diverifikasi.'],
+
+            ['id_user' => 8, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Juara 1', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Dicatat oleh Admin Lomba.'],
+            ['id_user' => 10, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Juara 2', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Dicatat oleh Admin Lomba.'],
+            ['id_user' => 12, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'pemenang', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Juara 3', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Dicatat oleh Admin Lomba.'],
+
+            // [PERBAIKAN] Peserta lainnya (7 orang) mendapatkan prestasi sebagai 'peserta'
+            ['id_user' => 14, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+            ['id_user' => 15, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+            ['id_user' => 16, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+            ['id_user' => 17, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+            ['id_user' => 18, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+            ['id_user' => 6, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+            ['id_user' => 7, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/sertifikat_dummy.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
+        ]);
     }
 }
