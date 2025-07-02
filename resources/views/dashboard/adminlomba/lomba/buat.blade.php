@@ -140,7 +140,7 @@
                             <textarea
                                 name="tahap[0][deskripsi]"
                                 placeholder="Deskripsi tahap"
-                                class="w-full border bg-white border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                class="w-full border bg-white border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 rows="2"></textarea>
                         </div>
                     </div>
@@ -272,24 +272,20 @@
                 // Fungsi untuk menangani submit form
                 async function handleFormSubmit(event) {
                     event.preventDefault();
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                     const formData = new FormData(lombaForm);
                     messageDiv.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Memproses...</div>`;
 
                     try {
                         const token = localStorage.getItem('authToken');
-                        const response = await axios.post("/api/lomba", formData, {
-                            headers: {
-                                'Authorization': `Bearer ${token}` // Pastikan token dikirim jika diperlukan
-                            }
-                        });
+                        const response = await axios.post("/api/lomba", formData);
 
                         if (response.data.success) {
                             messageDiv.innerHTML = `<div class="p-4 bg-green-100 text-green-800 rounded-lg">Lomba berhasil dipublikasikan!</div>`;
 
                             lombaForm.reset();
 
-                            // BARU: Reset juga input Choices.js
                             choicesInstance.clearStore();
 
                             lokasiOfflineContainer.classList.add('hidden');

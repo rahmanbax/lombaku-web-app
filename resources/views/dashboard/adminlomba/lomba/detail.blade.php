@@ -94,10 +94,12 @@
                 <table class="w-full text-sm text-left">
                     <thead class="text-xs text-gray-500 uppercase bg-gray-100">
                         <tr>
-                            <th scope="col" class="px-6 py-3">Nama Mahasiswa</th>
+                            <th scope="col" class="px-6 py-3">Nama Peserta</th>
                             <th scope="col" class="px-6 py-3">NIM</th>
-                            <th scope="col" class="px-6 py-3">Program Studi</th>
-                            <th scope="col" class="px-6 py-3 text-center">Nilai</th>
+                            <th scope="col" class="px-6 py-3">Tim</th>
+                            <th scope="col" class="px-6 py-3 text-center">Skor Rata-rata</th>
+                            <th scope="col" class="px-6 py-3 text-center">Status</th>
+                            <th scope="col" class="px-6 py-3 text-center">Detail</th>
                         </tr>
                     </thead>
                     <tbody id="peserta-table-body">
@@ -122,7 +124,7 @@
                     <h3 class="text-xl font-semibold text-gray-900">Detail Pengumpulan</h3>
                     <p id="detail-modal-subtitle" class="text-sm text-gray-500 mt-1"></p>
                     <p id="detail-modal-deskripsi-pengumpulan" class=" mt-2"></p>
-                    <p class="mt-2 text-sm text-black/60">Link Pengumpulan:</p>
+                    <p class="mt-2 text-sm text-black/60">Link Pengumpulan</p>
                     <a id="detail-modal-link-pengumpulan" class="text-sm text-blue-500 hover:underline"></a>
                 </div>
                 <button id="close-detail-modal-btn" type="button" class="text-gray-400 hover:text-gray-600 rounded-full p-1 -mt-2 -mr-2">
@@ -228,6 +230,28 @@
         </div>
     </div>
 
+    <!-- Modal 4: Untuk Detail Tim -->
+    <div id="tim-detail-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full flex items-center justify-center hidden">
+        <div class="relative w-full max-w-lg shadow-lg rounded-lg bg-white p-6 mx-5 lg:mx-auto">
+            <!-- Header Modal -->
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900">Detail Tim</h3>
+                    <p id="tim-modal-nama" class="text-lg mt-4 font-medium"></p>
+                </div>
+                <button id="close-tim-modal-btn" type="button" class="text-gray-400 hover:text-gray-600 rounded-full p-1 -mt-2 -mr-2">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Konten Modal: Daftar Anggota Tim -->
+            <div id="tim-modal-member-list" class="mt-2 space-y-2">
+                <!-- Daftar anggota akan diisi oleh JS di sini -->
+                <p class="text-center text-gray-500 p-4">Memuat data anggota...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Script dipanggil setelah semua HTML dimuat -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -262,37 +286,14 @@
             const batalPrestasiBtn = document.getElementById('batal-prestasi-btn');
             const kirimPrestasiBtn = document.getElementById('kirim-prestasi-btn');
 
+            // [BARU] Elemen untuk Modal Detail Tim
+            const timDetailModal = document.getElementById('tim-detail-modal');
+            const timModalNama = document.getElementById('tim-modal-nama');
+            const timModalMemberList = document.getElementById('tim-modal-member-list');
+            const closeTimModalBtn = document.getElementById('close-tim-modal-btn');
+
             let allRegistrations = []; // Variabel global untuk simpan data peserta
             let totalTahapLomba = 0;
-
-            function renderPesertaTable(registrations, lombaData) { // <-- BARU: Terima data lomba
-                allRegistrations = registrations;
-                totalTahapLomba = lombaData.tahaps ? lombaData.tahaps.length : 0;
-                pesertaTableBody.innerHTML = '';
-                if (!registrations || registrations.length === 0) {
-                    pesertaTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
-                    return;
-                }
-                registrations.forEach((reg, index) => {
-                    // ... (kode render baris tabel tetap sama) ...
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white bg-gray-50 hover:bg-gray-100';
-                    const mahasiswa = reg.mahasiswa;
-                    const profil = mahasiswa.profil_mahasiswa;
-
-                    row.innerHTML = `
-                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa.nama}</th>
-                    <td class="px-6 py-4">${profil ? profil.nim : '-'}</td>
-                    <td class="px-6 py-4">${profil?.program_studi?.nama_program_studi || '-'}</td>
-                    <td class="px-6 py-4 text-center">
-                        <button class="detail-btn py-1 px-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-semibold" data-index="${index}">
-                            Detail Penilaian
-                        </button>
-                    </td>
-                `;
-                    pesertaTableBody.appendChild(row);
-                });
-            }
 
             // --- Helper Functions ---
             function formatDate(dateString) {
@@ -362,27 +363,63 @@
             function renderPesertaTable(registrations) {
                 allRegistrations = registrations;
                 pesertaTableBody.innerHTML = '';
+
+                // Perbarui colspan menjadi 6 sesuai jumlah kolom baru
                 if (!registrations || registrations.length === 0) {
-                    pesertaTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
+                    pesertaTableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Belum ada peserta yang mendaftar.</td></tr>`;
                     return;
                 }
 
                 registrations.forEach((reg, index) => {
                     const row = document.createElement('tr');
-                    row.className = 'bg-white bg-gray-50 hover:bg-gray-100';
+                    row.className = 'bg-white hover:bg-gray-50'; // Gaya baris diubah sedikit untuk konsistensi
                     const mahasiswa = reg.mahasiswa;
-                    const profil = mahasiswa.profil_mahasiswa;
 
+                    // --- Persiapan Variabel untuk Kolom yang Membutuhkan Logika ---
+                    // Variabel ini disiapkan di sini agar innerHTML tetap rapi.
+
+                    // 1. Variabel untuk Skor Rata-rata
+                    let skorRataRataHtml = 'Belum dinilai';
+                    if (reg.penilaian && reg.penilaian.length > 0) {
+                        const totalSkor = reg.penilaian.reduce((sum, item) => sum + item.nilai, 0);
+                        const avg = totalSkor / reg.penilaian.length;
+                        skorRataRataHtml = avg;
+                    }
+
+                    // 2. Variabel untuk Status
+                    const existingPrestasi = mahasiswa.prestasi.find(p => p.id_lomba == reg.id_lomba);
+                    const statusHtml = existingPrestasi ?
+                        `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 text-nowrap rounded-full">Selesai Dinilai</span>` :
+                        `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 text-nowrap rounded-full">Butuh Penilaian</span>`;
+
+                    let timHtml;
+                    if (reg.tim) {
+                        // Jika objek 'reg.tim' ada (tidak null atau undefined), maka ini adalah lomba tim.
+                        // Buat tombol yang bisa diklik untuk membuka modal.
+                        timHtml = `<button class="tim-detail-btn hover:underline cursor-pointer" data-reg-index="${index}">${reg.tim.nama_tim}</button>`;
+                    } else {
+                        // Jika objek 'reg.tim' tidak ada, maka ini adalah pendaftar individu.
+                        // Tampilkan teks "Individu" dengan warna abu-abu agar tidak terlalu menonjol.
+                        timHtml = `<span class="">Individu</span>`;
+                    }
+
+
+                    // --- [BAGIAN UTAMA YANG DIUBAH] ---
+                    // innerHTML diubah untuk mencocokkan 6 kolom yang Anda minta.
+                    // Data simpel diambil langsung, data yang butuh logika menggunakan variabel di atas.
                     row.innerHTML = `
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa.nama}</th>
-                <td class="px-6 py-4">${profil ? profil.nim : '-'}</td>
-                <td class="px-6 py-4">${profil?.program_studi?.nama_program_studi || '-'}</td>
-                <td class="px-6 py-4 text-center">
-                    <button class="detail-btn py-1 px-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-semibold" data-index="${index}">
-                        Detail
-                    </button>
-                </td>
-            `;
+            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${mahasiswa.nama}</td>
+            <td class="px-6 py-4">${mahasiswa.profil_mahasiswa?.nim || '-'}</td>
+            <td class="px-6 py-4">${timHtml}</td>
+            <td class="px-6 py-4 text-center">${skorRataRataHtml}</td>
+            <td class="px-6 py-4 text-center">${statusHtml}</td>
+            <td class="px-6 py-4 text-center">
+                <button class="detail-btn py-1 px-3 bg-blue-500 text-white rounded-md text-xs hover:bg-blue-600 font-semibold" data-index="${index}">
+                    Nilai
+                </button>
+            </td>
+        `;
+
                     pesertaTableBody.appendChild(row);
                 });
             }
@@ -402,6 +439,33 @@
                 }
             }
 
+            function showTimDetailModal(tim) {
+                timDetailModal.classList.remove('hidden');
+                timModalNama.textContent = tim.nama_tim;
+                timModalMemberList.innerHTML = '';
+
+                // Data anggota sekarang langsung diambil dari 'tim.members'
+                if (tim.members && tim.members.length > 0) {
+                    tim.members.forEach(member => {
+                        const memberDiv = document.createElement('div');
+                        memberDiv.className = 'p-3 bg-gray-100 rounded-lg';
+
+                        const nama = member.nama;
+                        const nim = member.profil_mahasiswa?.nim || 'N/A';
+                        const prodi = member.profil_mahasiswa?.program_studi?.nama_program_studi || 'N/A';
+
+                        memberDiv.innerHTML = `
+                <p class="font-semibold text-gray-800">${nama}</p>
+                <p class="text-sm text-gray-500">${nim} - ${prodi}</p>
+            `;
+                        timModalMemberList.appendChild(memberDiv);
+                    });
+                } else {
+                    timModalMemberList.innerHTML = `<p class="text-center text-gray-500 p-4">Tidak ada anggota ditemukan.</p>`;
+                }
+            }
+
+
             // --- Fungsi untuk membuka Modal 1 (Detail Peserta) ---
             async function showDetailModal(registration) {
                 detailModalSubtitle.textContent = `${registration.mahasiswa.nama}`;
@@ -414,9 +478,15 @@
                 try {
                     const lombaId = window.location.pathname.split('/').pop();
                     const tahapResponse = await axios.get(`/api/lomba/${lombaId}/tahap`);
+
                     const allTahap = tahapResponse.data.data;
                     const totalTahapLomba = allTahap.length;
                     const existingScores = registration.penilaian || [];
+
+                    // --- [PERUBAHAN 1] ---
+                    // Cek status prestasi SEKALI di awal untuk efisiensi.
+                    const existingPrestasi = registration.mahasiswa.prestasi.find(p => p.id_lomba == registration.id_lomba);
+                    const isPrestasiDiberikan = !!existingPrestasi; // Akan bernilai true jika prestasi ada, false jika tidak.
 
                     tahapPenilaianList.innerHTML = '';
                     if (allTahap.length === 0) {
@@ -431,73 +501,77 @@
 
                         let scoreOrButton;
                         if (score) {
-                            scoreOrButton = `
-                            <div class="flex flex-col items-end justify-end">
-                                
-                                <h2 class="font-bold text-end text-lg">${score.nilai}</h2>
-                                    <p class="text-gray-500 text-end text-xs">${score.catatan}</p>
-                                    <button class="mt-2 w-fit edit-nilai-btn text-blue-500 hover:bg-blue-100 border border-blue-500 px-3 py-1 flex items-center justify-center rounded-md hover:bg-blue-100 flex gap-1 text-xs"
-                                        title="Edit Nilai"
-                                        data-penilaian-id="${score.id_penilaian}" 
-                                        data-nilai-lama="${score.nilai}"
-                                        data-catatan-lama="${score.catatan || ''}"
-                                        data-tahap-nama="${tahap.nama_tahap}">
-                                    <span class="material-symbols-outlined" style="font-size: 10px;">edit</span>Edit
-                                </button>
-                            </div>
-                            `;
-                        } else {
-                            scoreOrButton = `
-                        <button class="beri-nilai-spesifik-btn bg-blue-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-blue-600"
-                                data-registrasi-id="${registration.id_registrasi_lomba}"
-                                data-tahap-id="${tahap.id_tahap}"
-                                data-tahap-nama="${tahap.nama_tahap}">
-                            + Beri Nilai
-                        </button>
+                            // --- [PERUBAHAN 2] ---
+                            // Tambahkan pengecekan apakah prestasi sudah diberikan.
+                            if (isPrestasiDiberikan) {
+                                // Jika sudah, tampilkan nilai saja TANPA tombol edit.
+                                scoreOrButton = `
+                    <div class="flex flex-col items-end justify-end">
+                        <h2 class="font-bold text-end text-lg">${score.nilai}</h2>
+                        <p class="text-gray-500 text-end text-xs">${score.catatan || ''}</p>
+                    </div>
                     `;
+                            } else {
+                                // Jika belum, tampilkan nilai DENGAN tombol edit.
+                                scoreOrButton = `
+                    <div class="flex flex-col items-end justify-end">
+                        <h2 class="font-bold text-end text-lg">${score.nilai}</h2>
+                        <p class="text-gray-500 text-end text-xs">${score.catatan || ''}</p>
+                        <button class="mt-2 w-fit edit-nilai-btn text-blue-500 hover:bg-blue-100 border border-blue-500 px-3 py-1 flex items-center justify-center rounded-md hover:bg-blue-100 flex gap-1 text-xs"
+                            title="Edit Nilai"
+                            data-penilaian-id="${score.id_penilaian}" 
+                            data-nilai-lama="${score.nilai}"
+                            data-catatan-lama="${score.catatan || ''}"
+                            data-tahap-nama="${tahap.nama_tahap}">
+                            <span class="material-symbols-outlined" style="font-size: 10px;">edit</span>Edit
+                        </button>
+                    </div>
+                    `;
+                            }
+                        } else {
+                            // Jika belum ada nilai sama sekali, tampilkan tombol "Beri Nilai".
+                            scoreOrButton = `
+                <button class="beri-nilai-spesifik-btn bg-blue-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-blue-600"
+                        data-registrasi-id="${registration.id_registrasi_lomba}"
+                        data-tahap-id="${tahap.id_tahap}"
+                        data-tahap-nama="${tahap.nama_tahap}">
+                    + Beri Nilai
+                </button>
+                `;
                         }
 
                         listItem.innerHTML = `
-                    <span class="text-gray-800 font-medium">${tahap.nama_tahap}</span>
-                    ${scoreOrButton}
-                `;
+                <span class="text-gray-800 font-medium">${tahap.nama_tahap}</span>
+                ${scoreOrButton}
+            `;
                         tahapPenilaianList.appendChild(listItem);
                     });
 
+                    // Logika untuk menampilkan tombol "Berikan Prestasi" atau pesan status tetap sama
                     if (existingScores.length === totalTahapLomba && totalTahapLomba > 0) {
                         const actionContainer = document.createElement('div');
-                        actionContainer.className = 'mt-2';
-
-                        // Cek apakah mahasiswa sudah memiliki prestasi untuk lomba ini
-                        const existingPrestasi = registration.mahasiswa.prestasi.find(p => p.id_lomba === registration.id_lomba);
 
                         if (existingPrestasi) {
-                            // --- SUDAH ADA PRESTASI: TAMPILKAN TOMBOL EDIT ---
+                            // SUDAH ADA PRESTASI: Tampilkan pesan status.
                             actionContainer.innerHTML = `
-            <div class="w-full border border-green-500 rounded-md p-2 bg-green-100 text-center">
-                <p class="text-xs font-semibold text-green-700">Prestasi sudah diberikan.</p>
-                <p class="text-xs text-green-600 mt-1">Peringkat: ${existingPrestasi.peringkat}</p>
-            </div>
-            <button id="edit-prestasi-btn" 
-                    data-prestasi-id="${existingPrestasi.id_prestasi}"
-                    class="w-full mt-2 border border-blue-500 text-blue-500 py-2 px-4 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
-                Edit Prestasi dan Sertifikat
-            </button>
-        `;
+                <div class="w-full border border-green-500 rounded-md p-2 bg-green-50 text-center">
+                    <p class="text-xs text-green-800">Prestasi Telah Diberikan</p>
+                    <p class="text-green-700 mt-1">Peringkat: <span class="font-bold">${existingPrestasi.peringkat}</span></p>
+                </div>
+                `;
                         } else {
-                            // --- BELUM ADA PRESTASI: TAMPILKAN TOMBOL BERIKAN ---
+                            // BELUM ADA PRESTASI: Tampilkan tombol untuk memberikan.
                             actionContainer.innerHTML = `
-            <div class="w-full border border-blue-500 rounded-md p-2 bg-blue-50">
-                <p class="text-xs text-center text-blue-500">Semua tahap telah dinilai. Silahkan berikan prestasi dan sertifikat</p>
-            </div>
-            <button id="beri-prestasi-btn" 
-                    data-registrasi-id="${registration.id_registrasi_lomba}"
-                    class="w-full mt-2 bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined" style="font-size: 16px;">military_tech</span>
-                Berikan Prestasi dan Sertifikat
-            </button>
-        `;
+                <div class="w-full border border-blue-500 rounded-md p-2 bg-blue-50 mb-2">
+                    <p class="text-xs text-center text-blue-700">Semua tahap telah dinilai. Silakan berikan prestasi dan sertifikat.</p>
+                </div>
+                <button id="beri-prestasi-btn" 
+                        data-registrasi-id="${registration.id_registrasi_lomba}"
+                        class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">military_tech</span>
+                    Berikan Prestasi
+                </button>
+                `;
                         }
                         tahapPenilaianList.appendChild(actionContainer);
                     }
@@ -561,6 +635,10 @@
                 penilaianModal.classList.add('hidden');
             }
 
+            function hideTimDetailModal() {
+                timDetailModal.classList.add('hidden');
+            }
+
             async function refreshDataAfterSubmit() {
                 hidePenilaianModal(); // Tutup modal form penilaian
                 hideDetailModal(); // Tutup juga modal detail peserta
@@ -597,10 +675,21 @@
             // --- Event Listeners ---
             pesertaTableBody.addEventListener('click', function(event) {
                 const detailButton = event.target.closest('.detail-btn');
+                const timDetailButton = event.target.closest('.tim-detail-btn');
                 if (detailButton) {
                     const index = detailButton.dataset.index;
                     const registration = allRegistrations[index];
                     if (registration) showDetailModal(registration);
+                }
+                if (timDetailButton) {
+                    // Ambil index registrasi dari tombol
+                    const regIndex = timDetailButton.dataset.regIndex;
+                    // Dapatkan objek registrasi lengkap dari array
+                    const registration = allRegistrations[regIndex];
+                    // Panggil fungsi dengan objek 'tim' dari registrasi tersebut
+                    if (registration && registration.tim) {
+                        showTimDetailModal(registration.tim);
+                    }
                 }
             });
 
@@ -759,6 +848,7 @@
             batalPenilaianBtn.addEventListener('click', hidePenilaianModal);
             closePrestasiModalBtn.addEventListener('click', hidePrestasiModal);
             batalPrestasiBtn.addEventListener('click', hidePrestasiModal);
+            closeTimModalBtn.addEventListener('click', hideTimDetailModal);
 
 
             // Panggil fungsi utama saat halaman dimuat

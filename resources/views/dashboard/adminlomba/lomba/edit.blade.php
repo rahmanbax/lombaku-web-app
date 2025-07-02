@@ -257,7 +257,7 @@
                     <textarea
                         name="tahap[${index}][deskripsi]"
                         placeholder="Deskripsi tahap"
-                        class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         rows="2"
                     >${deskripsi}</textarea>
                 `;
@@ -297,6 +297,7 @@
             // === Menangani submit form untuk UPDATE ===
             lombaForm.addEventListener("submit", async function(event) {
                 event.preventDefault();
+                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 const formData = new FormData(lombaForm);
                 // Choices.js tidak mengisi <select> secara native, jadi kita ambil nilainya manual

@@ -33,7 +33,6 @@ class DatabaseSeeder extends Seeder
             ['id_program_studi' => 9, 'nama_program_studi' => 'S1 Terapan Sistem Informasi Kota Cerdas', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-
         DB::table('tags')->insert([
             ['id_tag' => 1, 'nama_tag' => 'Programming', 'created_at' => now(), 'updated_at' => now()],
             ['id_tag' => 2, 'nama_tag' => 'UI/UX', 'created_at' => now(), 'updated_at' => now()],
@@ -62,95 +61,99 @@ class DatabaseSeeder extends Seeder
             ['id_tag' => 25, 'nama_tag' => 'Marketing', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-
         // =================================================================
-        // 2. USERS
+        // 2. USERS (Added more students)
         // =================================================================
-        $this->command->info('Seeding Users...');
+        $this->command->info('Seeding Users (Admins, Staff, Dosen, and Mahasiswa)...');
         DB::table('users')->insert([
             // Admins & Staff (ID 1-3)
-            ['id_user' => 1, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'kemahasiswaan', 'password' => Hash::make('password'), 'nama' => 'Bapak Kemahasiswaan', 'notelp' => '081100000001', 'email' => 'kemahasiswaan@kampus.ac.id', 'role' => 'kemahasiswaan', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 2, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'admin.if', 'password' => Hash::make('password'), 'nama' => 'Admin Prodi Informatika', 'notelp' => '081100000002', 'email' => 'admin.if@kampus.ac.id', 'role' => 'admin_prodi', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 3, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'lombapedia', 'password' => Hash::make('password'), 'nama' => 'Admin Lombapedia', 'notelp' => '081100000003', 'email' => 'contact@lombapedia.com', 'role' => 'admin_lomba', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 1, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Bapak Kemahasiswaan', 'notelp' => '081100000001', 'email' => 'kemahasiswaan@kampus.ac.id', 'role' => 'kemahasiswaan', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 2, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Admin Prodi Informatika', 'notelp' => '081100000002', 'email' => 'admin.if@kampus.ac.id', 'role' => 'admin_prodi', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 3, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Admin Lombapedia', 'notelp' => '081100000003', 'email' => 'contact@lombapedia.com', 'role' => 'admin_lomba', 'created_at' => now(), 'updated_at' => now()],
 
             // Dosen (ID 4-5)
-            ['id_user' => 4, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'dosen.budi', 'password' => Hash::make('password'), 'nama' => 'Budi Santoso, M.Kom.', 'notelp' => '081211112222', 'email' => 'budi.s@kampus.ac.id', 'role' => 'dosen', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 5, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'dosen.ana', 'password' => Hash::make('password'), 'nama' => 'Ana Lestari, M.Ds.', 'notelp' => '081233334444', 'email' => 'ana.l@kampus.ac.id', 'role' => 'dosen', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 4, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Budi Santoso, M.Kom.', 'notelp' => '081211112222', 'email' => 'budi.s@kampus.ac.id', 'role' => 'dosen', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 5, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Ana Lestari, M.Ds.', 'notelp' => '081233334444', 'email' => 'ana.l@kampus.ac.id', 'role' => 'dosen', 'created_at' => now(), 'updated_at' => now()],
 
-            // Mahasiswa (ID 6-8)
-            ['id_user' => 6, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'mahasiswa.andi', 'password' => Hash::make('password'), 'nama' => 'Andi Hermawan', 'notelp' => '085711112222', 'email' => 'andi.h@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 7, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'mahasiswa.siti', 'password' => Hash::make('password'), 'nama' => 'Siti Aminah', 'notelp' => '085733334444', 'email' => 'siti.a@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 8, 'foto_profile' => 'images/profile/default-profile.png', 'username' => 'mahasiswa.rina', 'password' => Hash::make('password'), 'nama' => 'Rina Wijayanti', 'notelp' => '085755556666', 'email' => 'rina.w@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            // Mahasiswa (ID 6-20)
+            ['id_user' => 6, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Andi Hermawan', 'notelp' => '085711112222', 'email' => 'andi.h@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 7, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Siti Aminah', 'notelp' => '085733334444', 'email' => 'siti.a@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 8, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Rina Wijayanti', 'notelp' => '085755556666', 'email' => 'rina.w@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 9, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Eko Prasetyo', 'notelp' => '085777778888', 'email' => 'eko.p@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 10, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Dewi Safitri', 'notelp' => '085799990000', 'email' => 'dewi.s@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 11, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Fajar Nugroho', 'notelp' => '085710101010', 'email' => 'fajar.n@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 12, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Indah Permata', 'notelp' => '085720202020', 'email' => 'indah.p@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 13, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Guntur Wibowo', 'notelp' => '085730303030', 'email' => 'guntur.w@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 14, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Lestari Handayani', 'notelp' => '085740404040', 'email' => 'lestari.h@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 15, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Putra Maulana', 'notelp' => '085750505050', 'email' => 'putra.m@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 16, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Nadia Utami', 'notelp' => '085760606060', 'email' => 'nadia.u@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 17, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Risky Aditya', 'notelp' => '085770707070', 'email' => 'risky.a@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 18, 'foto_profile' => 'images/profile/default-profile.png', 'password' => Hash::make('password'), 'nama' => 'Sri Wahyuni', 'notelp' => '085780808080', 'email' => 'sri.w@student.kampus.ac.id', 'role' => 'mahasiswa', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // =================================================================
-        // 3. PROFILES
+        // 3. PROFILES (Added profiles for new students)
         // =================================================================
         $this->command->info('Seeding Profiles (Mahasiswa, Dosen, Admin Lomba)...');
         DB::table('profil_mahasiswa')->insert([
             ['id_user' => 6, 'id_program_studi' => 1, 'nim' => 11223301, 'tanggal_lahir' => '2002-05-10', 'jenis_kelamin' => 'Laki-laki', 'created_at' => now(), 'updated_at' => now()],
             ['id_user' => 7, 'id_program_studi' => 1, 'nim' => 11223302, 'tanggal_lahir' => '2002-08-15', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 8, 'id_program_studi' => 3, 'nim' => 33221101, 'tanggal_lahir' => '2003-01-20', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
-        ]);
-        DB::table('profil_dosen')->insert([
-            ['id_user' => 4, 'id_program_studi' => 1, 'nip' => 99887701, 'created_at' => now(), 'updated_at' => now()],
-            ['id_user' => 5, 'id_program_studi' => 3, 'nip' => 99887702, 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 8, 'id_program_studi' => 7, 'nim' => 77221101, 'tanggal_lahir' => '2003-01-20', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 9, 'id_program_studi' => 2, 'nim' => 22223301, 'tanggal_lahir' => '2002-11-30', 'jenis_kelamin' => 'Laki-laki', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 10, 'id_program_studi' => 2, 'nim' => 22223302, 'tanggal_lahir' => '2003-03-25', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 11, 'id_program_studi' => 3, 'nim' => 33221101, 'tanggal_lahir' => '2002-07-19', 'jenis_kelamin' => 'Laki-laki', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 12, 'id_program_studi' => 4, 'nim' => 44221101, 'tanggal_lahir' => '2003-02-14', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 13, 'id_program_studi' => 5, 'nim' => 55221101, 'tanggal_lahir' => '2002-09-09', 'jenis_kelamin' => 'Laki-laki', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 14, 'id_program_studi' => 6, 'nim' => 66221101, 'tanggal_lahir' => '2003-04-01', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 15, 'id_program_studi' => 7, 'nim' => 77221102, 'tanggal_lahir' => '2002-12-12', 'jenis_kelamin' => 'Laki-laki', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 16, 'id_program_studi' => 8, 'nim' => 88221101, 'tanggal_lahir' => '2003-06-06', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 17, 'id_program_studi' => 9, 'nim' => 99221101, 'tanggal_lahir' => '2002-10-20', 'jenis_kelamin' => 'Laki-laki', 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 18, 'id_program_studi' => 1, 'nim' => 11223303, 'tanggal_lahir' => '2003-08-17', 'jenis_kelamin' => 'Perempuan', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // Catatan: Migrasi profil_admin_lomba tidak memiliki foreign key 'id_user'.
-        // Untuk fungsionalitas penuh, disarankan menambahkan `id_user` ke tabel tsb.
-        // Di sini, kita akan mengasumsikan profil ini milik user dengan id=3.
+        DB::table('profil_dosen')->insert([
+            ['id_user' => 4, 'id_program_studi' => 1, 'nip' => 99887701, 'created_at' => now(), 'updated_at' => now()],
+            ['id_user' => 5, 'id_program_studi' => 7, 'nip' => 99887702, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
         DB::table('profil_admin_lomba')->insert([
-            // Seharusnya ada: 'id_user' => 3,
-            ['id_user' => 3,'alamat' => 'Jl. Teknologi No. 1, Jakarta', 'jenis_organisasi' => 'Perusahaan', 'created_at' => now(), 'updated_at' => now()]
+            ['id_user' => 3, 'alamat' => 'Jl. Teknologi No. 1, Jakarta', 'jenis_organisasi' => 'Perusahaan', 'created_at' => now(), 'updated_at' => now()]
         ]);
 
         // =================================================================
         // 4. LOMBA (Mencakup semua status: disetujui, ditolak, dll)
         // =================================================================
         $this->command->info('Seeding Lomba...');
-        $this->command->info('Seeding Lomba...');
-
         DB::table('lomba')->insert([
+            // [ID 1] Lomba yang sedang berlangsung, bisa didaftar
             ['id_lomba' => 1, 'foto_lomba' => 'images/lomba/image-lomba.jpg', 'nama_lomba' => 'National Hackathon 2024', 'deskripsi' => 'Kompetisi membuat aplikasi inovatif untuk solusi perkotaan.', 'deskripsi_pengumpulan' => 'Proposal aplikasi Smart City.', 'jenis_lomba' => 'kelompok', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'berlangsung', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => Carbon::now()->addDays(5), 'tanggal_mulai_lomba' => Carbon::now()->subDays(1), 'tanggal_selesai_lomba' => Carbon::now()->addDays(10), 'penyelenggara' => 'Tech Indonesia', 'id_pembuat' => 3, 'created_at' => now(), 'updated_at' => now()],
 
+            // [ID 2] Lomba yang sudah selesai, data registrasi lampau ada
             ['id_lomba' => 2, 'foto_lomba' => 'images/lomba/image-lomba.jpg', 'nama_lomba' => 'UI/UX Challenge 2023', 'deskripsi' => 'Rancang antarmuka aplikasi mobile banking yang ramah pengguna.', 'deskripsi_pengumpulan' => 'Desain UI/UX mobile banking submission.', 'jenis_lomba' => 'individu', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'selesai', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => Carbon::now()->subMonths(2)->startOfMonth(), 'tanggal_mulai_lomba' => Carbon::now()->subMonths(2)->day(10), 'tanggal_selesai_lomba' => Carbon::now()->subMonths(2)->endOfMonth(), 'penyelenggara' => 'Creative Hub', 'id_pembuat' => 3, 'created_at' => now(), 'updated_at' => now()],
 
+            // [ID 3] Lomba yang belum disetujui, tidak bisa didaftar
             ['id_lomba' => 3, 'foto_lomba' => 'images/lomba/image-lomba.jpg', 'nama_lomba' => 'Global Business Case Competition', 'deskripsi' => 'Selesaikan studi kasus bisnis dari perusahaan multinasional.', 'deskripsi_pengumpulan' => 'Deskripsi singkat ide bisnis.', 'jenis_lomba' => 'kelompok', 'lokasi' => 'offline', 'lokasi_offline' => 'Bali Convention Center', 'tingkat' => 'internasional', 'status' => 'belum disetujui', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => Carbon::now()->addMonths(1), 'tanggal_mulai_lomba' => Carbon::now()->addMonths(1)->addWeeks(2), 'tanggal_selesai_lomba' => Carbon::now()->addMonths(2), 'penyelenggara' => 'Global Business Inc.', 'id_pembuat' => 3, 'created_at' => now(), 'updated_at' => now()],
 
+            // [ID 4] Lomba yang sudah disetujui tapi belum mulai, bisa didaftar
             ['id_lomba' => 4, 'foto_lomba' => 'images/lomba/image-lomba.jpg', 'nama_lomba' => 'Capture The Flag 2025', 'deskripsi' => 'Kompetisi keamanan siber untuk mahasiswa dan profesional.', 'deskripsi_pengumpulan' => 'CTF qualification writeup', 'jenis_lomba' => 'kelompok', 'lokasi' => 'online', 'lokasi_offline' => null, 'tingkat' => 'nasional', 'status' => 'disetujui', 'alasan_penolakan' => null, 'tanggal_akhir_registrasi' => Carbon::now()->addMonths(3), 'tanggal_mulai_lomba' => Carbon::now()->addMonths(4), 'tanggal_selesai_lomba' => Carbon::now()->addMonths(4)->addDays(2), 'penyelenggara' => 'Cyber Community', 'id_pembuat' => 3, 'created_at' => now(), 'updated_at' => now()],
 
+            // [ID 5] Lomba yang ditolak, tidak bisa didaftar
             ['id_lomba' => 5, 'foto_lomba' => 'images/lomba/image-lomba.jpg', 'nama_lomba' => 'Lomba Makan Kerupuk Internal', 'deskripsi' => 'Kompetisi adu cepat makan kerupuk dalam rangka 17-an.', 'deskripsi_pengumpulan' => 'Proposal keikutsertaan.', 'jenis_lomba' => 'individu', 'lokasi' => 'offline', 'lokasi_offline' => 'Lapangan Kampus', 'tingkat' => 'internal', 'status' => 'ditolak', 'alasan_penolakan' => 'Lomba tidak relevan dengan bidang akademik dan prestasi mahasiswa.', 'tanggal_akhir_registrasi' => Carbon::now()->subDays(10), 'tanggal_mulai_lomba' => Carbon::now()->subDays(9), 'tanggal_selesai_lomba' => Carbon::now()->subDays(9), 'penyelenggara' => 'Panitia HUT RI Kampus', 'id_pembuat' => 3, 'created_at' => now(), 'updated_at' => now()],
         ]);
-
-
-
 
         // =================================================================
         // 5. TAHAP_LOMBA
         // =================================================================
         $this->command->info('Seeding Tahap Lomba...');
-        $this->command->info('Seeding Tahap Lomba...');
-
         DB::table('tahap_lomba')->insert([
-            // Lomba 1
+            // Lomba 1 (ID: 1, 2)
             ['id_lomba' => 1, 'nama_tahap' => 'Penyisihan Proposal', 'urutan' => 1, 'deskripsi' => 'Seleksi awal berdasarkan proposal.', 'created_at' => now(), 'updated_at' => now()],
             ['id_lomba' => 1, 'nama_tahap' => 'Final Presentation', 'urutan' => 2, 'deskripsi' => 'Presentasi final di depan juri.', 'created_at' => now(), 'updated_at' => now()],
-
-            // Lomba 2
+            // Lomba 2 (ID: 3)
             ['id_lomba' => 2, 'nama_tahap' => 'Pengumpulan & Penilaian Karya', 'urutan' => 1, 'deskripsi' => 'Penilaian hasil UI/UX.', 'created_at' => now(), 'updated_at' => now()],
-
-            // Lomba 3
-            ['id_lomba' => 3, 'nama_tahap' => 'Seleksi Proposal Bisnis', 'urutan' => 1, 'deskripsi' => 'Seleksi awal berdasarkan proposal bisnis.', 'created_at' => now(), 'updated_at' => now()],
-
-            // Lomba 4
+            // Lomba 4 (ID: 4)
             ['id_lomba' => 4, 'nama_tahap' => 'Babak Kualifikasi', 'urutan' => 1, 'deskripsi' => 'Kualifikasi online.', 'created_at' => now(), 'updated_at' => now()],
-
-            // Lomba 5
-            ['id_lomba' => 5, 'nama_tahap' => 'Penulisan Esai', 'urutan' => 1, 'deskripsi' => 'Mengumpulkan esai sesuai tema.', 'created_at' => now(), 'updated_at' => now()],
-
         ]);
-
 
         // =================================================================
         // 6. DAFTAR_TAG (Pivot Lomba-Tags)
@@ -163,9 +166,7 @@ class DatabaseSeeder extends Seeder
             ['id_lomba' => 3, 'id_tag' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['id_lomba' => 4, 'id_tag' => 6, 'created_at' => now(), 'updated_at' => now()],
             ['id_lomba' => 4, 'id_tag' => 5, 'created_at' => now(), 'updated_at' => now()],
-            ['id_lomba' => 5, 'id_tag' => 17, 'created_at' => now(), 'updated_at' => now()],
         ]);
-
 
         // =================================================================
         // 7. TIM & MEMBER_TIM
@@ -174,32 +175,43 @@ class DatabaseSeeder extends Seeder
         DB::table('tim')->insert([
             ['id_tim' => 1, 'nama_tim' => 'Tim Koding Keren', 'created_at' => now(), 'updated_at' => now()],
             ['id_tim' => 2, 'nama_tim' => 'Tim CyberSec', 'created_at' => now(), 'updated_at' => now()],
+            ['id_tim' => 3, 'nama_tim' => 'Tim Data Diggers', 'created_at' => now(), 'updated_at' => now()],
         ]);
         DB::table('member_tim')->insert([
-            // Tim 1 (Andi & Siti)
+            // Tim 1: Koding Keren (Andi & Siti)
             ['id_tim' => 1, 'id_mahasiswa' => 6, 'created_at' => now(), 'updated_at' => now()], // Andi
             ['id_tim' => 1, 'id_mahasiswa' => 7, 'created_at' => now(), 'updated_at' => now()], // Siti
-            // Tim 2 (Andi & Rina)
-            ['id_tim' => 2, 'id_mahasiswa' => 6, 'created_at' => now(), 'updated_at' => now()], // Andi
-            ['id_tim' => 2, 'id_mahasiswa' => 8, 'created_at' => now(), 'updated_at' => now()], // Rina
+            // Tim 2: CyberSec (Fajar & Guntur)
+            ['id_tim' => 2, 'id_mahasiswa' => 11, 'created_at' => now(), 'updated_at' => now()], // Fajar
+            ['id_tim' => 2, 'id_mahasiswa' => 13, 'created_at' => now(), 'updated_at' => now()], // Guntur
+            // Tim 3: Data Diggers (Eko & Sri)
+            ['id_tim' => 3, 'id_mahasiswa' => 9, 'created_at' => now(), 'updated_at' => now()], // Eko
+            ['id_tim' => 3, 'id_mahasiswa' => 18, 'created_at' => now(), 'updated_at' => now()], // Sri
         ]);
 
         // =================================================================
-        // 8. REGISTRASI_LOMBA
+        // 8. REGISTRASI_LOMBA (Logic updated: Dosen Pembimbing wajib, registrasi hanya di lomba yang valid, ada alasan penolakan)
         // =================================================================
-        $this->command->info('Seeding Registrasi Lomba...');
+        $this->command->info('Seeding Registrasi Lomba with new logic...');
+        // !! PENTING: Pastikan tabel `registrasi_lomba` memiliki kolom `catatan_penolakan` (VARCHAR/TEXT, nullable)
         DB::table('registrasi_lomba')->insert([
-            ['id_registrasi_lomba' => 1, 'link_pengumpulan' => 'https://github.com/tim-koding-keren/hackathon2024', 'status_verifikasi' => 'diterima', 'id_mahasiswa' => 6, 'id_lomba' => 1, 'id_tim' => 1, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 2, 'link_pengumpulan' => 'https://figma.com/rina-wijayanti/uiux2023', 'status_verifikasi' => 'diterima', 'id_mahasiswa' => 8, 'id_lomba' => 2, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 3, 'link_pengumpulan' => 'https://docs.google.com/siti-business-idea', 'status_verifikasi' => 'menunggu', 'id_mahasiswa' => 7, 'id_lomba' => 3, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 4, 'link_pengumpulan' => 'https://docs.google.com/tim-cybersec-ctf', 'status_verifikasi' => 'ditolak', 'id_mahasiswa' => 6, 'id_lomba' => 4, 'id_tim' => 2, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 5, 'link_pengumpulan' => 'https://github.com/tim-cybersec/ctf-qual', 'status_verifikasi' => 'diterima', 'id_mahasiswa' => 7, 'id_lomba' => 4, 'id_tim' => 2, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 6, 'link_pengumpulan' => 'https://docs.google.com/smartcity-idea', 'status_verifikasi' => 'menunggu', 'id_mahasiswa' => 7, 'id_lomba' => 1, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 7, 'link_pengumpulan' => 'https://figma.com/siti-uxdesign2023', 'status_verifikasi' => 'ditolak', 'id_mahasiswa' => 7, 'id_lomba' => 2, 'id_tim' => null, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 8, 'link_pengumpulan' => 'https://github.com/tim-cybersec/ctf-final', 'status_verifikasi' => 'diterima', 'id_mahasiswa' => 8, 'id_lomba' => 4, 'id_tim' => 2, 'id_dosen' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id_registrasi_lomba' => 9, 'link_pengumpulan' => 'https://github.com/tim-koding-keren/prototype', 'status_verifikasi' => 'menunggu', 'id_mahasiswa' => 6, 'id_lomba' => 1, 'id_tim' => 1, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 1] Diterima: Tim 1 mendaftar di Lomba 1 (Hackathon)
+            ['id_registrasi_lomba' => 1, 'link_pengumpulan' => 'https://github.com/tim-koding-keren/hackathon2024', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 6, 'id_lomba' => 1, 'id_tim' => 1, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 2] Diterima (lampau): Rina mendaftar di Lomba 2 (UI/UX Challenge)
+            ['id_registrasi_lomba' => 2, 'link_pengumpulan' => 'https://figma.com/rina-wijayanti/uiux2023', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 8, 'id_lomba' => 2, 'id_tim' => null, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 3] Menunggu: Siti (individu) mendaftar di Lomba 1 (Hackathon)
+            ['id_registrasi_lomba' => 3, 'link_pengumpulan' => 'https://docs.google.com/siti-smartcity-idea', 'status_verifikasi' => 'menunggu', 'catatan_penolakan' => null, 'id_mahasiswa' => 7, 'id_lomba' => 1, 'id_tim' => null, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 4] Ditolak: Tim 2 mendaftar di Lomba 4 (CTF)
+            ['id_registrasi_lomba' => 4, 'link_pengumpulan' => 'https://docs.google.com/tim-cybersec-ctf', 'status_verifikasi' => 'ditolak', 'catatan_penolakan' => 'Proposal tim belum lengkap. Silakan perbaiki dan ajukan kembali.', 'id_mahasiswa' => 11, 'id_lomba' => 4, 'id_tim' => 2, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 5] Diterima: Tim 2 (pengajuan lain) mendaftar di Lomba 4 (CTF)
+            ['id_registrasi_lomba' => 5, 'link_pengumpulan' => 'https://github.com/tim-cybersec/ctf-qual', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 11, 'id_lomba' => 4, 'id_tim' => 2, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 6] Menunggu: Tim 3 mendaftar di Lomba 1 (Hackathon)
+            ['id_registrasi_lomba' => 6, 'link_pengumpulan' => 'https://github.com/data-diggers/hackathon', 'status_verifikasi' => 'menunggu', 'catatan_penolakan' => null, 'id_mahasiswa' => 9, 'id_lomba' => 1, 'id_tim' => 3, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 7] Ditolak (lampau): Indah mendaftar di Lomba 2 (UI/UX Challenge)
+            ['id_registrasi_lomba' => 7, 'link_pengumpulan' => 'https://figma.com/indah-uxdesign2023', 'status_verifikasi' => 'ditolak', 'catatan_penolakan' => 'Link submission tidak dapat diakses. Mohon periksa kembali permission.', 'id_mahasiswa' => 12, 'id_lomba' => 2, 'id_tim' => null, 'id_dosen' => 5, 'created_at' => now(), 'updated_at' => now()],
+            // [Reg 8] Diterima: Putra (individu) mendaftar di Lomba 4 (CTF)
+            ['id_registrasi_lomba' => 8, 'link_pengumpulan' => 'https://github.com/putra-maulana/ctf-final', 'status_verifikasi' => 'diterima', 'catatan_penolakan' => null, 'id_mahasiswa' => 15, 'id_lomba' => 4, 'id_tim' => null, 'id_dosen' => 4, 'created_at' => now(), 'updated_at' => now()],
         ]);
-
 
         // =================================================================
         // 9. PENILAIAN_PESERTA

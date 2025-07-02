@@ -18,9 +18,9 @@ class AuthController extends Controller
     // Method register() Anda sudah benar, tidak perlu diubah.
     public function register(Request $request)
     {
-        // ... (kode register Anda)
+        Log::info('--- Proses registrasi dimulai ---', ['request_data' => $request->all()]);
+
         $rules = [
-            'username' => 'required|string|unique:users,username|max:30',
             'password' => 'required|string|min:6',
             'nama' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
@@ -35,22 +35,27 @@ class AuthController extends Controller
             $rules['jenis_kelamin'] = 'nullable|in:Laki-laki,Perempuan';
         }
         if ($request->input('role') === 'admin_lomba') {
+            // [PERBAIKAN] Pastikan nama field di validasi sama dengan yang diakses nanti
             $rules['alamat'] = 'required|string|max:255';
-            $rules['jenis_organisasi'] = 'required|string|in:perusahaan,organisasi,lainnya';
+            $rules['jenis_organisasi'] = 'required|string|in:perusahaan,mahasiswa,lainnya'; // Sesuaikan dengan Enum di migrasi
         }
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
+            Log::warning('Validasi registrasi gagal.', ['errors' => $validator->errors()->all()]);
             return redirect()->route('register')
                 ->withErrors($validator)
                 ->withInput();
         }
 
+        Log::info('Validasi berhasil.');
+
         try {
             DB::transaction(function () use ($request) {
+                Log::info('Memulai DB Transaction.');
+
                 $user = User::create([
-                    'username' => $request->username,
                     'password' => Hash::make($request->password),
                     'nama' => $request->nama,
                     'email' => $request->email,
@@ -58,7 +63,10 @@ class AuthController extends Controller
                     'role' => $request->role,
                 ]);
 
+                Log::info('User berhasil dibuat.', ['user_id' => $user->id_user]);
+
                 if ($user->role === 'mahasiswa') {
+                    Log::info('Membuat profil mahasiswa...');
                     ProfilMahasiswa::create([
                         'id_user' => $user->id_user,
                         'nim' => $request->nim,
@@ -66,18 +74,32 @@ class AuthController extends Controller
                         'tanggal_lahir' => $request->tanggal_lahir,
                         'jenis_kelamin' => $request->jenis_kelamin,
                     ]);
+                    Log::info('Profil mahasiswa berhasil dibuat.');
                 }
+
                 if ($user->role === 'admin_lomba') {
+                    Log::info('Membuat profil admin lomba...');
                     ProfilAdminLomba::create([
-                        'id_user' => $user->id_user,
-                        'alamat' => $request->alamat_organisasi,
+                        'id_user' => $user->id_user, // Diasumsikan kolom ini ada di migrasi Anda
+                        'alamat' => $request->alamat, // <-- [PERBAIKAN] Menggunakan $request->alamat
                         'jenis_organisasi' => $request->jenis_organisasi,
                     ]);
+                    Log::info('Profil admin lomba berhasil dibuat.');
                 }
             });
+
+            Log::info('DB Transaction berhasil. Proses registrasi selesai.');
         } catch (\Exception $e) {
+            // <-- [PERUBAHAN] Ini bagian terpenting untuk debug -->
+            Log::error('!!! EXCEPTION SAAT REGISTRASI !!!', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString() // Memberikan trace lengkap error
+            ]);
+
             return redirect()->route('register')
-                ->with('error', 'Registrasi Gagal. Terjadi kesalahan pada server.')
+                ->with('error', 'Registrasi Gagal. Terjadi kesalahan pada server. Silakan cek log untuk detail.')
                 ->withInput();
         }
 

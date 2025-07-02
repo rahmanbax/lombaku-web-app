@@ -62,6 +62,31 @@
                 <a href="/dashboard/kemahasiswaan/lomba/buat" class="whitespace-nowrap py-2 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">Publikasikan Lomba</a>
             </div>
 
+            <div class="mt-4">
+                <nav class="flex flex-wrap gap-2 gap-y-2 text-sm font-medium" aria-label="Tabs">
+                    <button data-status="" class="filter-tab whitespace-nowrap border border-blue-500 bg-blue-100 text-blue-500 px-3 py-2 rounded-full">
+                        Semua
+                        <span id="count-semua" class="hidden text-xs">...</span>
+                    </button>
+                    <button data-status="belum disetujui" class="filter-tab whitespace-nowrap py-2 px-3 text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-full">
+                        Butuh Persetujuan
+                        <span id="count-belum_disetujui" class="hidden text-xs">...</span>
+                    </button>
+                    <button data-status="disetujui" class="filter-tab whitespace-nowrap py-2 px-3 text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-full">
+                        Disetujui
+                        <span id="count-disetujui" class="hidden text-xs">...</span>
+                    </button>
+                    <button data-status="berlangsung" class="filter-tab whitespace-nowrap py-2 px-3 text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-full">
+                        Berlangsung
+                        <span id="count-berlangsung" class="hidden text-xs">...</span>
+                    </button>
+                    <button data-status="selesai" class="filter-tab whitespace-nowrap py-2 px-3 text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-full">
+                        Selesai
+                        <span id="count-selesai" class="hidden text-xs">...</span>
+                    </button>
+                </nav>
+            </div>
+
             <div class="mt-4 overflow-x-auto">
                 <table class="lg:w-full rounded-lg overflow-hidden table-auto">
                     <thead class="text-xs text-gray-500 uppercase bg-gray-100">
@@ -86,6 +111,8 @@
                     </tbody>
                 </table>
             </div>
+
+            <div id="pagination-container" class="flex justify-center mt-6"></div>
 
         </section>
     </main>
@@ -127,6 +154,10 @@
             const tableBody = document.getElementById("lomba-table-body");
             const searchInput = document.getElementById("search-lomba-input");
             let debounceTimer;
+            let currentFilterStatus = ""; // Menyimpan status filter aktif
+            let currentSearchTerm = ""; // Menyimpan kata kunci pencarian aktif
+            const filterTabs = document.querySelectorAll(".filter-tab");
+            const paginationContainer = document.getElementById("pagination-container");
 
             // Modal Penolakan
             const tolakLombaModal = document.getElementById('tolak-lomba-modal');
@@ -152,55 +183,127 @@
                 return new Date(dateString).toLocaleDateString("id-ID", options);
             }
 
+            function getStatusBadge(status) {
+                const statusMap = {
+                    'belum disetujui': 'bg-yellow-100 text-yellow-800',
+                    'disetujui': 'bg-green-100 text-green-800',
+                    'berlangsung': 'bg-blue-100 text-blue-800',
+                    'selesai': 'bg-gray-100 text-gray-800',
+                    'ditolak': 'bg-red-100 text-red-800'
+                };
+                const statusText = status.replace(/_/g, " ").split(" ").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+                return `<span class="px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap ${statusMap[status] || 'bg-gray-100'}">${statusText}</span>`;
+            }
+
             function capitalizeFirstLetter(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
             }
 
             // === Fungsi Utama untuk Fetch dan Render Data ===
-            async function fetchAllLomba(searchTerm = "") {
-                tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Mencari...</td></tr>`;
+            async function fetchAllLomba(url = null) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Memuat...</td></tr>`;
+
+                if (!url) {
+                    const params = new URLSearchParams({
+                        status: currentFilterStatus,
+                        search: currentSearchTerm
+                    }).toString();
+                    url = `/api/lomba?${params}`;
+                }
 
                 try {
-                    const url = searchTerm ? `/api/lomba?search=${searchTerm}` : "/api/lomba";
-                    const response = await axios.get(url); // Auth token di-handle oleh middleware di sisi server
-                    const lombas = response.data.data;
+                    const response = await axios.get(url);
+                    const paginatedData = response.data.data;
 
-                    tableBody.innerHTML = ""; // Kosongkan tabel
+                    renderLombaTable(paginatedData.data);
+                    renderPagination(paginatedData.links, paginatedData.total > 0);
 
-                    if (lombas.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Tidak ada lomba yang ditemukan.</td></tr>`;
-                        return;
-                    }
-
-                    lombas.data.forEach((lomba) => {
-                        const row = document.createElement("tr");
-                        row.className = "bg-gray-50 hover:bg-gray-100";
-
-                        const penyelenggaraNama = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A");
-                        const statusText = lomba.status.replace(/_/g, " ").split(" ").map(capitalizeFirstLetter).join(" ");
-
-                        // --- INI ADALAH PERUBAHAN UTAMA UNTUK KOLOM AKSI ---
-                        row.innerHTML = `
-                    <td class="p-3 font-semibold">
-                        <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="hover:underline">${lomba.nama_lomba}</a>
-                    </td>
-                    <td class="p-3 capitalize">${lomba.tingkat}</td>
-                    <td class="p-3">${statusText}</td>
-                    <td class="p-3 text-center">${lomba.registrasi_count}</td>
-                    <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
-                    <td class="p-3">${penyelenggaraNama}</td>
-                    <td class="p-3">
-                        <div class="flex gap-2 justify-end">
-                            <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600">Lihat</a>
-                        </div>
-                    </td>
-                `;
-                        tableBody.appendChild(row);
-                    });
                 } catch (error) {
                     console.error("Error fetching data:", error);
                     tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-red-500">Gagal memuat data.</td></tr>`;
+                    paginationContainer.innerHTML = '';
                 }
+            }
+
+            function renderLombaTable(lombas) {
+                tableBody.innerHTML = "";
+                if (lombas.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">Tidak ada lomba yang ditemukan.</td></tr>`;
+                    return;
+                }
+
+                lombas.forEach((lomba) => {
+                    const row = document.createElement("tr");
+                    row.className = "bg-gray-50 hover:bg-gray-100";
+                    const penyelenggaraNama = lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A");
+
+                    // --- PERUBAHAN UTAMA DIMULAI DI SINI ---
+
+                    // 1. Siapkan variabel untuk menampung HTML tombol aksi
+                    let actionButtonsHTML = '';
+
+                    // 2. Cek status lomba
+                    if (lomba.status === 'belum disetujui') {
+                        // Jika butuh persetujuan, tambahkan tombol Tolak & Setujui
+                        // Class 'tolak-lomba-btn' dan 'setujui-lomba-btn' penting agar event listener berfungsi
+                        actionButtonsHTML = `
+                <button class="py-1 px-2 text-red-500 border border-red-500 rounded-sm text-sm hover:bg-red-100 tolak-lomba-btn" data-id="${lomba.id_lomba}">Tolak</button>
+                <button class="setujui-lomba-btn w-fit px-2 py-1 text-sm rounded-sm text-white bg-blue-500 hover:bg-blue-600 cursor-pointer" data-id="${lomba.id_lomba}">Setujui</button>
+                <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue border border-blue-500 hover:bg-blue-100 text-blue-500">Lihat</a>
+            `;
+                    } else {
+                        // Untuk status lainnya, tampilkan tombol Lihat
+                        actionButtonsHTML = `
+                <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="w-fit px-2 py-1 text-sm rounded-sm text-blue border border-blue-500 hover:bg-blue-100 text-blue-500">Lihat</a>
+            `;
+                    }
+
+                    // 3. Masukkan HTML baris tabel dengan tombol aksi yang sudah disiapkan
+                    row.innerHTML = `
+            <td class="p-3 font-semibold">
+                <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="hover:underline">${lomba.nama_lomba}</a>
+            </td>
+            <td class="p-3 capitalize">${lomba.tingkat}</td>
+            <td class="p-3">${getStatusBadge(lomba.status)}</td>
+            <td class="p-3 text-center">${lomba.registrasi_count}</td>
+            <td class="p-3">${formatDate(lomba.tanggal_akhir_registrasi)}</td>
+            <td class="p-3">${penyelenggaraNama}</td>
+            <td class="p-3">
+                <div class="flex gap-2 justify-end">
+                    ${actionButtonsHTML}
+                </div>
+            </td>
+        `;
+                    // --- AKHIR PERUBAHAN ---
+
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function renderPagination(links, hasData) {
+                paginationContainer.innerHTML = '';
+                if (!hasData || links.length <= 3) return;
+
+                links.forEach(link => {
+                    const button = document.createElement('button');
+                    let buttonContent = link.label.includes('Previous') ? `<span class="material-symbols-outlined">chevron_left</span>` :
+                        link.label.includes('Next') ? `<span class="material-symbols-outlined">chevron_right</span>` : link.label;
+
+                    button.innerHTML = buttonContent;
+
+                    if (!link.url) {
+                        button.className = 'w-10 h-10 flex items-center justify-center text-gray-400 bg-white border border-gray-300 mx-1 cursor-not-allowed rounded-full';
+                        button.disabled = true;
+                    } else if (link.active) {
+                        button.className = 'w-10 h-10 flex items-center justify-center text-white bg-blue-500 border border-blue-500 mx-1 rounded-full';
+                        button.disabled = true;
+                    } else {
+                        button.className = 'w-10 h-10 flex items-center justify-center text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 mx-1 rounded-full cursor-pointer';
+                        button.dataset.url = link.url;
+                    }
+
+                    paginationContainer.appendChild(button);
+                });
             }
 
             // Fungsi baru untuk mengambil dan menampilkan statistik
@@ -248,7 +351,7 @@
 
                         lombaButuhPersetujuan.forEach((lomba) => {
                             const lombaElement = document.createElement('div');
-                            lombaElement.className = 'flex items-center gap-2 p-3 bg-gray-100 rounded-lg mb-2';
+                            lombaElement.className = 'flex items-center gap-2 p-3 bg-gray-100 rounded-lg';
 
                             // --- PERUBAHAN DI SINI ---
                             // Hapus onclick dan tambahkan class + atribut data-*
@@ -257,9 +360,9 @@
                             <a href="/dashboard/kemahasiswaan/lomba/${lomba.id_lomba}" class="text-base font-medium hover:underline">${lomba.nama_lomba}</a>
                             <p class="text-xs text-black/50">${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : "N/A")}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button class="py-1 px-3 text-red-500 border border-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 tolak-lomba-btn" data-id="${lomba.id_lomba}">Tolak</button>
-                            <button class="py-1 px-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 setujui-lomba-btn" data-id="${lomba.id_lomba}">Setujui</button>
+                        <div class="flex items-center gap-1">
+                            <button class="py-1 px-2 text-red-500 border border-red-500 rounded-sm text-sm hover:bg-red-100 tolak-lomba-btn" data-id="${lomba.id_lomba}">Tolak</button>
+                            <button class="py-1 px-2 bg-blue-500 text-white rounded-sm text-sm hover:bg-blue-600 setujui-lomba-btn" data-id="${lomba.id_lomba}">Setujui</button>
                         </div>
                     `;
                             // --- AKHIR PERUBAHAN ---
@@ -303,6 +406,20 @@
                     alert(errorMessage);
                 }
             }
+
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    filterTabs.forEach(t => {
+                        t.classList.remove('bg-blue-100', 'text-blue-500', 'border-blue-500');
+                        t.classList.add('text-gray-500', 'border-gray-300', 'hover:bg-gray-100');
+                    });
+                    tab.classList.remove('text-gray-500', 'border-gray-300', 'hover:bg-gray-100');
+                    tab.classList.add('bg-blue-100', 'text-blue-500', 'border-blue-500');
+
+                    currentFilterStatus = tab.dataset.status;
+                    fetchAllLomba(); // Panggil tanpa URL agar mengambil dari filter saat ini (halaman 1)
+                });
+            });
 
             // --- Fungsi Kontrol Modal ---
             function showTolakModal(lombaId) {
@@ -365,8 +482,29 @@
             searchInput.addEventListener("input", (event) => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    fetchAllLomba(event.target.value);
+                    currentSearchTerm = event.target.value;
+                    fetchAllLomba(); // Panggil tanpa URL
                 }, 500);
+            });
+
+            paginationContainer.addEventListener('click', function(event) {
+                const button = event.target.closest('button[data-url]');
+                if (button) {
+                    fetchAllLomba(button.dataset.url);
+                }
+            });
+
+            tableBody.addEventListener('click', function(event) {
+                const setujuiButton = event.target.closest('.setujui-lomba-btn');
+                const tolakButton = event.target.closest('.tolak-lomba-btn');
+
+                if (setujuiButton) {
+                    const lombaId = setujuiButton.dataset.id;
+                    showSetujuiModal(lombaId);
+                } else if (tolakButton) {
+                    const lombaId = tolakButton.dataset.id;
+                    showTolakModal(lombaId);
+                }
             });
 
             // Panggil fungsi utama saat halaman dimuat

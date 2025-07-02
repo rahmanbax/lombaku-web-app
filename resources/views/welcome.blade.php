@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,21 +11,25 @@
         .card-lomba:hover .lomba-image {
             transform: scale(1.05);
         }
+
         .fade-in-up {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
+
         .fade-in-up.visible {
             opacity: 1;
             transform: translateY(0);
         }
+
         .hero-bg {
             background-color: #f0f4ff;
             background-image:
                 radial-gradient(at 0% 0%, hsla(253, 100%, 75%, 0.15) 0px, transparent 50%),
                 radial-gradient(at 98% 1%, hsla(220, 100%, 75%, 0.15) 0px, transparent 50%);
         }
+
         .status-badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.75rem;
@@ -60,7 +65,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Lomba Terbaru Section -->
     <section id="lomba-terbaru" class="container mx-auto px-4 py-16">
         <h2 class="text-3xl font-bold text-center text-gray-800 mb-12 fade-in-up">Lomba Terbaru Untukmu</h2>
@@ -100,8 +105,8 @@
         </div>
     </template>
 
- 
- <footer class="bg-gray-800 text-white mt-20">
+
+    <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
                 <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
@@ -117,142 +122,154 @@
         </div>
     </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('lomba-container');
-    const loadingState = document.getElementById('loading-state');
-    const template = document.getElementById('lomba-card-template');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('lomba-container');
+            const loadingState = document.getElementById('loading-state');
+            const template = document.getElementById('lomba-card-template');
 
-    const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-
-    async function fetchLatestLombas() {
-        loadingState.style.display = 'flex';
-        container.innerHTML = '';
-        container.appendChild(loadingState);
-
-        try {
-            const response = await axios.get('/api/lomba', { params: { limit: 6 } });
-            
-            // === PERBAIKAN: HAPUS FILTER JAVASCRIPT ===
-            // Kita asumsikan backend sudah mengirim data yang benar, atau kita tampilkan apa adanya.
-            const lombas = response.data.data.data; // Langsung gunakan data tanpa filter.
-            
-            loadingState.style.display = 'none';
-            
-            if (lombas.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-gray-500 text-lg">Saat ini belum ada lomba yang tersedia.</p></div>`;
-                return;
-            }
-
-            lombas.forEach((lomba, index) => {
-                const card = template.content.cloneNode(true);
-                const cardElement = card.querySelector('.card-lomba');
-                cardElement.classList.add('fade-in-up');
-                cardElement.style.transitionDelay = `${index * 100}ms`;
-
-                const link = `/lomba/${lomba.id_lomba}`;
-                
-                const imageEl = card.querySelector('.lomba-image');
-                if (lomba.foto_lomba) {
-                    imageEl.src = lomba.foto_lomba;
-                } else {
-                    imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=E0E7FF&color=3730A3&size=300`;
-                }
-                imageEl.alt = lomba.nama_lomba;
-                card.querySelector('.lomba-link-img').href = link;
-                
-                const tagsContainer = card.querySelector('.absolute.top-3.left-3');
-                tagsContainer.innerHTML = '';
-                lomba.tags.slice(0, 2).forEach(tag => {
-                    const tagEl = document.createElement('span');
-                    tagEl.className = 'bg-white/90 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm';
-                    tagEl.textContent = tag.nama_tag;
-                    tagsContainer.appendChild(tagEl);
-                });
-
-                const statusContainer = card.querySelector('.lomba-status-badge');
-                if (lomba.status) {
-                    const statusEl = document.createElement('span');
-                    statusEl.className = 'status-badge';
-                    let statusText = lomba.status.replace(/_/g, ' ');
-
-                    switch (lomba.status) {
-                        case 'pendaftaran_dibuka':
-                            statusEl.classList.add('bg-green-100', 'text-green-800');
-                            statusText = "Buka Pendaftaran";
-                            break;
-                        case 'pendaftaran_ditutup':
-                            statusEl.classList.add('bg-yellow-100', 'text-yellow-800');
-                            statusText = "Pendaftaran Ditutup";
-                            break;
-                        case 'sedang_berlangsung':
-                            statusEl.classList.add('bg-blue-100', 'text-blue-800');
-                            statusText = "Berlangsung";
-                            break;
-                        case 'selesai':
-                            statusEl.classList.add('bg-gray-200', 'text-gray-800');
-                            statusText = "Selesai";
-                            break;
-                        case 'belum_disetujui': // Menangani status internal
-                            statusEl.classList.add('bg-orange-100', 'text-orange-800');
-                            statusText = "Review";
-                            break;
-                        default: 
-                            statusEl.classList.add('bg-gray-100', 'text-gray-600');
-                            break;
-                    }
-                    statusEl.textContent = statusText;
-                    statusContainer.appendChild(statusEl);
-                }
-
-                card.querySelector('.lomba-nama').textContent = lomba.nama_lomba;
-                card.querySelector('.lomba-nama').title = lomba.nama_lomba;
-                card.querySelector('.lomba-penyelenggara').textContent = lomba.penyelenggara || 'Komunitas Mahasiswa';
-                card.querySelector('.lomba-tanggal').textContent = `Batas Daftar: ${formatDate(lomba.tanggal_akhir_registrasi)}`;
-                card.querySelector('.lomba-link-detail').href = link;
-                
-                container.appendChild(card);
+            const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
             });
-            
-            setTimeout(() => {
-                document.querySelectorAll('.fade-in-up').forEach(el => el.classList.add('visible'));
-            }, 100);
 
-        } catch (error) {
-            console.error('Gagal mengambil data lomba:', error);
-            loadingState.style.display = 'none';
-            container.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-red-500 text-lg">Gagal memuat data lomba. Silakan coba lagi nanti.</p></div>`;
-        }
-    }
+            async function fetchLatestLombas() {
+                loadingState.style.display = 'flex';
+                container.innerHTML = '';
+                container.appendChild(loadingState);
 
-    const searchInput = document.getElementById('search-input-welcome');
-    function handleSearch() {
-        const query = searchInput.value.trim();
-        if (query) {
-            window.location.href = `/lombaterkini?search=${encodeURIComponent(query)}`;
-        }
-    }
+                try {
+                    const response = await axios.get('/api/lomba', {
+                        params: {
+                            limit: 6
+                        }
+                    });
 
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSearch();
-        }
-    });
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                    // === PERBAIKAN: HAPUS FILTER JAVASCRIPT ===
+                    // Kita asumsikan backend sudah mengirim data yang benar, atau kita tampilkan apa adanya.
+                    const lombas = response.data.data.data; // Langsung gunakan data tanpa filter.
+
+                    loadingState.style.display = 'none';
+
+                    if (lombas.length === 0) {
+                        container.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-gray-500 text-lg">Saat ini belum ada lomba yang tersedia.</p></div>`;
+                        return;
+                    }
+
+                    lombas.forEach((lomba, index) => {
+                        const card = template.content.cloneNode(true);
+                        const cardElement = card.querySelector('.card-lomba');
+                        cardElement.classList.add('fade-in-up');
+                        cardElement.style.transitionDelay = `${index * 100}ms`;
+
+                        const link = `/lomba/${lomba.id_lomba}`;
+
+                        const imageEl = card.querySelector('.lomba-image');
+                        if (lomba.foto_lomba) {
+                            imageEl.src = lomba.foto_lomba;
+                        } else {
+                            imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=E0E7FF&color=3730A3&size=300`;
+                        }
+                        imageEl.alt = lomba.nama_lomba;
+                        card.querySelector('.lomba-link-img').href = link;
+
+                        const tagsContainer = card.querySelector('.absolute.top-3.left-3');
+                        tagsContainer.innerHTML = '';
+                        lomba.tags.slice(0, 2).forEach(tag => {
+                            const tagEl = document.createElement('span');
+                            tagEl.className = 'bg-white/90 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm';
+                            tagEl.textContent = tag.nama_tag;
+                            tagsContainer.appendChild(tagEl);
+                        });
+
+                        const statusContainer = card.querySelector('.lomba-status-badge');
+                        if (lomba.status) {
+                            const statusEl = document.createElement('span');
+                            statusEl.className = 'status-badge';
+                            let statusText = lomba.status.replace(/_/g, ' ');
+
+                            switch (lomba.status) {
+                                case 'pendaftaran_dibuka':
+                                    statusEl.classList.add('bg-green-100', 'text-green-800');
+                                    statusText = "Buka Pendaftaran";
+                                    break;
+                                case 'pendaftaran_ditutup':
+                                    statusEl.classList.add('bg-yellow-100', 'text-yellow-800');
+                                    statusText = "Pendaftaran Ditutup";
+                                    break;
+                                case 'sedang_berlangsung':
+                                    statusEl.classList.add('bg-blue-100', 'text-blue-800');
+                                    statusText = "Berlangsung";
+                                    break;
+                                case 'selesai':
+                                    statusEl.classList.add('bg-gray-200', 'text-gray-800');
+                                    statusText = "Selesai";
+                                    break;
+                                case 'belum_disetujui': // Menangani status internal
+                                    statusEl.classList.add('bg-orange-100', 'text-orange-800');
+                                    statusText = "Review";
+                                    break;
+                                default:
+                                    statusEl.classList.add('bg-gray-100', 'text-gray-600');
+                                    break;
+                            }
+                            statusEl.textContent = statusText;
+                            statusContainer.appendChild(statusEl);
+                        }
+
+                        card.querySelector('.lomba-nama').textContent = lomba.nama_lomba;
+                        card.querySelector('.lomba-nama').title = lomba.nama_lomba;
+                        card.querySelector('.lomba-penyelenggara').textContent = lomba.penyelenggara || 'Komunitas Mahasiswa';
+                        card.querySelector('.lomba-tanggal').textContent = `Batas Daftar: ${formatDate(lomba.tanggal_akhir_registrasi)}`;
+                        card.querySelector('.lomba-link-detail').href = link;
+
+                        container.appendChild(card);
+                    });
+
+                    setTimeout(() => {
+                        document.querySelectorAll('.fade-in-up').forEach(el => el.classList.add('visible'));
+                    }, 100);
+
+                } catch (error) {
+                    console.error('Gagal mengambil data lomba:', error);
+                    loadingState.style.display = 'none';
+                    container.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-red-500 text-lg">Gagal memuat data lomba. Silakan coba lagi nanti.</p></div>`;
+                }
             }
+
+            const searchInput = document.getElementById('search-input-welcome');
+
+            function handleSearch() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    window.location.href = `/lombaterkini?search=${encodeURIComponent(query)}`;
+                }
+            }
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSearch();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
+            fetchLatestLombas();
         });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
-
-    fetchLatestLombas();
-});
-</script>
+    </script>
 
 </body>
+
 </html>

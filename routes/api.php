@@ -84,12 +84,17 @@ Route::get('/lomba/{id}/tahap', [TahapLombaController::class, 'index']);
 Route::get('/lomba/distribusi-pendaftar', [LombaController::class, 'getDistribusiPendaftar']);
 Route::get('/lomba/berlangsung', [LombaController::class, 'getLombaBerlangsung']);
 Route::get('/lomba/terbaru', [LombaController::class, 'getMyRecentLombas']);
+Route::get('/lomba/kemahasiswaan', [LombaController::class, 'getGlobalStats']);
 Route::patch('/lomba/{id}/setujui', [LombaController::class, 'setujuiLomba']);
 Route::patch('/lomba/{id}/tolak', [LombaController::class, 'tolakLomba']);
 Route::put('/penilaian/{id}', [PenilaianController::class, 'update']);
 Route::put('/prestasi/{prestasi}', [PrestasiController::class, 'update']);
 Route::post('/prestasi/berikan', [PrestasiController::class, 'berikan']);
 Route::post('/penilaian', [PenilaianController::class, 'store']);
+Route::get('/mahasiswa/stats', [MahasiswaController::class, 'getDashboardStats']);
+Route::get('/mahasiswa/{nim}/detail', [MahasiswaController::class, 'showDetail']);
 Route::apiResource('lomba', LombaController::class);
 Route::apiResource('tags', TagController::class)->only(['index']);
 Route::apiResource('mahasiswa', MahasiswaController::class);
+
+
