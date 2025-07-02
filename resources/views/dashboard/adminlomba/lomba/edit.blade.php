@@ -68,6 +68,23 @@
                     </select>
                 </div>
 
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label class="text-black/60 font-semibold">Dosen Pembimbing</label>
+                    <div class="flex items-center gap-6 mt-2">
+                        <!-- Opsi 'Tidak' (default) -->
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="butuh_pembimbing" value="0" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300" checked>
+                            <span>Tidak</span>
+                        </label>
+                        <!-- Opsi 'Ya' -->
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="butuh_pembimbing" value="1" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <span>Ya, Wajib</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Jika 'Ya', maka mahasiswa wajib memilih dosen pembimbing saat mendaftar.</p>
+                </div>
+
                 <!-- Lokasi -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="lokasi" class="text-black/60 font-semibold">Lokasi</label>
@@ -174,6 +191,7 @@
 
                     // --- Isi data Lomba ---
                     const lomba = lombaResponse.data.data;
+                    const butuhPembimbingValue = lomba.butuh_pembimbing ? '1' : '0';
                     document.getElementById('nama_lomba').value = lomba.nama_lomba;
                     document.getElementById('deskripsi').value = lomba.deskripsi;
                     document.getElementById('deskripsi_pengumpulan').value = lomba.deskripsi_pengumpulan;
@@ -184,6 +202,7 @@
                     document.getElementById('tanggal_akhir_registrasi').value = lomba.tanggal_akhir_registrasi.split(' ')[0]; // Ambil bagian tanggal
                     document.getElementById('tanggal_mulai_lomba').value = lomba.tanggal_mulai_lomba.split(' ')[0];
                     document.getElementById('tanggal_selesai_lomba').value = lomba.tanggal_selesai_lomba.split(' ')[0];
+                    document.querySelector(`input[name="butuh_pembimbing"][value="${butuhPembimbingValue}"]`).checked = true;
 
                     handleLokasiChange(); // Tampilkan/sembunyikan input lokasi offline
 
@@ -297,7 +316,10 @@
             // === Menangani submit form untuk UPDATE ===
             lombaForm.addEventListener("submit", async function(event) {
                 event.preventDefault();
-                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                messageDiv.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
 
                 const formData = new FormData(lombaForm);
                 // Choices.js tidak mengisi <select> secara native, jadi kita ambil nilainya manual

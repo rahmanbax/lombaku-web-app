@@ -63,6 +63,23 @@
                     </select>
                 </div>
 
+                <div class="col-span-4 lg:col-span-12 w-full">
+                    <label class="text-black/60 font-semibold">Dosen Pembimbing</label>
+                    <div class="flex items-center gap-6 mt-2">
+                        <!-- Opsi 'Tidak' (default) -->
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="butuh_pembimbing" value="0" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300" checked>
+                            <span>Tidak</span>
+                        </label>
+                        <!-- Opsi 'Ya' -->
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="butuh_pembimbing" value="1" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <span>Ya, Wajib</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Jika 'Ya', maka mahasiswa wajib memilih dosen pembimbing saat mendaftar.</p>
+                </div>
+
                 <!-- lokasi -->
                 <div class="col-span-4 lg:col-span-12 w-full">
                     <label for="lokasi" class="text-black/60 font-semibold">Lokasi</label>

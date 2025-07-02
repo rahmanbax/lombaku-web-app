@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="col-span-4 lg:col-span-12 w-full">
-                    <label class="text-black/60 font-semibold">Membutuhkan Dosen Pembimbing?</label>
+                    <label class="text-black/60 font-semibold">Dosen Pembimbing</label>
                     <div class="flex items-center gap-6 mt-2">
                         <!-- Opsi 'Tidak' (default) -->
                         <label class="flex items-center gap-2 cursor-pointer">

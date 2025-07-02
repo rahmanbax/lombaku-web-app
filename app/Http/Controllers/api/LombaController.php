@@ -269,6 +269,7 @@ class LombaController extends Controller
             'tahap.*.id'          => 'nullable|integer|exists:tahap_lomba,id_tahap', // ID boleh null (untuk tahap baru)
             'tahap.*.nama'        => 'required|string|max:100',
             'tahap.*.deskripsi'   => 'nullable|string',
+            'butuh_pembimbing' => 'sometimes|required|boolean'
         ]);
 
         if ($validator->fails()) {
