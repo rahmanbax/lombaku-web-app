@@ -9,6 +9,9 @@ use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\Api\AdminProdiController;
 use App\Http\Controllers\API\DosenController;
 use App\Http\Controllers\API\HasilLombaController;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
+
 // ==========================================================
 // Rute Dosen
 // ==========================================================
