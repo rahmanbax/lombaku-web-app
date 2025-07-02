@@ -123,7 +123,7 @@
             <h3 class="text-lg font-medium text-gray-900">Alasan Penolakan</h3>
             <form id="tolak-lomba-form" class="">
                 <input type="hidden" id="tolak-lomba-id">
-                <textarea id="alasan-penolakan-textarea" class="mt-2 w-full p-2 h-20 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alasan penolakkan lomba" required></textarea>
+                <textarea id="alasan-penolakan-textarea" rows="2" class="mt-2 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alasan penolakkan lomba" required></textarea>
                 <div class="items-center flex justify-end gap-2 mt-2">
                     <button id="batal-tolak-btn" type="button" class="px-4 py-2 rounded-md hover:bg-gray-100 text-black border border-gray-300">Batal</button>
                     <button id="kirim-penolakan-btn" type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Tolak</button>

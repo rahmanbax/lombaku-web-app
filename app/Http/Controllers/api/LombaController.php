@@ -23,7 +23,7 @@ class LombaController extends Controller
      */
     public function index(Request $request)
     {
-        
+
         // Mulai query builder dengan eager loading
         $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
 
@@ -135,6 +135,12 @@ class LombaController extends Controller
                 ? $request->penyelenggara
                 : $user->nama;
 
+            $statusLomba = 'belum disetujui';
+
+            if ($user && $user->role === 'kemahasiswaan') {
+                $statusLomba = 'disetujui';
+            }
+
             // Buat lomba dengan path gambar dari storage
             $lomba = Lomba::create([
                 'nama_lomba'    => $request->nama_lomba,
@@ -143,7 +149,7 @@ class LombaController extends Controller
                 'lokasi'        => $request->lokasi,
                 'lokasi_offline' => $request->lokasi === 'offline' ? $request->lokasi_offline : null,
                 'tingkat'       => $request->tingkat,
-                'status'        => 'belum disetujui',
+                'status'        => $statusLomba,
                 'penyelenggara' => $penyelenggaraNama,
                 'tanggal_akhir_registrasi' => $request->tanggal_akhir_registrasi,
                 'tanggal_mulai_lomba' => $request->tanggal_mulai_lomba,

@@ -21,6 +21,11 @@
                 <!-- <a href="/logout" class="px-3 py-2 hover:bg-gray-100 text-red-500 flex items-center gap-2"><span class="material-symbols-outlined">logout</span>Logout</a> -->
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
+                    <!-- edit profil -->
+                    <a href="/dashboard/adminlomba/profile" class="px-3 py-2 hover:bg-gray-100 flex items-center gap-2 w-full cursor-pointer"><span class="material-symbols-outlined text-gray-500">
+                            person
+                        </span>Edit Profil
+                    </a>
                     <button type="submit" class="px-3 py-2 hover:bg-gray-100 text-red-500 flex items-center gap-2 w-full cursor-pointer"><span class="material-symbols-outlined">logout</span>Logout
                     </button>
                 </form>

@@ -56,6 +56,7 @@ class AuthController extends Controller
                 Log::info('Memulai DB Transaction.');
 
                 $user = User::create([
+                    'foto_profile' => 'foto_profile/default-profile.png', 
                     'password' => Hash::make($request->password),
                     'nama' => $request->nama,
                     'email' => $request->email,
