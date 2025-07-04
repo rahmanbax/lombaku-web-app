@@ -40,8 +40,8 @@
         
         <div id="filter-container" class="mb-6 flex justify-center md:justify-start items-center space-x-2 bg-white p-2 rounded-full shadow-sm max-w-max">
             <button class="filter-btn active" data-filter="all"><i class="fas fa-list-ul mr-2"></i>Semua</button>
-            <button class="filter-btn" data-filter="lomba"><i class="fas fa-flag-checkered mr-2"></i>Pendaftaran Lomba</button>
-            <button class="filter-btn" data-filter="prestasi"><i class="fas fa-medal mr-2"></i>Pengajuan Prestasi</button>
+            <button class="filter-btn" data-filter="lomba"><i class="fas fa-flag-checkered mr-2"></i>Partisipasi Lomba</button>
+            <button class="filter-btn" data-filter="prestasi"><i class="fas fa-medal mr-2"></i>Prestasi Eksternal</button>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -101,7 +101,7 @@
         </div>
         <div class="bg-gray-900 py-6">
             <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const paginationContainer = document.getElementById('pagination-container');
     const template = document.getElementById('history-item-template');
     
-    // Hapus `baseUrl` karena kita akan menggunakan URL relatif
     let currentFilter = 'all'; 
     const filterContainer = document.getElementById('filter-container');
 
@@ -126,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = ''; 
         container.appendChild(loadingState);
         
-        // Buat URL dengan Axios, ini lebih aman daripada constructor URL
         try {
             const response = await axios.get(url, {
                 params: {
@@ -147,11 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         
         if (items.length === 0) {
-            let message = "Anda belum pernah mendaftar lomba atau mengajukan prestasi.";
+            let message = "Anda belum memiliki riwayat kegiatan.";
             if(currentFilter === 'lomba') {
-                message = "Anda belum pernah mendaftar lomba apapun.";
+                message = "Anda belum pernah berpartisipasi dalam lomba.";
             } else if (currentFilter === 'prestasi') {
-                message = "Anda belum pernah mengajukan prestasi apapun.";
+                message = "Anda belum memiliki pengajuan prestasi eksternal.";
             }
             container.innerHTML = `<div class="p-12 text-center text-gray-500"><i class="fas fa-box-open fa-3x mb-4 text-gray-300"></i><h3 class="text-xl font-semibold">Belum Ada Riwayat</h3><p>${message}</p></div>`;
             return;
@@ -174,35 +172,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const dosenInfoContainer = card.querySelector('.item-dosen-info');
             const timInfoContainer = card.querySelector('.item-tim-info');
             
-            if (item.type.toLowerCase().includes('prestasi')) {
+            // Logika untuk menampilkan aksi dan ikon
+            if (item.sertifikat_path) { // Jika ada sertifikat, prioritaskan itu
                 itemIcon.innerHTML = `<i class="fas fa-medal text-yellow-500"></i>`;
                 itemIcon.className += ' bg-yellow-100';
-                if (item.sertifikat_path) {
-                    // === INILAH PERBAIKAN UTAMANYA ===
-                    // Membuat URL yang benar ke folder public/storage
-                    actionsContainer.innerHTML = `<a href="/storage/${item.sertifikat_path}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-certificate mr-1"></i> Lihat Sertifikat</a>`;
-                }
-            } else { 
+                actionsContainer.innerHTML = `<a href="/storage/${item.sertifikat_path}" target="_blank" download class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-certificate mr-1"></i> Lihat Sertifikat</a>`;
+            } else { // Jika tidak ada sertifikat, tampilkan aksi default
                 itemIcon.innerHTML = `<i class="fas fa-flag-checkered text-indigo-500"></i>`;
                 itemIcon.className += ' bg-indigo-100';
-
                 if (item.action_url && item.action_text) {
                      actionsContainer.innerHTML = `<a href="${item.action_url}" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-eye mr-1"></i> ${item.action_text}</a>`;
                 } else {
                     actionsContainer.innerHTML = `<span class="text-gray-400 text-sm">Tidak ada aksi</span>`;
                 }
-
-                if (item.nama_dosen) {
-                    dosenInfoContainer.innerHTML = `<p class="flex items-center text-gray-600"><i class="fas fa-user-tie fa-fw mr-2 text-gray-400"></i>Dosen: <strong>${item.nama_dosen}</strong></p>`;
-                    dosenInfoContainer.classList.remove('hidden');
-                }
-
-                if (item.nama_tim && item.members && item.members.length > 0) {
-                    const membersHtml = item.members.map(nama => `<span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md">${nama}</span>`).join(' ');
-                    timInfoContainer.innerHTML = `<div class="flex items-start text-gray-600"><i class="fas fa-users fa-fw mr-2 mt-0.5 text-gray-400"></i><div><p>Tim: <strong>${item.nama_tim}</strong></p><div class="pl-0 mt-1 flex flex-wrap gap-1.5">${membersHtml}</div></div></div>`;
-                    timInfoContainer.classList.remove('hidden');
-                }
             }
+            
+            // Menampilkan info dosen dan tim (tidak berubah)
+            if (item.nama_dosen) {
+                dosenInfoContainer.innerHTML = `<p class="flex items-center text-gray-600"><i class="fas fa-user-tie fa-fw mr-2 text-gray-400"></i>Dosen: <strong>${item.nama_dosen}</strong></p>`;
+                dosenInfoContainer.classList.remove('hidden');
+            }
+            if (item.nama_tim && item.members && item.members.length > 0) {
+                const membersHtml = item.members.map(nama => `<span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md">${nama}</span>`).join(' ');
+                timInfoContainer.innerHTML = `<div class="flex items-start text-gray-600"><i class="fas fa-users fa-fw mr-2 mt-0.5 text-gray-400"></i><div><p>Tim: <strong>${item.nama_tim}</strong></p><div class="pl-0 mt-1 flex flex-wrap gap-1.5">${membersHtml}</div></div></div>`;
+                timInfoContainer.classList.remove('hidden');
+            }
+
             container.appendChild(card);
         });
     };

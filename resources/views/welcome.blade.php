@@ -94,6 +94,16 @@
             <div class="p-6">
                 <p class="lomba-penyelenggara text-sm text-gray-500 mb-2 capitalize"></p>
                 <h3 class="lomba-nama text-xl font-bold text-gray-800 mb-4 h-14" title=""></h3>
+                
+                <!-- ============================================= -->
+                <!-- === PERUBAHAN 1: TAMBAHKAN ELEMEN DI SINI === -->
+                <!-- ============================================= -->
+                <div class="flex items-center text-gray-600 text-sm mb-3">
+                    <i class="lomba-jenis-icon fas fa-fw mr-2 text-blue-500"></i>
+                    <span class="lomba-jenis-text"></span>
+                </div>
+                <!-- ============================================= -->
+
                 <div class="flex items-center text-gray-600 text-sm">
                     <i class="fas fa-calendar-alt mr-2 text-red-500"></i>
                     <span class="lomba-tanggal"></span>
@@ -117,7 +127,7 @@
         </div>
         <div class="bg-gray-900 py-6">
             <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -140,20 +150,12 @@
                 container.appendChild(loadingState);
 
                 try {
-                    // ======================================================
-                    // === INI BAGIAN YANG DIPERBAIKI =======================
-                    // ======================================================
-                    // Tambahkan parameter 'status' untuk meminta hanya lomba yang
-                    // statusnya 'disetujui' atau 'berlangsung'.
                     const response = await axios.get('/api/lomba', {
                         params: {
                             limit: 6,
                             status: ['disetujui', 'berlangsung']
                         }
                     });
-                    // ======================================================
-                    // === AKHIR DARI PERBAIKAN =============================
-                    // ======================================================
 
                     const lombas = response.data.data.data;
                     loadingState.style.display = 'none';
@@ -173,11 +175,9 @@
 
                         const imageEl = card.querySelector('.lomba-image');
 
-                        // Gunakan foto_lomba_url yang sudah dikirim dari API
                         if (lomba.foto_lomba_url) {
                             imageEl.src = lomba.foto_lomba_url;
                         } else {
-                            // Fallback jika tidak ada gambar
                             imageEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lomba.nama_lomba)}&background=E0E7FF&color=3730A3&size=300`;
                         }
 
@@ -232,6 +232,25 @@
                         card.querySelector('.lomba-nama').textContent = lomba.nama_lomba;
                         card.querySelector('.lomba-nama').title = lomba.nama_lomba;
                         card.querySelector('.lomba-penyelenggara').textContent = lomba.penyelenggara || 'Komunitas Mahasiswa';
+                        
+                        // ==============================================================
+                        // === PERUBAHAN 2: TAMBAHKAN LOGIKA JAVASCRIPT DI SINI ===
+                        // ==============================================================
+                        const jenisIconEl = card.querySelector('.lomba-jenis-icon');
+                        const jenisTextEl = card.querySelector('.lomba-jenis-text');
+
+                        if (lomba.jenis_lomba === 'individu') {
+                            jenisIconEl.classList.add('fa-user');
+                            jenisTextEl.textContent = 'Individu';
+                        } else if (lomba.jenis_lomba === 'kelompok') {
+                            jenisIconEl.classList.add('fa-users');
+                            jenisTextEl.textContent = 'Kelompok';
+                        } else {
+                            // Sembunyikan elemen jika jenis lomba tidak ada
+                            jenisIconEl.parentElement.style.display = 'none';
+                        }
+                        // ==============================================================
+
                         card.querySelector('.lomba-tanggal').textContent = `Batas Daftar: ${formatDate(lomba.tanggal_akhir_registrasi)}`;
                         card.querySelector('.lomba-link-detail').href = link;
 
@@ -248,8 +267,7 @@
                     container.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-red-500 text-lg">Gagal memuat data lomba. Silakan coba lagi nanti.</p></div>`;
                 }
             }
-
-            // ... sisa kode lainnya (search, observer) tetap sama ...
+            
             const searchInput = document.getElementById('search-input-welcome');
 
             function handleSearch() {

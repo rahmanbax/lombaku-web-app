@@ -75,6 +75,19 @@
                             <p id="lomba-tingkat" class="text-gray-600 capitalize">-</p>
                         </div>
                     </div>
+
+                    <!-- ============================================= -->
+                    <!-- === PERUBAHAN 1: TAMBAHKAN ELEMEN DI SINI === -->
+                    <!-- ============================================= -->
+                    <div class="flex items-start">
+                        <i id="lomba-jenis-icon" class="fas fa-lg text-blue-500 mt-1 mr-4"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Jenis Lomba</p>
+                            <p id="lomba-jenis-text" class="text-gray-600 capitalize">-</p>
+                        </div>
+                    </div>
+                    <!-- ============================================= -->
+
                     <div class="flex items-start">
                         <i class="fas fa-map-marker-alt fa-lg text-blue-500 mt-1 mr-4"></i>
                         <div>
@@ -106,14 +119,24 @@
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-20">
-        {{-- Konten Footer --}}
+ <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                    Daftar sebagai Admin Lomba
+                </button>
+            </div>
+        </div>
+        <div class="bg-gray-900 py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ... (kode Anda yang lain untuk mengambil elemen DOM)
         const loadingOverlay = document.getElementById('loading-overlay');
         const mainContent = document.getElementById('main-content');
         const bookmarkBtn = document.getElementById('bookmark-btn');
@@ -121,7 +144,6 @@
         const pathParts = window.location.pathname.split('/');
         const lombaId = pathParts[pathParts.length - 1];
 
-        // ... (fungsi formatDate() Anda)
         function formatDate(dateString) {
             if (!dateString) return '-';
             const date = new Date(dateString);
@@ -132,15 +154,12 @@
             });
         }
 
-        // ... (fungsi loadLombaData() Anda)
-        // Fungsi ini sudah benar karena mengambil status is_bookmarked dari API LombaController@show
         async function loadLombaData() {
             if (!lombaId || isNaN(lombaId)) {
                 showError('ID Lomba tidak valid.');
                 return;
             }
             try {
-                // Panggilan API ini akan mengembalikan data lomba termasuk 'is_bookmarked'
                 const response = await axios.get(`/api/lomba/${lombaId}`);
                 if (response.data.success) {
                     renderPage(response.data.data);
@@ -160,8 +179,6 @@
             }
         }
 
-        // ... (fungsi renderPage() Anda)
-        // Fungsi ini sudah benar, terutama pada baris updateBookmarkButton(lomba.is_bookmarked);
         function renderPage(lomba) {
             document.title = `${lomba.nama_lomba} - Lombaku`;
 
@@ -175,6 +192,27 @@
             document.getElementById('lomba-nama').textContent = lomba.nama_lomba;
             document.getElementById('penyelenggara-nama').textContent = `Diselenggarakan oleh ${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui')}`;
             document.getElementById('lomba-tingkat').textContent = lomba.tingkat;
+            
+            // ==========================================================
+            // === PERUBAHAN 2: TAMBAHKAN LOGIKA JAVASCRIPT DI SINI ===
+            // ==========================================================
+            const jenisIconEl = document.getElementById('lomba-jenis-icon');
+            const jenisTextEl = document.getElementById('lomba-jenis-text');
+            // Reset kelas ikon sebelumnya
+            jenisIconEl.className = 'fas fa-lg text-blue-500 mt-1 mr-4';
+
+            if (lomba.jenis_lomba === 'individu') {
+                jenisIconEl.classList.add('fa-user');
+                jenisTextEl.textContent = 'Individu';
+            } else if (lomba.jenis_lomba === 'kelompok') {
+                jenisIconEl.classList.add('fa-users');
+                jenisTextEl.textContent = 'Kelompok';
+            } else {
+                jenisIconEl.classList.add('fa-question-circle');
+                jenisTextEl.textContent = 'Tidak Ditentukan';
+            }
+            // ==========================================================
+
             document.getElementById('lomba-lokasi').textContent = lomba.lokasi;
             document.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
             document.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
@@ -189,7 +227,6 @@
                 tagsContainer.appendChild(tagEl);
             });
 
-            // Bagian penting: Mengatur status awal tombol bookmark
             updateBookmarkButton(lomba.is_bookmarked);
 
             const today = new Date();
@@ -208,7 +245,6 @@
             }
         }
         
-        // ... (fungsi updateBookmarkButton() Anda, ini sudah benar)
         function updateBookmarkButton(isBookmarked) {
             const icon = bookmarkBtn.querySelector('i');
             const text = bookmarkBtn.querySelector('span');
@@ -227,36 +263,21 @@
             bookmarkBtn.dataset.bookmarked = isBookmarked;
         }
 
-        // Ini adalah fungsi inti yang sudah Anda buat, dan ini sudah benar!
         async function toggleBookmark() {
             const isCurrentlyBookmarked = bookmarkBtn.dataset.bookmarked === 'true';
-            
-            // Optimistic UI Update: Langsung ubah tampilan tombol tanpa menunggu response API
             updateBookmarkButton(!isCurrentlyBookmarked); 
             bookmarkBtn.disabled = true;
 
             try {
                 let response;
                 if (isCurrentlyBookmarked) {
-                    // Jika sudah di-bookmark, kirim request DELETE untuk menghapus
                     response = await axios.delete(`/api/bookmarks/${lombaId}`);
                 } else {
-                    // Jika belum, kirim request POST untuk menambahkan
                     response = await axios.post('/api/bookmarks', { id_lomba: lombaId });
                 }
                 
-                // Tampilkan pesan sukses dari API
-                if (response.data && response.data.message) {
-                    // Anda bisa menggunakan library notifikasi yang lebih canggih (seperti Toastify)
-                    // tapi alert sudah cukup untuk fungsionalitas dasar.
-                    // alert(response.data.message); 
-                    // Kita tidak perlu alert agar user experience lebih mulus
-                }
-
             } catch (error) {
                 console.error('Error toggling bookmark:', error);
-                
-                // Rollback UI: Kembalikan tampilan tombol ke state semula jika API gagal
                 updateBookmarkButton(isCurrentlyBookmarked); 
 
                 if (error.response && error.response.status === 401) {
@@ -274,7 +295,6 @@
 
         function showError(message) {
             const container = document.getElementById('lomba-detail-container');
-            // Menggunakan innerHTML agar bisa merender tag <a> pada pesan error
             container.innerHTML = `<div class="text-center py-20 col-span-full"><p class="text-red-500 text-lg">${message}</p></div>`;
         }
         

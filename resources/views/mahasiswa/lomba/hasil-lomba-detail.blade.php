@@ -12,14 +12,40 @@
 
     <main class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
+            <!-- Header Halaman -->
             <div class="mb-8">
                 <a href="{{ route('hasil-lomba.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali ke Daftar Hasil Lomba
                 </a>
                 <h1 class="text-3xl font-bold text-gray-800">{{ $registrasi->lomba->nama_lomba }}</h1>
-                <p class="text-gray-600">Detail hasil penilaian untuk partisipasi Anda.</p>
+                <p class="text-gray-600">Detail hasil partisipasi Anda.</p>
+            </div>
+            
+            <!-- Panel Hasil Prestasi dan Sertifikat -->
+            <div class="bg-white rounded-xl shadow-md border overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Hasil Prestasi</h2>
+                    @if(isset($prestasi) && $prestasi)
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <p class="font-bold text-lg text-green-800">Selamat, Anda meraih: {{ $prestasi->peringkat }}</p>
+                                <p class="text-sm text-green-700 mt-1">Sertifikat Anda tersedia untuk diunduh.</p>
+                            </div>
+                            <a href="{{ Storage::url($prestasi->sertifikat_path) }}" 
+                               download 
+                               class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto text-center">
+                                <i class="fas fa-download mr-2"></i>Download Sertifikat
+                            </a>
+                        </div>
+                    @else
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md">
+                            <p class="text-blue-800">Sertifikat partisipasi atau pemenang akan tersedia di sini setelah diberikan oleh penyelenggara lomba.</p>
+                        </div>
+                    @endif
+                </div>
             </div>
 
+            <!-- Kartu Rincian Penilaian -->
             <div class="bg-white rounded-xl shadow-md border overflow-hidden">
                 <div class="p-6">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-6">Rincian Penilaian</h2>
@@ -75,7 +101,7 @@
         </div>
         <div class="bg-gray-900 py-6">
             <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">&copy; lombaku@2025. All rights reserved.</p>
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
             </div>
         </div>
     </footer>
