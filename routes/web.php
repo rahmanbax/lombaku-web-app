@@ -98,6 +98,7 @@ Route::get('/hasil-lomba', [HasilLombaController::class, 'index'])
 Route::get('/hasil-lomba/{registrasi}', [HasilLombaController::class, 'show'])
     ->middleware('auth')
     ->name('hasil-lomba.show');
+
 // ==========================================================
 // Rute Autentikasi
 // ==========================================================

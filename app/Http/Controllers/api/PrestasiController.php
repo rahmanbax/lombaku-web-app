@@ -19,46 +19,49 @@ class PrestasiController extends Controller
      * Menyimpan pengajuan rekognisi prestasi baru.
      * POST /api/prestasi
      */
-    public function store(Request $request)
-    {
-        // 1. Validasi input dari form
-        $validatedData = $request->validate([
-            'nama_lomba_eksternal'  => 'required|string|max:255',
-            'penyelenggara_eksternal' => 'required|string|max:255',
-            'tingkat'               => 'required|in:internal,nasional,internasional',
-            'peringkat'             => 'required|string|max:100',
-            'tanggal_diraih'        => 'required|date',
-            'sertifikat'            => 'required|file|mimes:pdf,jpg,png,jpeg|max:2048', // Wajib ada file sertifikat
-        ]);
+    
+public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'nama_lomba_eksternal'  => 'required|string|max:255',
+        'penyelenggara_eksternal' => 'required|string|max:255',
+        'tingkat'               => 'required|in:internal,nasional,internasional',
+        'peringkat'             => 'required|string|max:100',
+        'tanggal_diraih'        => 'required|date',
+        'sertifikat'            => 'required_without:existing_sertifikat_path|nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
+        'existing_sertifikat_path' => 'nullable|string',
+    ]);
 
-        // 2. Handle file upload untuk sertifikat
+    $sertifikatPath = null;
+    
+    if ($request->hasFile('sertifikat')) {
         $sertifikatPath = $request->file('sertifikat')->store('sertifikat_prestasi', 'public');
-
-        // 3. Buat record baru di tabel 'prestasi'
-        Prestasi::create([
-            'id_user' => Auth::id(), // ID mahasiswa yang mengajukan
-            'lomba_dari' => 'eksternal', // Menandakan ini dari pengajuan luar
-
-            // Kolom dari hasil validasi
-            'nama_lomba_eksternal'  => $validatedData['nama_lomba_eksternal'],
-            'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
-            'tingkat'               => $validatedData['tingkat'],
-            'peringkat'             => $validatedData['peringkat'],
-            'tanggal_diraih'        => $validatedData['tanggal_diraih'],
-
-            // Path file sertifikat yang sudah di-upload
-            'sertifikat_path'       => $sertifikatPath,
-
-            // Status default untuk verifikasi
-            'status_verifikasi'     => 'menunggu',
-        ]);
-
-        // 4. Kirim respons sukses
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengajuan rekognisi prestasi berhasil dikirim! Silakan tunggu proses verifikasi.'
-        ], 201);
+    } 
+    elseif ($request->filled('existing_sertifikat_path')) {
+        $sertifikatPath = $request->existing_sertifikat_path;
     }
+
+    if (is_null($sertifikatPath)) {
+        return response()->json(['message' => 'Bukti sertifikat wajib ada.'], 422);
+    }
+
+    Prestasi::create([
+        'id_user' => Auth::id(), 
+        'lomba_dari' => 'eksternal',
+        'nama_lomba_eksternal'  => $validatedData['nama_lomba_eksternal'],
+        'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
+        'tingkat'               => $validatedData['tingkat'],
+        'peringkat'             => $validatedData['peringkat'],
+        'tanggal_diraih'        => $validatedData['tanggal_diraih'],
+        'sertifikat_path'       => $sertifikatPath,
+        'status_verifikasi'     => 'menunggu',
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Pengajuan rekognisi prestasi berhasil dikirim!'
+    ], 201);
+}
 
     public function berikan(Request $request)
     {

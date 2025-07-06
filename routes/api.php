@@ -32,6 +32,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookmarks', [BookmarkController::class, 'store']);
     Route::delete('/bookmarks/{id_lomba}', [BookmarkController::class, 'destroy']);
     Route::get('/lomba/{id}/pendaftar', [LombaController::class, 'getPendaftar']);
+    Route::post('/prestasi', [PrestasiController::class, 'store']); // Untuk form eksternal
+    Route::post('/prestasi/internal', [PrestasiController::class, 'storeInternal']); // Untuk klaim awal
+    Route::get('/prestasi/internal-untuk-rekognisi', [PrestasiController::class, 'getInternalUntukRekognisi']); // [ROUTE BARU/PENTING]
+    Route::get('/prestasi/lomba-yang-bisa-diklaim', [PrestasiController::class, 'getLombaUntukDiklaim']);
 
     // ==========================================================
     // === TAMBAHKAN ROUTE INI UNTUK MENANGANI PENDAFTARAN LOMBA ===
