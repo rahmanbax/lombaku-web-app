@@ -6,46 +6,43 @@
     <title>Arsip Lomba - Admin Prodi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Poppins', sans-serif; } </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-slate-50">
     <div class="flex h-screen">
-        
         @include('admin.nav-adminprodi')
 
-        <!-- Main Content -->
         <main class="flex-1 overflow-y-auto">
-            <div class="container mx-auto px-6 py-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-6">Arsip Lomba</h1>
-                <p class="text-gray-600 mb-6">Daftar semua lomba yang telah selesai.</p>
+            <div class="p-6 md:p-10">
+                <h1 class="text-3xl font-bold text-slate-800 mb-2">Arsip Lomba</h1>
+                <p class="text-slate-600 mb-8">Daftar semua lomba yang telah selesai.</p>
 
-                <!-- Search Section -->
-                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
                     <div>
-                        <label for="search-input" class="text-sm font-medium text-gray-700">Cari Lomba</label>
-                        <input type="text" id="search-input" placeholder="Ketik nama lomba atau penyelenggara..." class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <label for="search-input" class="text-sm font-medium text-slate-600">Cari Lomba</label>
+                        <input type="text" id="search-input" placeholder="Ketik nama lomba atau penyelenggara..." class="mt-2 block w-full px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                 </div>
 
-                <!-- Table Section -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Lomba</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Penyelenggara</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Selesai</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nama Lomba</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Penyelenggara</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Tanggal Selesai</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="relative px-6 py-3"><span class="sr-only">Aksi</span></th>
                                 </tr>
                             </thead>
-                            <tbody id="arsip-tbody" class="bg-white divide-y divide-gray-200">
-                                <!-- Data arsip akan dirender di sini -->
-                            </tbody>
+                            <tbody id="arsip-tbody" class="bg-white divide-y divide-slate-200"></tbody>
                         </table>
                     </div>
-                    <!-- Pagination Container -->
-                    <div id="pagination-links" class="p-4 border-t"></div>
+                    <div id="pagination-links" class="p-6 border-t border-slate-200 flex justify-center"></div>
                 </div>
             </div>
         </main>
@@ -60,15 +57,10 @@
         let searchTimeout;
 
         const fetchArchives = async (url = API_URL) => {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">Memuat data...</td></tr>`;
-            
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-500">Memuat data arsip...</td></tr>`;
             try {
-                const config = {
-                    params: { search: searchInput.value }
-                };
-                
+                const config = { params: { search: searchInput.value } };
                 const response = await axios.get(url, config);
-                
                 renderTable(response.data.data);
                 renderPagination(response.data);
             } catch (error) {
@@ -80,23 +72,17 @@
         const renderTable = (items) => {
             tbody.innerHTML = '';
             if (items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">Tidak ada data arsip yang ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-500">Tidak ada data arsip yang ditemukan.</td></tr>`;
                 return;
             }
-
             items.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">${item.nama_lomba}</div>
-                        <div class="text-sm text-gray-500">${item.tingkat}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${item.penyelenggara}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${new Date(item.tanggal_selesai_lomba).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap"><div class="font-medium text-slate-800">${item.nama_lomba}</div><div class="text-sm text-slate-500">${item.tingkat}</div></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${item.penyelenggara}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${new Date(item.tanggal_selesai_lomba).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${getStatusBadge(item.status)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                        <a href="/adminprodi/lomba/${item.id_lomba}" class="text-indigo-600 hover:text-indigo-900">Lihat Detail</a>
-                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"><a href="/adminprodi/lomba/${item.id_lomba}" class="text-blue-600 hover:text-blue-800">Lihat Detail</a></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -105,37 +91,29 @@
         const renderPagination = (data) => {
             paginationContainer.innerHTML = '';
             if (!data || !data.links || data.last_page <= 1) return;
-            
             const nav = document.createElement('nav');
-            const linksHtml = data.links.map(link => {
-                if (!link.url) {
-                    return `<span class="px-3 py-1 mx-1 border rounded text-sm text-gray-400 cursor-not-allowed">${link.label}</span>`;
-                }
-                return `<a href="${link.url}" class="pagination-btn px-3 py-1 mx-1 border rounded text-sm bg-white text-gray-700 hover:bg-gray-100 ${link.active ? 'bg-blue-500 text-white border-blue-500' : ''}">${link.label}</a>`;
-            }).join('');
-            nav.innerHTML = `<div class="flex items-center justify-center">${linksHtml}</div>`;
+            data.links.forEach(link => {
+                const linkElement = document.createElement('a');
+                linkElement.href = link.url || '#';
+                linkElement.innerHTML = link.label;
+                let classes = 'pagination-btn px-4 py-2 mx-1 text-sm rounded-md transition ';
+                if (link.active) { classes += 'bg-blue-600 text-white shadow-sm'; }
+                else if (!link.url) { classes += 'bg-slate-100 text-slate-400 cursor-not-allowed'; }
+                else { classes += 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; }
+                linkElement.className = classes;
+                if (link.url) { linkElement.addEventListener('click', (e) => { e.preventDefault(); fetchArchives(e.target.href); }); }
+                nav.appendChild(linkElement);
+            });
             paginationContainer.appendChild(nav);
         };
 
         const getStatusBadge = (status) => {
-            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+            return `<span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
         };
 
-        searchInput.addEventListener('keyup', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                fetchArchives();
-            }, 500);
-        });
-        
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('pagination-btn')) {
-                e.preventDefault();
-                fetchArchives(e.target.href);
-            }
-        });
+        searchInput.addEventListener('keyup', () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { fetchArchives(); }, 500); });
+        document.addEventListener('click', function(e) { if (e.target.classList.contains('pagination-btn')) { e.preventDefault(); fetchArchives(e.target.href); } });
 
-        // Initial fetch
         fetchArchives();
     });
     </script>

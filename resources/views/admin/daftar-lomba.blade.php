@@ -7,28 +7,37 @@
     <title>Daftar Lomba - Admin Prodi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- Menambahkan Google Font 'Poppins' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-slate-50">
 
     <div class="flex h-screen">
-      <!-- Sidebar -->
-      @include('admin.nav-adminprodi')
+        <!-- Sidebar -->
+        @include('admin.nav-adminprodi')
 
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto">
-            <div class="container mx-auto px-6 py-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-4">Manajemen Data Lomba</h1>
+            <div class="p-6 md:p-10">
+                <h1 class="text-3xl font-bold text-slate-800 mb-8">Manajemen Data Lomba</h1>
 
-                <!-- Filter dan Pencarian -->
-                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Filter dan Pencarian (Desain Ulang) -->
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label for="search" class="text-sm font-medium text-gray-700">Cari Lomba</label>
-                            <input type="text" id="search-input" placeholder="Nama lomba atau penyelenggara..." class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <label for="search-input" class="text-sm font-medium text-slate-600">Cari Lomba</label>
+                            <input type="text" id="search-input" placeholder="Nama lomba atau penyelenggara..." class="mt-2 block w-full px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         </div>
                         <div>
-                            <label for="status-filter" class="text-sm font-medium text-gray-700">Status</label>
-                            <select id="status-filter" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <label for="status-filter" class="text-sm font-medium text-slate-600">Status</label>
+                            <select id="status-filter" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 <option value="">Semua Status</option>
                                 <option value="belum disetujui">Belum Disetujui</option>
                                 <option value="ditolak">Ditolak</option>
@@ -38,31 +47,31 @@
                             </select>
                         </div>
                          <div>
-                            <label for="reset" class="text-sm font-medium text-gray-700 invisible">Reset</label>
-                            <button id="reset-filter-btn" class="mt-1 w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">Reset Filter</button>
+                            <label for="reset" class="text-sm font-medium text-slate-700 invisible">Aksi</label>
+                            <button id="reset-filter-btn" class="mt-2 w-full bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition">Reset Filter</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tabel Daftar Lomba -->
-                <div class="bg-white rounded-lg shadow-md">
+                <!-- Tabel Daftar Lomba (Desain Ulang) -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Lomba</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Penyelenggara</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nama Lomba</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Penyelenggara</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Periode</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="relative px-6 py-3"><span class="sr-only">Aksi</span></th>
                                 </tr>
                             </thead>
-                            <tbody id="lomba-table-body" class="bg-white divide-y divide-gray-200">
+                            <tbody id="lomba-table-body" class="bg-white divide-y divide-slate-200">
                                 <!-- Data akan dimuat oleh JavaScript -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="pagination-links" class="p-4 border-t">
+                    <div id="pagination-links" class="p-6 border-t border-slate-200 flex justify-center">
                         <!-- Paginasi akan dimuat oleh JavaScript -->
                     </div>
                 </div>
@@ -71,7 +80,6 @@
     </div>
 
     <script>
-        // Script JS tidak perlu diubah
         document.addEventListener('DOMContentLoaded', function() {
             const API_URL = '/api/admin-prodi/lombas'; 
             const tableBody = document.getElementById('lomba-table-body');
@@ -82,86 +90,100 @@
             let searchTimeout;
 
             async function fetchLombas(url = API_URL) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Memuat data...</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-sm text-slate-500">Memuat data lomba...</td></tr>`;
                 try {
-                    const params = new URLSearchParams();
-                    const search = searchInput.value;
-                    const status = statusFilter.value;
-                    if (search) params.append('search', search);
-                    if (status) params.append('status', status);
-                    const finalUrl = `${url}?${params.toString()}`;
-                    const response = await axios.get(finalUrl);
+                    const config = {
+                        params: {
+                            search: searchInput.value,
+                            status: statusFilter.value
+                        }
+                    };
+                    const pageUrl = new URL(url, window.location.origin);
+                    if (pageUrl.searchParams.has('page')) {
+                        config.params.page = pageUrl.searchParams.get('page');
+                    }
+                    const response = await axios.get(API_URL, config);
                     renderTable(response.data.data);
                     renderPagination(response.data);
                 } catch (error) {
                     console.error('Gagal mengambil data lomba:', error);
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Gagal memuat data. Silakan coba lagi.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-sm text-red-500">Gagal memuat data. Silakan coba lagi.</td></tr>`;
                 }
             }
             
             function renderTable(lombas) {
                 tableBody.innerHTML = '';
                 if (!lombas || lombas.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data yang ditemukan.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-sm text-slate-500">Tidak ada data lomba yang ditemukan.</td></tr>`;
                     return;
                 }
                 lombas.forEach(lomba => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">${lomba.nama_lomba}</div>
-                                <div class="text-sm text-gray-500">${lomba.tingkat}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${lomba.penyelenggara}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                Mulai: ${formatDate(lomba.tanggal_mulai_lomba)} <br>
-                                Selesai: ${formatDate(lomba.tanggal_selesai_lomba)}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">${getStatusBadge(lomba.status)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <a href="/adminprodi/lomba/${lomba.id_lomba}" class="text-indigo-600 hover:text-indigo-900">Detail</a>
-                            </td>
-                        </tr>
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-medium text-slate-800">${lomba.nama_lomba}</div>
+                            <div class="text-sm text-slate-500">${lomba.tingkat.charAt(0).toUpperCase() + lomba.tingkat.slice(1)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${lomba.penyelenggara || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                            ${formatDate(lomba.tanggal_mulai_lomba)} - ${formatDate(lomba.tanggal_selesai_lomba)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">${getStatusBadge(lomba.status)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="/adminprodi/lomba/${lomba.id_lomba}" class="text-blue-600 hover:text-blue-800">Detail</a>
+                        </td>
                     `;
-                    tableBody.insertAdjacentHTML('beforeend', row);
+                    tableBody.appendChild(row);
                 });
             }
+
             function renderPagination(paginationData) {
                 paginationContainer.innerHTML = '';
                 if (!paginationData || !paginationData.links || paginationData.links.length <= 3) return;
                 paginationData.links.forEach(link => {
-                    const url = new URL(link.url || window.location.href);
-                    const search = searchInput.value;
-                    const status = statusFilter.value;
-                    if (search) url.searchParams.set('search', search);
-                    if (status) url.searchParams.set('status', status);
-                    const linkElement = document.createElement('button');
+                    const linkElement = document.createElement('a');
+                    linkElement.href = link.url || '#';
                     linkElement.innerHTML = link.label;
-                    linkElement.disabled = !link.url;
-                    linkElement.className = `px-3 py-1 mx-1 border rounded text-sm ${link.active ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'} ${!link.url ? 'cursor-not-allowed text-gray-400' : 'hover:bg-gray-100'}`;
+                    let classes = 'pagination-btn px-4 py-2 mx-1 text-sm rounded-md transition ';
+                    if (link.active) {
+                        classes += 'bg-blue-600 text-white shadow-sm';
+                    } else if (!link.url) {
+                        classes += 'bg-slate-100 text-slate-400 cursor-not-allowed';
+                    } else {
+                        classes += 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200';
+                    }
+                    linkElement.className = classes;
                     if (link.url) {
-                        linkElement.addEventListener('click', (e) => {
+                        linkElement.addEventListener('click', function(e) {
                             e.preventDefault();
-                            fetchLombas(url.href);
+                            fetchLombas(link.url);
                         });
                     }
                     paginationContainer.appendChild(linkElement);
                 });
             }
+
             function getStatusBadge(status) {
                 const statuses = {
-                    'disetujui': 'bg-blue-100 text-blue-800', 'berlangsung': 'bg-green-100 text-green-800',
-                    'selesai': 'bg-gray-100 text-gray-800', 'belum disetujui': 'bg-yellow-100 text-yellow-800',
+                    'disetujui': 'bg-blue-100 text-blue-800',
+                    'berlangsung': 'bg-green-100 text-green-800',
+                    'selesai': 'bg-slate-100 text-slate-800',
                     'ditolak': 'bg-red-100 text-red-800',
+                    'belum disetujui': 'bg-amber-100 text-amber-800'
                 };
                 const statusText = (status || '').replace(/_/g, ' ');
-                return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statuses[status] || 'bg-gray-100 text-gray-800'}">${capitalizeFirstLetter(statusText)}</span>`;
+                return `<span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statuses[status] || 'bg-slate-100 text-slate-800'}">${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</span>`;
             }
-            function formatDate(dateString) { if (!dateString) return '-'; return new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }); }
-            function capitalizeFirstLetter(string) { return string.charAt(0).toUpperCase() + string.slice(1); }
+
+            function formatDate(dateString) { 
+                if (!dateString) return '-'; 
+                return new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }); 
+            }
+            
             searchInput.addEventListener('keyup', () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => fetchLombas(), 500); });
             statusFilter.addEventListener('change', () => fetchLombas());
             resetBtn.addEventListener('click', () => { searchInput.value = ''; statusFilter.value = ''; fetchLombas(); });
+            
             fetchLombas();
         });
     </script>
