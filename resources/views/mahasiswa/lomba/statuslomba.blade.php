@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingState = document.getElementById('loading-state');
     const paginationContainer = document.getElementById('pagination-container');
     const template = document.getElementById('history-item-template');
-    let currentFilter = 'all'; 
+    let currentFilter = 'all';
     const filterContainer = document.getElementById('filter-container');
 
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
@@ -106,10 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await axios.post('/api/prestasi', rekognisiData);
             Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.data.message || 'Pengajuan rekognisi berhasil dikirim.', timer: 2000, showConfirmButton: false });
+            
+            // [PERBAIKAN] Teks diubah agar konsisten dengan renderItems
             const rekognisiBadge = cardElement.querySelector('.item-rekognisi-badge');
-            rekognisiBadge.innerHTML = 'Menunggu Rekognisi';
+            rekognisiBadge.innerHTML = 'Menunggu';
             rekognisiBadge.className = 'item-rekognisi-badge status-badge status-menunggu';
             buttonElement.remove();
+
         } catch (error) {
             console.error('Gagal mengajukan rekognisi:', error);
             const errorMessage = error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.';
@@ -150,23 +153,26 @@ document.addEventListener('DOMContentLoaded', () => {
             
             card.querySelector('.item-name').textContent = item.nama;
             card.querySelector('.item-type').textContent = item.type;
-            
-            // [MODIFIKASI] Mengubah selector, label, dan data dari 'kategori' menjadi 'tingkat'
             card.querySelector('.item-tingkat').textContent = `Tingkat: ${item.tingkat}`;
-
             card.querySelector('.item-tanggal').textContent = formatDate(item.tanggal);
             
             const statusBadge = card.querySelector('.item-status-badge');
             statusBadge.textContent = item.status_text;
             if (item.status_class) statusBadge.classList.add(item.status_class);
 
+            // =============================================================
+            // [PERBAIKAN UTAMA ADA DI SINI]
+            // Logika diubah untuk selalu menampilkan 'Menunggu' jika ada status rekognisi.
             const rekognisiBadge = card.querySelector('.item-rekognisi-badge');
             if (item.status_rekognisi) {
-                rekognisiBadge.textContent = item.status_rekognisi;
-                rekognisiBadge.classList.add('status-badge', item.status_rekognisi_class);
+                // Selalu set teks menjadi 'Menunggu'
+                rekognisiBadge.textContent = 'Menunggu'; 
+                // Selalu gunakan class 'status-menunggu'
+                rekognisiBadge.classList.add('status-badge', 'status-menunggu');
             } else {
                 rekognisiBadge.innerHTML = `<span class="text-gray-400">-</span>`;
             }
+            // =============================================================
 
             actionsContainer.innerHTML = '';
 
@@ -201,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    // ... (fungsi renderPagination dan filter tetap sama) ...
     const renderPagination = (data) => {
         paginationContainer.innerHTML = ''; if (data.last_page <= 1) return;
         const nav = document.createElement('nav'); nav.className = 'flex items-center space-x-2';
@@ -214,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         paginationContainer.appendChild(nav);
     };
+
     filterContainer.addEventListener('click', (e) => {
         const targetButton = e.target.closest('.filter-btn');
         if (!targetButton || targetButton.classList.contains('active')) return;
@@ -222,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFilter = targetButton.dataset.filter;
         fetchRiwayat();
     });
+
     fetchRiwayat();
 });
 </script>
