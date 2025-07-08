@@ -72,13 +72,16 @@
     <!-- Template untuk satu kartu lomba -->
     <template id="lomba-card-template">
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5">
-            <div class="relative">
-                <img class="lomba-image w-full h-48 object-cover" src="" alt="Foto Lomba">
-                <!-- ====================================================== -->
-                <!-- === PERBAIKAN: Baris di bawah ini dihapus ========== -->
-                <!-- <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div> -->
-                <!-- ====================================================== -->
+            <!-- ====================================================== -->
+            <!-- ===          PERBAIKAN UTAMA ADA DI SINI         === -->
+            <!-- ====================================================== -->
+            <!-- Pembungkus gambar dibuat menjadi kotak (1:1) dengan aspect-square -->
+            <div class="relative overflow-hidden aspect-square">
+                <!-- Gambar diubah menjadi h-full untuk mengisi tinggi pembungkusnya -->
+                <img class="lomba-image w-full h-full object-cover" src="" alt="Foto Lomba">
             </div>
+            <!-- ====================================================== -->
+            
             <div class="p-6">
                 <div class="flex justify-between items-start mb-3">
                     <div class="flex flex-wrap gap-2">
