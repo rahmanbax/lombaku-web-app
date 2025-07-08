@@ -4,9 +4,9 @@ namespace App\Exports;
 
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings; // Untuk judul kolom
-use Maatwebsite\Excel\Concerns\WithMapping;  // Untuk memformat setiap baris
-use Maatwebsite\Excel\Concerns\ShouldAutoSize; // Untuk ukuran kolom otomatis
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
 {
@@ -19,9 +19,24 @@ class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, Shou
         return User::where('role', 'mahasiswa')
             ->with('profilMahasiswa.programStudi')
             ->withCount([
-                'registrasiLomba',
-                'prestasi' => function ($query) {
+                // Hitung semua lomba yang pernah didaftarkan
+                'registrasiLomba', 
+                
+                // Hitung semua prestasi yang disetujui
+                'prestasi as total_prestasi' => function ($query) {
                     $query->where('status_verifikasi', 'disetujui');
+                },
+                
+                // [TAMBAHAN] Hitung prestasi dengan tipe 'pemenang'
+                'prestasi as juara_count' => function ($query) {
+                    $query->where('status_verifikasi', 'disetujui')
+                          ->where('tipe_prestasi', 'pemenang');
+                },
+
+                // [TAMBAHAN] Hitung prestasi dengan tipe 'peserta'
+                'prestasi as peserta_count' => function ($query) {
+                    $query->where('status_verifikasi', 'disetujui')
+                          ->where('tipe_prestasi', 'peserta');
                 }
             ])
             ->orderBy('nama', 'asc')
@@ -30,18 +45,19 @@ class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, Shou
 
     /**
      * Mendefinisikan judul kolom untuk file Excel.
-     *
-     * @return array
      */
     public function headings(): array
     {
+        // [PERUBAHAN] Tambahkan judul kolom baru
         return [
             'Nama Mahasiswa',
             'NIM',
             'Email',
             'Program Studi',
-            'Lomba Diikuti',
-            'Jumlah Prestasi',
+            'Total Lomba Diikuti',
+            'Total Prestasi (Disetujui)',
+            'Jumlah Prestasi sbg Juara',
+            'Jumlah Prestasi sbg Peserta',
         ];
     }
 
@@ -53,13 +69,16 @@ class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, Shou
      */
     public function map($mahasiswa): array
     {
+        // [PERUBAHAN] Tambahkan data baru ke dalam array baris
         return [
             $mahasiswa->nama,
-            $mahasiswa->profilMahasiswa->nim ?? 'N/A', // Handle jika profil belum ada
+            $mahasiswa->profilMahasiswa->nim ?? 'N/A',
             $mahasiswa->email,
             $mahasiswa->profilMahasiswa->programStudi->nama_program_studi ?? 'N/A',
             $mahasiswa->registrasi_lomba_count,
-            $mahasiswa->prestasi_count,
+            $mahasiswa->total_prestasi, // Menggunakan alias dari withCount
+            $mahasiswa->juara_count,   // Menggunakan alias dari withCount
+            $mahasiswa->peserta_count, // Menggunakan alias dari withCount
         ];
     }
 }
