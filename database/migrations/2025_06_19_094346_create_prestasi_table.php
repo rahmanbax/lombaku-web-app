@@ -42,7 +42,6 @@ return new class extends Migration
             $table->enum('status_verifikasi', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
             $table->foreignId('id_verifikator')->nullable()->constrained('users', 'id_user')->onDelete('set null');
             $table->text('catatan_verifikasi')->nullable();
-
             $table->timestamps();
         });
     }

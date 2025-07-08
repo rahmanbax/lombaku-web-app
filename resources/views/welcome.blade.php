@@ -84,25 +84,29 @@
     <!-- Template untuk kartu lomba -->
     <template id="lomba-card-template">
         <div class="card-lomba bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
-            <div class="relative overflow-hidden">
+            
+            <!-- ============================================= -->
+            <!-- === PERUBAHAN UTAMA ADA DI SINI === -->
+            <!-- ============================================= -->
+            <!-- [MODIFIKASI] Tambahkan 'aspect-square' pada div pembungkus untuk membuat rasio 1:1 (kotak) -->
+            <div class="relative overflow-hidden aspect-square">
                 <a class="lomba-link-img" href="#">
-                    <img class="lomba-image w-full h-52 object-cover transition-transform duration-300" src="" alt="">
+                    <!-- [MODIFIKASI] Ubah 'h-52' menjadi 'h-full' agar gambar mengisi penuh tinggi wadah kotaknya -->
+                    <img class="lomba-image w-full h-full object-cover transition-transform duration-300" src="" alt="">
                 </a>
                 <div class="absolute top-3 left-3 flex flex-wrap gap-2"></div>
                 <div class="lomba-status-badge absolute top-3 right-3"></div>
             </div>
+            <!-- ============================================= -->
+
             <div class="p-6">
                 <p class="lomba-penyelenggara text-sm text-gray-500 mb-2 capitalize"></p>
                 <h3 class="lomba-nama text-xl font-bold text-gray-800 mb-4 h-14" title=""></h3>
                 
-                <!-- ============================================= -->
-                <!-- === PERUBAHAN 1: TAMBAHKAN ELEMEN DI SINI === -->
-                <!-- ============================================= -->
                 <div class="flex items-center text-gray-600 text-sm mb-3">
                     <i class="lomba-jenis-icon fas fa-fw mr-2 text-blue-500"></i>
                     <span class="lomba-jenis-text"></span>
                 </div>
-                <!-- ============================================= -->
 
                 <div class="flex items-center text-gray-600 text-sm">
                     <i class="fas fa-calendar-alt mr-2 text-red-500"></i>
@@ -115,8 +119,7 @@
         </div>
     </template>
 
-
-    <footer class="bg-gray-800 text-white mt-20">
+       <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
                 <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
@@ -133,6 +136,7 @@
     </footer>
 
     <script>
+        // ... (seluruh kode JavaScript Anda tetap sama, tidak perlu diubah) ...
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('lomba-container');
             const loadingState = document.getElementById('loading-state');
@@ -233,9 +237,6 @@
                         card.querySelector('.lomba-nama').title = lomba.nama_lomba;
                         card.querySelector('.lomba-penyelenggara').textContent = lomba.penyelenggara || 'Komunitas Mahasiswa';
                         
-                        // ==============================================================
-                        // === PERUBAHAN 2: TAMBAHKAN LOGIKA JAVASCRIPT DI SINI ===
-                        // ==============================================================
                         const jenisIconEl = card.querySelector('.lomba-jenis-icon');
                         const jenisTextEl = card.querySelector('.lomba-jenis-text');
 
@@ -246,10 +247,8 @@
                             jenisIconEl.classList.add('fa-users');
                             jenisTextEl.textContent = 'Kelompok';
                         } else {
-                            // Sembunyikan elemen jika jenis lomba tidak ada
                             jenisIconEl.parentElement.style.display = 'none';
                         }
-                        // ==============================================================
 
                         card.querySelector('.lomba-tanggal').textContent = `Batas Daftar: ${formatDate(lomba.tanggal_akhir_registrasi)}`;
                         card.querySelector('.lomba-link-detail').href = link;

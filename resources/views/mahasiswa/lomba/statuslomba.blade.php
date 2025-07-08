@@ -7,14 +7,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #f9fafb; }
-        .status-badge { font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 500;}
+        .status-badge { display: inline-block; font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 500;}
         .status-prestasi { background-color: #DCFCE7; color: #166534; border: 1px solid #A7F3D0;}
         .status-menunggu { background-color: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A;}
         .status-diterima { background-color: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE;}
         .status-ditolak { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA;}
+        .status-netral { background-color: #F3F4F6; color: #374151; border: 1px solid #E5E7EB;}
         .filter-btn { padding: 0.5rem 1.25rem; border-radius: 9999px; font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out; border: 1px solid transparent; }
         .filter-btn.active { background-color: #3b82f6; color: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
         .pagination-link { padding: 0.5rem 1rem; border: 1px solid #ddd; color: #333; text-decoration: none; }
@@ -36,10 +38,11 @@
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-3 border-b text-sm">
-                <div class="col-span-5 font-semibold text-gray-600">Nama Kegiatan</div>
+                <div class="col-span-4 font-semibold text-gray-600">Nama Kegiatan</div>
                 <div class="col-span-2 font-semibold text-gray-600">Tanggal</div>
                 <div class="col-span-2 font-semibold text-gray-600">Status</div>
-                <div class="col-span-3 font-semibold text-gray-600">Aksi</div>
+                <div class="col-span-2 font-semibold text-gray-600">Status Rekognisi</div>
+                <div class="col-span-2 font-semibold text-gray-600">Aksi</div>
             </div>
             <div id="history-list-container">
                 <div id="loading-state" class="p-10 text-center"><i class="fas fa-spinner fa-spin fa-2x text-blue-500"></i><p class="mt-2 text-gray-500">Memuat riwayat...</p></div>
@@ -50,24 +53,44 @@
 </div>
 
 <template id="history-item-template">
-    <div class="history-card grid grid-cols-1 md:grid-cols-12 gap-4 p-6 border-b hover:bg-gray-50/50">
-        <div class="md:col-span-5 flex items-start space-x-4">
+    <div class="history-card grid grid-cols-1 md:grid-cols-12 gap-4 p-6 border-b hover:bg-gray-50/50 items-center">
+        <div class="md:col-span-4 flex items-start space-x-4">
             <div class="item-icon w-16 h-16 rounded-lg flex items-center justify-center text-xl shrink-0"></div>
             <div class="flex-grow">
                 <p class="item-type text-xs font-semibold uppercase tracking-wider"></p>
                 <h3 class="item-name font-bold text-gray-800"></h3>
-                <p class="item-kategori text-gray-500 text-sm mt-1"></p>
+                <!-- [MODIFIKASI] Mengganti class dari item-kategori menjadi item-tingkat -->
+                <p class="item-tingkat text-gray-500 text-sm mt-1"></p>
             </div>
         </div>
         <div class="md:col-span-2 flex flex-col justify-center"><span class="md:hidden text-gray-600 text-sm">Tanggal</span><span class="item-tanggal text-gray-800"></span></div>
         <div class="md:col-span-2 flex flex-col justify-center"><span class="md:hidden text-gray-600 text-sm">Status</span><span class="item-status-badge status-badge"></span></div>
-        <div class="item-actions md:col-span-3 flex items-center space-x-4"></div>
+        <div class="md:col-span-2 flex flex-col justify-center">
+            <span class="md:hidden text-gray-600 text-sm">Status Rekognisi</span>
+            <span class="item-rekognisi-badge"></span>
+        </div>
+        <div class="item-actions md:col-span-2 flex items-center space-x-4"></div>
     </div>
 </template>
 
-<x-footer/>
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                    Daftar sebagai Admin Lomba
+                </button>
+            </div>
+        </div>
+        <div class="bg-gray-900 py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const container = document.getElementById('history-list-container');
     const loadingState = document.getElementById('loading-state');
     const paginationContainer = document.getElementById('pagination-container');
@@ -77,6 +100,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
     
+    const ajukanRekognisi = async (rekognisiData, buttonElement, cardElement) => {
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> Mengajukan...`;
+        try {
+            const response = await axios.post('/api/prestasi', rekognisiData);
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.data.message || 'Pengajuan rekognisi berhasil dikirim.', timer: 2000, showConfirmButton: false });
+            const rekognisiBadge = cardElement.querySelector('.item-rekognisi-badge');
+            rekognisiBadge.innerHTML = 'Menunggu Rekognisi';
+            rekognisiBadge.className = 'item-rekognisi-badge status-badge status-menunggu';
+            buttonElement.remove();
+        } catch (error) {
+            console.error('Gagal mengajukan rekognisi:', error);
+            const errorMessage = error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.';
+            Swal.fire({ icon: 'error', title: 'Oops...', text: errorMessage });
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan`;
+        }
+    };
+
     const fetchRiwayat = async (url = '/api/riwayat') => {
         loadingState.style.display = 'block'; container.innerHTML = ''; container.appendChild(loadingState);
         try {
@@ -100,24 +142,34 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = `<div class="p-12 text-center text-gray-500"><i class="fas fa-box-open fa-3x mb-4 text-gray-300"></i><h3 class="text-xl font-semibold">Belum Ada Riwayat</h3><p>${message}</p></div>`;
             return;
         }
-
         items.forEach(item => {
-            const card = template.content.cloneNode(true);
+            const cardClone = template.content.cloneNode(true);
+            const card = cardClone.querySelector('.history-card');
             const itemIcon = card.querySelector('.item-icon');
             const actionsContainer = card.querySelector('.item-actions');
             
             card.querySelector('.item-name').textContent = item.nama;
             card.querySelector('.item-type').textContent = item.type;
-            card.querySelector('.item-kategori').textContent = `Kategori: ${item.kategori}`;
+            
+            // [MODIFIKASI] Mengubah selector, label, dan data dari 'kategori' menjadi 'tingkat'
+            card.querySelector('.item-tingkat').textContent = `Tingkat: ${item.tingkat}`;
+
             card.querySelector('.item-tanggal').textContent = formatDate(item.tanggal);
+            
             const statusBadge = card.querySelector('.item-status-badge');
             statusBadge.textContent = item.status_text;
             if (item.status_class) statusBadge.classList.add(item.status_class);
 
+            const rekognisiBadge = card.querySelector('.item-rekognisi-badge');
+            if (item.status_rekognisi) {
+                rekognisiBadge.textContent = item.status_rekognisi;
+                rekognisiBadge.classList.add('status-badge', item.status_rekognisi_class);
+            } else {
+                rekognisiBadge.innerHTML = `<span class="text-gray-400">-</span>`;
+            }
+
             actionsContainer.innerHTML = '';
 
-            // [PERBAIKAN LOGIKA UTAMA]
-            // Prioritas 1: Tampilkan link "Lihat Sertifikat"
             if (item.sertifikat_path) {
                 itemIcon.innerHTML = `<i class="fas fa-medal text-yellow-500"></i>`;
                 itemIcon.className += ' bg-yellow-100';
@@ -125,30 +177,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 sertifikatLink.href = `/storage/${item.sertifikat_path}`;
                 sertifikatLink.target = '_blank';
                 sertifikatLink.className = 'text-blue-600 hover:text-blue-800 text-sm font-medium';
-                sertifikatLink.innerHTML = `<i class="fas fa-certificate mr-1"></i> Lihat Sertifikat`;
+                sertifikatLink.innerHTML = `<i class="fas fa-certificate mr-1"></i> Lihat`;
                 actionsContainer.appendChild(sertifikatLink);
             }
 
-            // Prioritas 2 (Tambahan): Tampilkan tombol "Ajukan Rekognisi" JIKA URL-nya ada
-            if (item.rekognisi_url) {
-                const rekognisiBtn = document.createElement('a'); // Ini adalah link
-                rekognisiBtn.href = item.rekognisi_url; // Gunakan URL dari backend
-                rekognisiBtn.className = 'bg-orange-100 text-orange-800 hover:bg-orange-200 text-sm font-semibold py-1 px-3 rounded-full';
-                rekognisiBtn.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan Rekognisi`;
+            if (item.rekognisi_data) {
+                const rekognisiBtn = document.createElement('button');
+                rekognisiBtn.type = 'button';
+                rekognisiBtn.className = 'bg-orange-100 text-orange-800 hover:bg-orange-200 text-sm font-semibold py-1 px-3 rounded-full transition-colors';
+                rekognisiBtn.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan`;
+                rekognisiBtn.addEventListener('click', () => ajukanRekognisi(item.rekognisi_data, rekognisiBtn, card));
                 actionsContainer.appendChild(rekognisiBtn);
             }
             
-            // Fallback jika tidak ada aksi sama sekali
             if (actionsContainer.innerHTML.trim() === '') {
-                itemIcon.innerHTML = `<i class="fas fa-flag-checkered text-indigo-500"></i>`;
-                itemIcon.className += ' bg-indigo-100';
-                actionsContainer.innerHTML = `<span class="text-gray-400 text-sm">Tidak ada aksi</span>`;
+                if(!item.sertifikat_path) { 
+                    itemIcon.innerHTML = `<i class="fas fa-flag-checkered text-indigo-500"></i>`;
+                    itemIcon.className += ' bg-indigo-100';
+                }
+                actionsContainer.innerHTML = `<span class="text-gray-400 text-sm italic">-</span>`;
             }
-
-            container.appendChild(card);
+            container.appendChild(cardClone);
         });
     };
     
+    // ... (fungsi renderPagination dan filter tetap sama) ...
     const renderPagination = (data) => {
         paginationContainer.innerHTML = ''; if (data.last_page <= 1) return;
         const nav = document.createElement('nav'); nav.className = 'flex items-center space-x-2';
@@ -156,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!link.url) return;
             const a = document.createElement('a'); a.href = '#'; a.innerHTML = link.label; a.className = 'pagination-link';
             if (link.url === null) a.classList.add('disabled'); else a.addEventListener('click', (e) => { e.preventDefault(); fetchRiwayat(link.url); });
-            if (link.active) a.classList.add('active');
+            if (link.active) a.classList.add('active', 'bg-blue-500', 'text-white', 'border-blue-500');
             nav.appendChild(a);
         });
         paginationContainer.appendChild(nav);
@@ -169,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFilter = targetButton.dataset.filter;
         fetchRiwayat();
     });
-    
     fetchRiwayat();
 });
 </script>

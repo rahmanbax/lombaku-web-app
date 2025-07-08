@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/prestasi/internal', [PrestasiController::class, 'storeInternal']); // Untuk klaim awal
     Route::get('/prestasi/internal-untuk-rekognisi', [PrestasiController::class, 'getInternalUntukRekognisi']); // [ROUTE BARU/PENTING]
     Route::get('/prestasi/lomba-yang-bisa-diklaim', [PrestasiController::class, 'getLombaUntukDiklaim']);
+    Route::post('/prestasi/{prestasi}/ajukan-rekognisi', [PrestasiController::class, 'ajukanRekognisi'])->name('prestasi.ajukan-rekognisi');
 
     // ==========================================================
     // === TAMBAHKAN ROUTE INI UNTUK MENANGANI PENDAFTARAN LOMBA ===

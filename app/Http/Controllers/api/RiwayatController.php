@@ -4,13 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lomba;
-use App\Models\RegistrasiLomba;
 use App\Models\Prestasi;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 
 class RiwayatController extends Controller
@@ -28,11 +25,10 @@ class RiwayatController extends Controller
         $partisipasi = collect();
         $prestasi = collect();
         
-        // Bagian Partisipasi Lomba (tidak diubah)
         if ($filter === 'all' || $filter === 'lomba') {
             $claimedLombaIds = $user->prestasi()->whereNotNull('id_lomba')->pluck('id_lomba')->toArray();
             $partisipasi = $user->registrasiLomba()
-                                ->with(['lomba.tags', 'tim.members', 'dosenPembimbing'])
+                                ->with(['lomba', 'tim.members', 'dosenPembimbing']) // Hapus '.tags' karena tidak dipakai
                                 ->get()
                                 ->map(function ($item) use ($claimedLombaIds) {
                 
@@ -54,60 +50,81 @@ class RiwayatController extends Controller
                 return [
                     'id' => 'reg-' . $item->id_registrasi_lomba, 'type' => 'Partisipasi Lomba',
                     'nama' => $lomba?->nama_lomba ?? 'Lomba Telah Dihapus', 'tanggal' => $mainDate,
-                    'status_text' => $statusText, 'status_class' => $statusClass, 'kategori' => $lomba?->tags->first()?->nama_tag ?? 'Umum',
+                    'status_text' => $statusText, 'status_class' => $statusClass, 
+                    'tingkat' => ucfirst($lomba?->tingkat ?? 'Tidak Diketahui'), // [MODIFIKASI] Mengganti 'kategori' menjadi 'tingkat'
                     'sertifikat_path' => null, 'action_text' => $actionText, 'action_url' => $actionUrl,
                     'lomba_id' => $lomba?->id_lomba, 'lomba_status' => $lomba?->status,
                     'has_claimed_prestasi' => $lomba ? in_array($lomba->id_lomba, $claimedLombaIds) : true,
-                    'rekognisi_url' => null, // Tidak ada rekognisi dari partisipasi
+                    'rekognisi_data' => null,
+                    'status_rekognisi' => null, 
+                    'status_rekognisi_class' => null,
                 ];
             });
         }
 
-        // === PERBAIKAN UTAMA DI SINI ===
         if ($filter === 'all' || $filter === 'prestasi') {
-            $prestasi = $user->prestasi()->with('lomba.tags', 'lomba.pembuat')->get()->map(function ($item) {
+            $prestasi = $user->prestasi()->with('lomba.pembuat')->get()->map(function ($item) { // Hapus '.tags'
                 $lomba = $item->lomba;
-                $statusText = 'Verifikasi: ' . ucfirst($item->status_verifikasi);
-                $statusClass = 'status-ditolak';
-                
-                // [LOGIKA KUNCI] Buat URL untuk tombol "Ajukan Rekognisi"
-                $rekognisiUrl = null;
+                $rekognisiData = null;
+                $statusRekognisi = null;
+                $statusRekognisiClass = null;
+                $statusText = '';
+                $statusClass = '';
+                $type = '';
 
-                switch ($item->status_verifikasi) {
-                    case 'menunggu': $statusClass = 'status-menunggu'; break;
-                    case 'disetujui':
+                if ($item->lomba_dari === 'eksternal') {
+                    $type = 'Pengajuan Prestasi';
+                    if ($item->status_verifikasi === 'disetujui') {
                         $statusText = $item->peringkat;
                         $statusClass = 'status-prestasi';
-                        
-                        // Buat URL HANYA jika ini prestasi internal yang sudah disetujui
-                        if ($item->lomba_dari === 'internal' && $item->sertifikat_path) {
-                            $queryParams = http_build_query([
-                                'nama_lomba_eksternal' => $lomba?->nama_lomba ?? 'Prestasi Internal',
-                                'penyelenggara_eksternal' => $lomba?->penyelenggara ?? $lomba?->pembuat?->nama ?? 'Penyelenggara Internal',
-                                'tingkat' => $lomba?->tingkat ?? 'internal',
-                                'peringkat' => $item->peringkat,
-                                'tanggal_diraih' => Carbon::parse($item->tanggal_diraih)->toDateString(),
-                                'existing_sertifikat_path' => $item->sertifikat_path,
-                                'from_internal' => 'true' // Penanda untuk JavaScript
-                            ]);
-                            $rekognisiUrl = url('/ajukan-rekognisi?' . $queryParams);
+                    } else {
+                        $statusText = 'Diajukan';
+                        $statusClass = 'status-netral';
+                    }
+                    switch ($item->status_verifikasi) {
+                        case 'menunggu': $statusRekognisi = 'Menunggu Verifikasi'; $statusRekognisiClass = 'status-menunggu'; break;
+                        case 'disetujui': $statusRekognisi = 'Verifikasi Disetujui'; $statusRekognisiClass = 'status-diterima'; break;
+                        case 'ditolak': $statusRekognisi = 'Verifikasi Ditolak'; $statusRekognisiClass = 'status-ditolak'; break;
+                    }
+                } else {
+                    $type = 'Prestasi Internal';
+                    $statusText = $item->peringkat;
+                    $statusClass = 'status-prestasi';
+                    if ($item->sertifikat_path && is_null($item->status_rekognisi)) {
+                        $rekognisiData = [
+                            'nama_lomba_eksternal' => $lomba?->nama_lomba ?? 'Prestasi Internal',
+                            'penyelenggara_eksternal' => $lomba?->penyelenggara ?? $lomba?->pembuat?->nama ?? 'Penyelenggara Internal',
+                            'tingkat' => $lomba?->tingkat ?? 'internal',
+                            'peringkat' => $item->peringkat,
+                            'tanggal_diraih' => Carbon::parse($item->tanggal_diraih)->toDateString(),
+                            'existing_sertifikat_path' => $item->sertifikat_path,
+                            'id_prestasi_internal_sumber' => $item->id_prestasi,
+                        ];
+                    }
+                    if (!is_null($item->status_rekognisi)) {
+                        switch ($item->status_rekognisi) {
+                            case 'menunggu': $statusRekognisi = 'Menunggu Rekognisi'; $statusRekognisiClass = 'status-menunggu'; break;
+                            case 'disetujui': $statusRekognisi = 'Rekognisi Disetujui'; $statusRekognisiClass = 'status-diterima'; break;
+                            case 'ditolak': $statusRekognisi = 'Rekognisi Ditolak'; $statusRekognisiClass = 'status-ditolak'; break;
                         }
-                        break;
-                    case 'ditolak': $statusClass = 'status-ditolak'; break;
+                    }
                 }
 
                 $mainDate = $item->tanggal_diraih ? Carbon::parse($item->tanggal_diraih)->toDateString() : ($item->created_at ? $item->created_at->toDateString() : null);
 
                 return [
                     'id' => 'pres-' . $item->id_prestasi,
-                    'type' => $item->lomba_dari === 'eksternal' ? 'Pengajuan Prestasi' : 'Prestasi Internal',
+                    'type' => $type,
                     'nama' => $lomba?->nama_lomba ?? $item->nama_lomba_eksternal,
                     'tanggal' => $mainDate,
                     'status_text' => $statusText, 'status_class' => $statusClass,
-                    'kategori' => $lomba?->tags->first()?->nama_tag ?? ucfirst($item->tingkat ?? ''),
+                    // [MODIFIKASI] Mengganti 'kategori' menjadi 'tingkat' dan memastikan sumber datanya benar
+                    'tingkat' => ucfirst($lomba?->tingkat ?? $item->tingkat ?? 'Tidak Diketahui'),
                     'sertifikat_path' => $item->sertifikat_path,
                     'action_text' => null, 'action_url' => null,
-                    'rekognisi_url' => $rekognisiUrl, // [DATA BARU] Kirim URL ini ke frontend
+                    'rekognisi_data' => $rekognisiData,
+                    'status_rekognisi' => $statusRekognisi,
+                    'status_rekognisi_class' => $statusRekognisiClass,
                 ];
             });
         }

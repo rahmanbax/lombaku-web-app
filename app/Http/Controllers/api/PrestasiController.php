@@ -19,53 +19,79 @@ class PrestasiController extends Controller
      * Menyimpan pengajuan rekognisi prestasi baru.
      * POST /api/prestasi
      */
-    
-public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'nama_lomba_eksternal'  => 'required|string|max:255',
-        'penyelenggara_eksternal' => 'required|string|max:255',
-        'tingkat'               => 'required|in:internal,nasional,internasional',
-        'peringkat'             => 'required|string|max:100',
-        'tanggal_diraih'        => 'required|date',
-        'sertifikat'            => 'required_without:existing_sertifikat_path|nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-        'existing_sertifikat_path' => 'nullable|string',
-    ]);
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nama_lomba_eksternal'  => 'required|string|max:255',
+            'penyelenggara_eksternal' => 'required|string|max:255',
+            'tingkat'               => 'required|in:internal,nasional,internasional',
+            'peringkat'             => 'required|string|max:100',
+            'tanggal_diraih'        => 'required|date',
+            'sertifikat'            => 'required_without:existing_sertifikat_path|nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
+            'existing_sertifikat_path' => 'nullable|string',
+            'id_prestasi_internal_sumber' => 'nullable|exists:prestasi,id_prestasi', // Validasi sumber prestasi internal
+        ]);
 
-    $sertifikatPath = null;
-    
-    if ($request->hasFile('sertifikat')) {
-        $sertifikatPath = $request->file('sertifikat')->store('sertifikat_prestasi', 'public');
-    } 
-    elseif ($request->filled('existing_sertifikat_path')) {
-        $sertifikatPath = $request->existing_sertifikat_path;
+        $sertifikatPath = null;
+        
+        if ($request->hasFile('sertifikat')) {
+            $sertifikatPath = $request->file('sertifikat')->store('sertifikat_prestasi', 'public');
+        } 
+        elseif ($request->filled('existing_sertifikat_path')) {
+            $sertifikatPath = $request->existing_sertifikat_path;
+        }
+
+        if (is_null($sertifikatPath)) {
+            return response()->json(['message' => 'Bukti sertifikat wajib ada.'], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Langkah 1: Buat record prestasi 'eksternal' baru untuk pengajuan rekognisi
+            Prestasi::create([
+                'id_user' => Auth::id(), 
+                'lomba_dari' => 'eksternal',
+                'nama_lomba_eksternal'  => $validatedData['nama_lomba_eksternal'],
+                'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
+                'tingkat'               => $validatedData['tingkat'],
+                'peringkat'             => $validatedData['peringkat'],
+                'tanggal_diraih'        => $validatedData['tanggal_diraih'],
+                'sertifikat_path'       => $sertifikatPath,
+                'status_verifikasi'     => 'menunggu',
+                'id_prestasi_internal_sumber' => $validatedData['id_prestasi_internal_sumber'] ?? null,
+            ]);
+
+            // Langkah 2: Jika ini berasal dari pengajuan rekognisi, update status prestasi internal asli
+            if (!empty($validatedData['id_prestasi_internal_sumber'])) {
+                $prestasiInternalAsli = Prestasi::find($validatedData['id_prestasi_internal_sumber']);
+                if ($prestasiInternalAsli && $prestasiInternalAsli->id_user == Auth::id()) {
+                    $prestasiInternalAsli->status_rekognisi = 'menunggu';
+                    $prestasiInternalAsli->save();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengajuan rekognisi prestasi berhasil dikirim!'
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($request->hasFile('sertifikat') && isset($sertifikatPath) && Storage::disk('public')->exists($sertifikatPath)) {
+                Storage::disk('public')->delete($sertifikatPath);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
-    if (is_null($sertifikatPath)) {
-        return response()->json(['message' => 'Bukti sertifikat wajib ada.'], 422);
-    }
-
-    Prestasi::create([
-        'id_user' => Auth::id(), 
-        'lomba_dari' => 'eksternal',
-        'nama_lomba_eksternal'  => $validatedData['nama_lomba_eksternal'],
-        'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
-        'tingkat'               => $validatedData['tingkat'],
-        'peringkat'             => $validatedData['peringkat'],
-        'tanggal_diraih'        => $validatedData['tanggal_diraih'],
-        'sertifikat_path'       => $sertifikatPath,
-        'status_verifikasi'     => 'menunggu',
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Pengajuan rekognisi prestasi berhasil dikirim!'
-    ], 201);
-}
 
     public function berikan(Request $request)
     {
-        // 1. Validasi input (tetap sama)
         $validator = Validator::make($request->all(), [
             'id_user'             => 'required|exists:users,id_user',
             'id_lomba'            => [
@@ -87,11 +113,9 @@ public function store(Request $request)
             return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $validator->errors()], 422);
         }
 
-        // <-- [PERUBAHAN] Mulai Database Transaction -->
         DB::beginTransaction();
 
         try {
-            // 2. Handle File Upload (tetap sama)
             $sertifikatPath = null;
             if ($request->hasFile('sertifikat')) {
                 $file = $request->file('sertifikat');
@@ -99,7 +123,6 @@ public function store(Request $request)
                 $sertifikatPath = $file->storeAs('sertifikat', $fileName, 'public');
             }
 
-            // 3. Simpan ke Database (tetap sama)
             $prestasi = Prestasi::create([
                 'id_user'             => $request->id_user,
                 'id_lomba'            => $request->id_lomba,
@@ -108,31 +131,23 @@ public function store(Request $request)
                 'tanggal_diraih'      => $request->tanggal_diraih,
                 'sertifikat_path'     => $sertifikatPath,
                 'status_verifikasi'   => 'disetujui',
-                'lomba_dari'          => 'internal' // Pastikan ini diset
+                'lomba_dari'          => 'internal'
             ]);
 
-            // <-- [PERUBAHAN] Logika untuk update status lomba -->
             $lombaId = $request->id_lomba;
             $lomba = Lomba::find($lombaId);
 
             if ($lomba) {
-                // Hitung total pendaftar yang statusnya 'diterima'
                 $totalPendaftarDiterima = $lomba->registrasi()
                     ->where('status_verifikasi', 'diterima')
                     ->count();
-
-                // Hitung total peserta yang sudah diberi prestasi di lomba ini
                 $totalPenerimaPrestasi = Prestasi::where('id_lomba', $lombaId)->count();
-
-                // Cek apakah semua pendaftar yang diterima sudah diberi prestasi
                 if ($totalPendaftarDiterima > 0 && $totalPendaftarDiterima === $totalPenerimaPrestasi) {
-                    // Jika ya, ubah status lomba menjadi 'selesai'
                     $lomba->status = 'selesai';
                     $lomba->save();
                 }
             }
 
-            // <-- [PERUBAHAN] Commit transaction jika semua berhasil -->
             DB::commit();
 
             return response()->json([
@@ -141,10 +156,8 @@ public function store(Request $request)
                 'data'    => $prestasi
             ], 201);
         } catch (\Exception $e) {
-            // <-- [PERUBAHAN] Rollback transaction jika terjadi kesalahan -->
             DB::rollBack();
 
-            // Hapus file yang mungkin sudah ter-upload jika terjadi error
             if (isset($sertifikatPath) && Storage::disk('public')->exists($sertifikatPath)) {
                 Storage::disk('public')->delete($sertifikatPath);
             }
@@ -159,10 +172,6 @@ public function store(Request $request)
 
     public function update(Request $request, Prestasi $prestasi)
     {
-        // Otorisasi, pastikan admin yang benar yang bisa mengedit
-        // $this->authorize('update', $prestasi);
-
-        // Validasi
         $validator = Validator::make($request->all(), [
             'peringkat'     => 'sometimes|required|string|max:255',
             'tipe_prestasi' => 'sometimes|required|in:pemenang,peserta',
@@ -176,14 +185,10 @@ public function store(Request $request)
 
         $updateData = $request->only(['peringkat', 'tipe_prestasi', 'tanggal_diraih']);
 
-        // Handle jika ada file sertifikat baru yang di-upload
         if ($request->hasFile('sertifikat')) {
-            // Hapus file lama jika ada
             if ($prestasi->file_sertifikat && Storage::disk('public')->exists($prestasi->file_sertifikat)) {
                 Storage::disk('public')->delete($prestasi->file_sertifikat);
             }
-
-            // Simpan file baru
             $path = $request->file('sertifikat')->store('sertifikat', 'public');
             $updateData['file_sertifikat'] = $path;
         }
