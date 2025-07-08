@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="icon" href="{{ asset('images/lombaku-icon.png') }}" type="image/png">
+    <title>Detail Lomba</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </head>
@@ -576,9 +577,11 @@
                         if (existingPrestasi) {
                             // SUDAH ADA PRESTASI: Tampilkan pesan status.
                             actionContainer.innerHTML = `
-                <div class="w-full border border-green-500 rounded-md p-2 bg-green-50 text-center">
+                <div class="w-full border border-green-500 rounded-md p-2 bg-green-50 text-center flex flex-col items-center">
                     <p class="text-xs text-green-800">Prestasi Telah Diberikan</p>
                     <p class="text-green-700 mt-1">Peringkat: <span class="font-bold">${existingPrestasi.peringkat}</span></p>
+                    <a href="/${existingPrestasi.sertifikat_path}" target="_blank" class="mt-2 px-3 py-1 border border-green-500 text-green-600 rounded-md text-xs hover:bg-green-100 flex items-center gap-1 w-fit"><span class="material-symbols-outlined" style="font-size: 16px;">visibility</span> Lihat Sertifikat
+                        </a>
                 </div>
                 `;
                         } else {

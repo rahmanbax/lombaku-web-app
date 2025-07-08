@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
+    <link rel="icon" href="{{ asset('images/lombaku-icon.png') }}" type="image/png">
+    <title>Buat Lomba</title>
     <!-- BARU: Tambahkan CSS untuk Choices.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 
@@ -289,7 +289,10 @@
                 // Fungsi untuk menangani submit form
                 async function handleFormSubmit(event) {
                     event.preventDefault();
-                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    messageDiv.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
 
                     const formData = new FormData(lombaForm);
                     messageDiv.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Memproses...</div>`;

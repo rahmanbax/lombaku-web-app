@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Lomba Baru</title>
-
+    <link rel="icon" href="{{ asset('images/lombaku-icon.png') }}" type="image/png">
+    <title>Buat Lomba</title>
     <!-- [BARU] Tambahkan CSS untuk Choices.js agar tampilan tags lebih baik -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 

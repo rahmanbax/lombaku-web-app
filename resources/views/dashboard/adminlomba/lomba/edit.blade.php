@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('images/lombaku-icon.png') }}" type="image/png">
     <title>Edit Lomba</title>
-
     <!-- PERUBAHAN 1: Tambahkan CSS untuk Choices.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 

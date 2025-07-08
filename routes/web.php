@@ -143,65 +143,76 @@ Route::get('/lomba/{lomba}', function (Lomba $lomba) {
     return view('mahasiswa.lomba.detaillomba', compact('lomba'));
 })->name('lomba.show');
 
-// ==========================================================
-// === RUTE SERTIFIKAT DIHAPUS DARI SINI ===
-// Akses file akan ditangani langsung oleh web server melalui symbolic link.
-// ==========================================================
-
-// ==========================================================
-// Dashboard Route Kemahasiswaan
-
 // lindungi dengan middleware auth
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard/kemahasiswaan', function () {
-        return view('dashboard.kemahasiswaan.index');
-    });
 
-    Route::get('/dashboard/kemahasiswaan/lomba', function () {
-        return view('dashboard.kemahasiswaan.lomba.index');
-    });
+    // ===============================================
+    // GRUP ROUTE UNTUK KEMAHASISWAAN
+    // ===============================================
+    // Gunakan prefix untuk membuat URL lebih rapi dan middleware untuk keamanan
+    Route::prefix('dashboard/kemahasiswaan')
+        ->middleware('role.kemahasiswaan')
+        ->name('kemahasiswaan.') // Memberi nama prefix pada rute
+        ->group(function () {
 
-    Route::get('/dashboard/kemahasiswaan/lomba/buat', function () {
-        return view('dashboard.kemahasiswaan.lomba.buat');
-    });
+            Route::get('/', function () {
+                return view('dashboard.kemahasiswaan.index');
+            })->name('dashboard'); // Nama rute: kemahasiswaan.dashboard
 
-    Route::get('/dashboard/kemahasiswaan/lomba/{id}', function ($id) {
-        return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
-    });
+            Route::get('/lomba', function () {
+                return view('dashboard.kemahasiswaan.lomba.index');
+            })->name('lomba.index');
 
-    Route::get('/dashboard/kemahasiswaan/mahasiswa', function () {
-        return view('dashboard.kemahasiswaan.mahasiswa.index');
-    });
+            Route::get('/lomba/buat', function () {
+                return view('dashboard.kemahasiswaan.lomba.buat');
+            })->name('lomba.buat');
 
-    Route::get('/dashboard/kemahasiswaan/mahasiswa/{nim}', function ($nim) {
-        return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
-    });
+            Route::get('/lomba/{id}', function ($id) {
+                return view('dashboard.kemahasiswaan.lomba.detail', ['id' => $id]);
+            })->name('lomba.detail');
 
-    // Dashboard Route Admin Lomba
-    Route::get('/dashboard/adminlomba', function () {
-        return view('dashboard.adminlomba.index');
-    });
+            Route::get('/mahasiswa', function () {
+                return view('dashboard.kemahasiswaan.mahasiswa.index');
+            })->name('mahasiswa.index');
 
-    Route::get('/dashboard/adminlomba/lomba', function () {
-        return view('dashboard.adminlomba.lomba.index');
-    });
-
-    Route::get('/dashboard/adminlomba/lomba/buat', function () {
-        return view('dashboard.adminlomba.lomba.buat');
-    });
-
-    Route::get('/dashboard/adminlomba/lomba/edit/{id}', function ($id) {
-        return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
-    });
+            Route::get('/mahasiswa/{nim}', function ($nim) {
+                return view('dashboard.kemahasiswaan.mahasiswa.detail', ['nim' => $nim]);
+            })->name('mahasiswa.detail');
+        });
 
 
-    Route::get('/dashboard/adminlomba/lomba/{id}', function ($id) {
-        return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
-    });
+    // ===============================================
+    // GRUP ROUTE UNTUK ADMIN LOMBA
+    // ===============================================
+    Route::prefix('dashboard/adminlomba')
+        ->middleware('role.adminlomba')
+        ->name('adminlomba.') // Memberi nama prefix pada rute
+        ->group(function () {
 
-    Route::get('/dashboard/adminlomba/profile', function () {
-        return view('dashboard.adminlomba.editprofile');
-    });
+            Route::get('/', function () {
+                return view('dashboard.adminlomba.index');
+            })->name('dashboard'); // Nama rute: adminlomba.dashboard
+
+            Route::get('/lomba', function () {
+                return view('dashboard.adminlomba.lomba.index');
+            })->name('lomba.index');
+
+            Route::get('/lomba/buat', function () {
+                return view('dashboard.adminlomba.lomba.buat');
+            })->name('lomba.buat');
+
+            Route::get('/lomba/edit/{id}', function ($id) {
+                return view('dashboard.adminlomba.lomba.edit', ['id' => $id]);
+            })->name('lomba.edit');
+
+            Route::get('/lomba/{id}', function ($id) {
+                return view('dashboard.adminlomba.lomba.detail', ['id' => $id]);
+            })->name('lomba.detail');
+
+            Route::get('/profile', function () {
+                return view('dashboard.adminlomba.editprofile');
+            })->name('profile.edit');
+        });
 });
 
 // rute lihat sertifikat

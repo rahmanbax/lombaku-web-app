@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="icon" href="{{ asset('images/lombaku-icon.png') }}" type="image/png">
+    <title>Dashboard Mahasiswa</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
