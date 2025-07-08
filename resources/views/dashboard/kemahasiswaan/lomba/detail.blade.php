@@ -430,7 +430,8 @@
                 <div class="flex items-center gap-3 p-2 rounded-md bg-gray-100">
                     <img src="${member.foto_profile ? `/storage/${member.foto_profile}` : 'https://i.pravatar.cc/40'}" alt="Foto ${member.nama}" class="w-10 h-10 rounded-full object-cover bg-gray-200">
                     <div>
-                        <p class="font-medium text-gray-800">${member.nama}</p>
+                        <a href="/dashboard/kemahasiswaan/mahasiswa/${member.profil_mahasiswa?.nim}" class="font-medium text-gray-800 hover:underline">${member.nama}</a>
+                        <p class="text-sm text-gray-500">${member.profil_mahasiswa?.program_studi?.nama_program_studi || 'Tidak diketahui'}</p>
                         <p class="text-xs text-gray-500">${nim}</p>
                     </div>
                 </div>
