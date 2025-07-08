@@ -35,9 +35,6 @@
                         <div class="bg-white p-6 rounded-xl shadow-md">
                             <h2 class="text-xl font-bold text-gray-800 mb-4">Detail Lomba</h2>
                             
-                            <!-- =============================================== -->
-                            <!-- === PERBAIKAN 1: Tautan Gambar Aman === -->
-                            <!-- =============================================== -->
                             @if($lomba->foto_lomba)
                                 <img src="{{ Storage::url($lomba->foto_lomba) }}" alt="Foto Lomba {{ $lomba->nama_lomba }}" class="rounded-lg w-full object-cover aspect-video mb-4 bg-gray-200">
                             @else
@@ -101,9 +98,6 @@
                                         <div><h4 class="font-bold text-lg">Individu</h4><p class="text-sm text-gray-600">Mendaftar sebagai perorangan.</p></div>
                                     </label>
                                     
-                                    <!-- =============================================== -->
-                                    <!-- === PERBAIKAN 3: Nonaktifkan Opsi Kelompok Jika Tidak Memungkinkan === -->
-                                    <!-- =============================================== -->
                                     <label class="registration-type-card border-2 rounded-lg p-6 flex items-center space-x-4 @if($mahasiswaList->isEmpty()) disabled @endif">
                                         <input type="radio" name="tipe_pendaftaran" value="kelompok" @if($mahasiswaList->isEmpty()) disabled @endif>
                                         <i class="fas fa-users text-3xl text-green-500"></i>
@@ -140,11 +134,8 @@
                         </div>
 
                         <div class="mb-8">
-                            <label class="block text-xl font-bold text-gray-800 mb-4">Lengkapi Informasi</label>
+                            <label class="block text-xl font-bold text-gray-800 mb-4">3. Lengkapi Informasi</label>
                              <div class="space-y-6 bg-gray-50 p-6 rounded-lg border">
-                                <!-- =============================================== -->
-                                <!-- === PERBAIKAN 2: Logika Dosen Pembimbing === -->
-                                <!-- =============================================== -->
                                 <div>
                                     <label for="id_dosen" class="block text-gray-700 text-sm font-bold mb-2">
                                         Dosen Pembimbing 
@@ -175,6 +166,16 @@
                                     </p>
                                 </div>
 
+                                <!-- =============================================== -->
+                                <!-- === PERBAIKAN UTAMA: MENAMPILKAN DESKRIPSI PENGUMPULAN === -->
+                                <!-- =============================================== -->
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                                    <h5 class="font-bold text-blue-800 flex items-center"><i class="fas fa-info-circle mr-2"></i>Petunjuk Pengumpulan</h5>
+                                    <div class="prose prose-sm mt-2 text-blue-700">
+                                        {!! $lomba->deskripsi_pengumpulan !!}
+                                    </div>
+                                </div>
+                                
                                 <div>
                                     <label for="link_pengumpulan" class="block text-gray-700 text-sm font-bold mb-2">Link Pengumpulan Karya/Berkas</label>
                                     <input type="url" id="link_pengumpulan" class="shadow-sm appearance-none border rounded-lg w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://drive.google.com/..." required>
@@ -193,21 +194,9 @@
             </div>
         </form>
     </main>
-    <footer class="bg-gray-800 text-white mt-20">
-        <div class="container mx-auto px-4 py-12">
-            <div class="max-w-3xl mx-auto text-center mb-8">
-                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
-                    Daftar sebagai Admin Lomba
-                </button>
-            </div>
-        </div>
-        <div class="bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+
+    <x-footer />
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -216,9 +205,8 @@
         $('#id_dosen').select2({ placeholder: "Pilih Dosen Pembimbing", allowClear: true });
         $('#members').select2({ placeholder: "Cari dan tambah anggota" });
         const lombaType = @json($lomba->jenis_lomba);
-        const mahasiswaTersedia = {{ $mahasiswaList->isNotEmpty() ? 'true' : 'false' }};
         
-        if (!lombaType) {
+        if (!lombaType || lombaType === 'mix') { // Jika jenisnya bisa individu atau kelompok
             const individuInfo = $('#individu-info');
             const kelompokSection = $('#kelompok-section');
             const typeCards = $('.registration-type-card');
@@ -248,7 +236,8 @@
             submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...');
             formErrorsDiv.slideUp();
             formErrorsList.empty();
-            const tipePendaftaranValue = $('input[name="tipe_pendaftaran"]:checked').val();
+            const tipePendaftaranValue = $('input[name="tipe_pendaftaran"]:checked').val() || lombaType; // Fallback ke tipe lomba jika radio button disabled
+            
             const formData = {
                 id_lomba: $('#id_lomba').val(),
                 tipe_pendaftaran: tipePendaftaranValue,

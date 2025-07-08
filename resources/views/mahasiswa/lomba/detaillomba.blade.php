@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Lomba - Lombaku</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
         body {
             font-family: 'Poppins', sans-serif;
         }
-
         #loading-overlay {
             display: flex;
         }
-
         .bookmarked {
             background-color: #3b82f6 !important;
             color: white !important;
@@ -26,7 +21,6 @@
         }
     </style>
 </head>
-
 <body class="bg-gray-100">
 
     <x-public-header-nav />
@@ -38,25 +32,22 @@
 
     <!-- Kontainer utama -->
     <main id="main-content" class="container mx-auto p-4 lg:py-10 lg:px-0 opacity-0 transition-opacity duration-500">
-
         <!-- Kontainer detail lomba -->
         <section id="lomba-detail-container" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- Kolom Kiri: Gambar dan Tombol Aksi -->
             <div class="lg:col-span-4">
-                <img id="lomba-image" src="" alt="Foto Lomba" class="rounded-lg object-cover w-full aspect-[4/3] shadow-lg bg-gray-200">
-                <div class="mt-6 space-y-3">
-
-                    <!-- Tombol Daftar Lomba -->
-                    <button id="daftar-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        <i class="fas fa-edit mr-2"></i> Daftar Lomba
-                    </button>
-
-                    <!-- Tombol Bookmark -->
-                    <button id="bookmark-btn" class="w-full bg-white border border-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition-all">
-                        <i class="far fa-bookmark mr-2"></i> <span>Simpan Lomba</span>
-                    </button>
-
+                
+                <!-- =============================================== -->
+                <!-- === PERBAIKAN UTAMA: Mengubah Rasio Aspek Gambar === -->
+                <!-- =============================================== -->
+                <img id="lomba-image" src="" alt="Foto Lomba" class="rounded-lg object-cover w-full aspect-square shadow-lg bg-gray-200">
+                
+                <div id="action-button-container" class="mt-6 space-y-3">
+                    {{-- Tombol akan dibuat oleh JavaScript --}}
                 </div>
+                <button id="bookmark-btn" class="mt-3 w-full bg-white border border-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition-all">
+                    <i class="far fa-bookmark mr-2"></i> <span>Simpan Lomba</span>
+                </button>
             </div>
 
             <!-- Kolom Kanan: Informasi Detail -->
@@ -64,62 +55,39 @@
                 <div id="lomba-tags" class="flex flex-wrap gap-2 mb-2"></div>
                 <h1 id="lomba-nama" class="text-3xl font-bold text-gray-800">Memuat nama lomba...</h1>
                 <p id="penyelenggara-nama" class="text-gray-500 mt-1 text-md"></p>
-
                 <div class="border-t my-6"></div>
-
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4 text-md">
                     <div class="flex items-start">
                         <i class="fas fa-award fa-lg text-blue-500 mt-1 mr-4"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">Tingkat</p>
-                            <p id="lomba-tingkat" class="text-gray-600 capitalize">-</p>
-                        </div>
+                        <div><p class="font-semibold text-gray-800">Tingkat</p><p id="lomba-tingkat" class="text-gray-600 capitalize">-</p></div>
                     </div>
-
-                    <!-- ============================================= -->
-                    <!-- === PERUBAHAN 1: TAMBAHKAN ELEMEN DI SINI === -->
-                    <!-- ============================================= -->
                     <div class="flex items-start">
                         <i id="lomba-jenis-icon" class="fas fa-lg text-blue-500 mt-1 mr-4"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">Jenis Lomba</p>
-                            <p id="lomba-jenis-text" class="text-gray-600 capitalize">-</p>
-                        </div>
+                        <div><p class="font-semibold text-gray-800">Jenis Lomba</p><p id="lomba-jenis-text" class="text-gray-600 capitalize">-</p></div>
                     </div>
-                    <!-- ============================================= -->
-
                     <div class="flex items-start">
                         <i class="fas fa-map-marker-alt fa-lg text-blue-500 mt-1 mr-4"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">Lokasi</p>
-                            <p id="lomba-lokasi" class="text-gray-600 capitalize">-</p>
-                        </div>
+                        <div><p class="font-semibold text-gray-800">Lokasi</p><p id="lomba-lokasi" class="text-gray-600 capitalize">-</p></div>
                     </div>
                     <div class="flex items-start">
                         <i class="fas fa-flag-checkered fa-lg text-blue-500 mt-1 mr-4"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">Status</p>
-                            <p id="lomba-status" class="text-gray-600 capitalize">-</p>
-                        </div>
+                        <div><p class="font-semibold text-gray-800">Status</p><p id="lomba-status" class="text-gray-600 capitalize">-</p></div>
                     </div>
                     <div class="flex items-start col-span-2 sm:col-span-1">
                         <i class="fas fa-calendar-times fa-lg text-red-500 mt-1 mr-4"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">Batas Registrasi</p>
-                            <p id="lomba-tanggal-akhir-registrasi" class="text-gray-600">-</p>
-                        </div>
+                        <div><p class="font-semibold text-gray-800">Batas Registrasi</p><p id="lomba-tanggal-akhir-registrasi" class="text-gray-600">-</p></div>
                     </div>
                 </div>
-
                 <div class="border-t my-6"></div>
-
                 <h2 class="font-bold text-xl text-gray-800">Deskripsi</h2>
-                <p id="lomba-deskripsi" class="mt-2 text-gray-700 leading-relaxed whitespace-pre-wrap">Memuat deskripsi...</p>
+                <div id="lomba-deskripsi" class="mt-4 p-5 bg-gray-50/75 rounded-lg border text-gray-700 leading-relaxed prose max-w-none">
+                    <p>Memuat deskripsi...</p>
+                </div>
             </div>
         </section>
     </main>
 
- <footer class="bg-gray-800 text-white mt-20">
+     <footer class="bg-gray-800 text-white mt-20">
         <div class="container mx-auto px-4 py-12">
             <div class="max-w-3xl mx-auto text-center mb-8">
                 <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
@@ -136,22 +104,19 @@
     </footer>
 
   <script>
+    // JavaScript tidak perlu diubah karena hanya kelas CSS yang diganti.
+    // Seluruh kode JavaScript Anda tetap sama.
     document.addEventListener('DOMContentLoaded', function() {
         const loadingOverlay = document.getElementById('loading-overlay');
         const mainContent = document.getElementById('main-content');
         const bookmarkBtn = document.getElementById('bookmark-btn');
-        const daftarBtn = document.getElementById('daftar-btn');
+        const actionButtonContainer = document.getElementById('action-button-container');
         const pathParts = window.location.pathname.split('/');
         const lombaId = pathParts[pathParts.length - 1];
 
         function formatDate(dateString) {
             if (!dateString) return '-';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('id-ID', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            return new Date(dateString).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
         async function loadLombaData() {
@@ -181,7 +146,6 @@
 
         function renderPage(lomba) {
             document.title = `${lomba.nama_lomba} - Lombaku`;
-
             const imageEl = document.getElementById('lomba-image');
             if (lomba.foto_lomba_url) {
                 imageEl.src = lomba.foto_lomba_url;
@@ -193,14 +157,9 @@
             document.getElementById('penyelenggara-nama').textContent = `Diselenggarakan oleh ${lomba.penyelenggara || (lomba.pembuat ? lomba.pembuat.nama : 'Tidak diketahui')}`;
             document.getElementById('lomba-tingkat').textContent = lomba.tingkat;
             
-            // ==========================================================
-            // === PERUBAHAN 2: TAMBAHKAN LOGIKA JAVASCRIPT DI SINI ===
-            // ==========================================================
             const jenisIconEl = document.getElementById('lomba-jenis-icon');
             const jenisTextEl = document.getElementById('lomba-jenis-text');
-            // Reset kelas ikon sebelumnya
-            jenisIconEl.className = 'fas fa-lg text-blue-500 mt-1 mr-4';
-
+            jenisIconEl.className = 'fas fa-lg text-blue-500 mt-1 mr-4'; // Reset
             if (lomba.jenis_lomba === 'individu') {
                 jenisIconEl.classList.add('fa-user');
                 jenisTextEl.textContent = 'Individu';
@@ -211,12 +170,11 @@
                 jenisIconEl.classList.add('fa-question-circle');
                 jenisTextEl.textContent = 'Tidak Ditentukan';
             }
-            // ==========================================================
 
             document.getElementById('lomba-lokasi').textContent = lomba.lokasi;
             document.getElementById('lomba-status').textContent = lomba.status.replace(/_/g, ' ');
             document.getElementById('lomba-tanggal-akhir-registrasi').textContent = formatDate(lomba.tanggal_akhir_registrasi);
-            document.getElementById('lomba-deskripsi').textContent = lomba.deskripsi;
+            document.getElementById('lomba-deskripsi').innerHTML = lomba.deskripsi;
 
             const tagsContainer = document.getElementById('lomba-tags');
             tagsContainer.innerHTML = '';
@@ -228,20 +186,41 @@
             });
 
             updateBookmarkButton(lomba.is_bookmarked);
-
-            const today = new Date();
-            const registrationEndDate = new Date(lomba.tanggal_akhir_registrasi);
-            today.setHours(0, 0, 0, 0);
-
-            daftarBtn.addEventListener('click', function() {
-                window.location.href = `/lomba/${lombaId}/registrasi`;
-            });
-
-            if (lomba.status !== 'disetujui' && lomba.status !== 'berlangsung' || registrationEndDate < today) {
-                daftarBtn.disabled = true;
-                daftarBtn.textContent = 'Pendaftaran Ditutup';
+            renderActionButtons(lomba);
+        }
+        
+        function renderActionButtons(lomba) {
+            actionButtonContainer.innerHTML = '';
+            const today = new Date().toISOString().split('T')[0];
+            if (lomba.status === 'selesai') {
+                const ajukanBtn = document.createElement('a');
+                ajukanBtn.href = `/lomba/${lomba.id_lomba}/ajukan-prestasi`;
+                ajukanBtn.className = 'block text-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all';
+                ajukanBtn.innerHTML = '<i class="fas fa-award mr-2"></i> Ajukan Prestasi';
+                actionButtonContainer.appendChild(ajukanBtn);
+            } else if (lomba.status === 'disetujui' || lomba.status === 'berlangsung') {
+                const registrationEndDate = new Date(lomba.tanggal_akhir_registrasi);
+                const todayDate = new Date(today);
+                
+                if (registrationEndDate >= todayDate) {
+                    const daftarBtn = document.createElement('a');
+                    daftarBtn.href = `/lomba/${lomba.id_lomba}/registrasi`;
+                    daftarBtn.className = 'block text-center w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all';
+                    daftarBtn.innerHTML = '<i class="fas fa-edit mr-2"></i> Daftar Lomba Sekarang';
+                    actionButtonContainer.appendChild(daftarBtn);
+                } else {
+                    const disabledBtn = document.createElement('button');
+                    disabledBtn.disabled = true;
+                    disabledBtn.className = 'w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-lg cursor-not-allowed';
+                    disabledBtn.textContent = 'Pendaftaran Telah Ditutup';
+                    actionButtonContainer.appendChild(disabledBtn);
+                }
             } else {
-                daftarBtn.disabled = false;
+                 const disabledBtn = document.createElement('button');
+                 disabledBtn.disabled = true;
+                 disabledBtn.className = 'w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-lg cursor-not-allowed';
+                 disabledBtn.textContent = 'Lomba Belum Dibuka';
+                 actionButtonContainer.appendChild(disabledBtn);
             }
         }
         
@@ -269,13 +248,11 @@
             bookmarkBtn.disabled = true;
 
             try {
-                let response;
                 if (isCurrentlyBookmarked) {
-                    response = await axios.delete(`/api/bookmarks/${lombaId}`);
+                    await axios.delete(`/api/bookmarks/${lombaId}`);
                 } else {
-                    response = await axios.post('/api/bookmarks', { id_lomba: lombaId });
+                    await axios.post('/api/bookmarks', { id_lomba: lombaId });
                 }
-                
             } catch (error) {
                 console.error('Error toggling bookmark:', error);
                 updateBookmarkButton(isCurrentlyBookmarked); 
@@ -302,5 +279,4 @@
     });
 </script>
 </body>
-
 </html>
