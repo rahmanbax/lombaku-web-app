@@ -22,13 +22,15 @@ class RiwayatController extends Controller
         $filter = $request->query('filter', 'all');
         $perPage = 10;
         
-        $partisipasi = collect();
-        $prestasi = collect();
+        $partisipasiItems = [];
+        $prestasiItems = [];
         
         if ($filter === 'all' || $filter === 'lomba') {
             $claimedLombaIds = $user->prestasi()->whereNotNull('id_lomba')->pluck('id_lomba')->toArray();
-            $partisipasi = $user->registrasiLomba()
-                                ->with(['lomba', 'tim.members', 'dosenPembimbing']) // Hapus '.tags' karena tidak dipakai
+            
+            // Konversi hasil map langsung menjadi array untuk menghindari galat
+            $partisipasiItems = $user->registrasiLomba()
+                                ->with(['lomba', 'tim.members', 'dosenPembimbing'])
                                 ->get()
                                 ->map(function ($item) use ($claimedLombaIds) {
                 
@@ -59,11 +61,12 @@ class RiwayatController extends Controller
                     'status_rekognisi' => null, 
                     'status_rekognisi_class' => null,
                 ];
-            });
+            })->all(); // <-- PERBAIKAN: Ubah menjadi array
         }
 
         if ($filter === 'all' || $filter === 'prestasi') {
-            $prestasi = $user->prestasi()->with('lomba.pembuat')->get()->map(function ($item) { // Hapus '.tags'
+            // Konversi hasil map langsung menjadi array untuk menghindari galat
+            $prestasiItems = $user->prestasi()->with('lomba.pembuat')->get()->map(function ($item) {
                 $lomba = $item->lomba;
                 $rekognisiData = null;
                 $statusRekognisi = null;
@@ -118,7 +121,6 @@ class RiwayatController extends Controller
                     'nama' => $lomba?->nama_lomba ?? $item->nama_lomba_eksternal,
                     'tanggal' => $mainDate,
                     'status_text' => $statusText, 'status_class' => $statusClass,
-                    // [MODIFIKASI] Mengganti 'kategori' menjadi 'tingkat' dan memastikan sumber datanya benar
                     'tingkat' => ucfirst($lomba?->tingkat ?? $item->tingkat ?? 'Tidak Diketahui'),
                     'sertifikat_path' => $item->sertifikat_path,
                     'action_text' => null, 'action_url' => null,
@@ -126,14 +128,26 @@ class RiwayatController extends Controller
                     'status_rekognisi' => $statusRekognisi,
                     'status_rekognisi_class' => $statusRekognisiClass,
                 ];
-            });
+            })->all(); // <-- PERBAIKAN: Ubah menjadi array
         }
         
-        $kegiatanGabungan = $partisipasi->merge($prestasi);
+        // PERBAIKAN: Gabungkan sebagai array PHP biasa, lalu buat koleksi baru
+        $kegiatanGabunganArray = array_merge($partisipasiItems, $prestasiItems);
+        $kegiatanGabungan = collect($kegiatanGabunganArray);
+        
         $kegiatanTersortir = $kegiatanGabungan->filter(fn($item) => !is_null($item['tanggal']))->sortByDesc('tanggal');
+        
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentItems = $kegiatanTersortir->slice(($currentPage - 1) * $perPage, $perPage)->values()->all();
-        $paginatedItems = new LengthAwarePaginator($currentItems, count($kegiatanTersortir), $perPage, $currentPage, ['path' => request()->url(), 'query' => $request->query()]);
+        
+        $paginatedItems = new LengthAwarePaginator(
+            $currentItems, 
+            $kegiatanTersortir->count(), // Gunakan count dari koleksi
+            $perPage, 
+            $currentPage, 
+            ['path' => request()->url(), 'query' => $request->query()]
+        );
+        
         return response()->json($paginatedItems);
     }
 }

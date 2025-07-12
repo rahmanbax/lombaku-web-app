@@ -59,7 +59,6 @@
             <div class="flex-grow">
                 <p class="item-type text-xs font-semibold uppercase tracking-wider"></p>
                 <h3 class="item-name font-bold text-gray-800"></h3>
-                <!-- [MODIFIKASI] Mengganti class dari item-kategori menjadi item-tingkat -->
                 <p class="item-tingkat text-gray-500 text-sm mt-1"></p>
             </div>
         </div>
@@ -73,21 +72,22 @@
     </div>
 </template>
 
-    <footer class="bg-gray-800 text-white mt-20">
-        <div class="container mx-auto px-4 py-12">
-            <div class="max-w-3xl mx-auto text-center mb-8">
-                <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
-                    Daftar sebagai Admin Lomba
-                </button>
-            </div>
+<footer class="bg-gray-800 text-white mt-20">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto text-center mb-8">
+            <p class="text-xl md:text-2xl font-medium mb-6">Butuh mahasiswa potensial untuk mengikuti lomba anda?</p>
+            <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+                Daftar sebagai Admin Lomba
+            </button>
         </div>
-        <div class="bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
-            </div>
+    </div>
+    <div class="bg-gray-900 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400">© lombaku@2025. All rights reserved.</p>
         </div>
-    </footer>
+    </div>
+</footer>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -107,9 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await axios.post('/api/prestasi', rekognisiData);
             Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.data.message || 'Pengajuan rekognisi berhasil dikirim.', timer: 2000, showConfirmButton: false });
             
-            // [PERBAIKAN] Teks diubah agar konsisten dengan renderItems
             const rekognisiBadge = cardElement.querySelector('.item-rekognisi-badge');
-            rekognisiBadge.innerHTML = 'Menunggu';
+            // Menampilkan status "Menunggu Rekognisi" setelah berhasil diajukan
+            rekognisiBadge.textContent = 'Menunggu Rekognisi';
             rekognisiBadge.className = 'item-rekognisi-badge status-badge status-menunggu';
             buttonElement.remove();
 
@@ -162,13 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // =============================================================
             // [PERBAIKAN UTAMA ADA DI SINI]
-            // Logika diubah untuk selalu menampilkan 'Menunggu' jika ada status rekognisi.
+            // Logika diubah untuk menampilkan status dan class dinamis dari API
             const rekognisiBadge = card.querySelector('.item-rekognisi-badge');
             if (item.status_rekognisi) {
-                // Selalu set teks menjadi 'Menunggu'
-                rekognisiBadge.textContent = 'Menunggu'; 
-                // Selalu gunakan class 'status-menunggu'
-                rekognisiBadge.classList.add('status-badge', 'status-menunggu');
+                rekognisiBadge.textContent = item.status_rekognisi; // Gunakan teks dari API
+                // Reset class dan tambahkan class status yang sesuai dari API
+                rekognisiBadge.className = 'item-rekognisi-badge';
+                if (item.status_rekognisi_class) {
+                    rekognisiBadge.classList.add('status-badge', item.status_rekognisi_class);
+                }
             } else {
                 rekognisiBadge.innerHTML = `<span class="text-gray-400">-</span>`;
             }
