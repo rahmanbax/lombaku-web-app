@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage; // <-- Tambahkan ini
+use Illuminate\Support\Facades\Storage;
 
 class RiwayatController extends Controller
 {
@@ -115,6 +115,7 @@ class RiwayatController extends Controller
                     $statusText = $item->peringkat;
                     $statusClass = 'status-prestasi';
                     
+                    // Kondisi ini hanya terpenuhi jika prestasi internal dan BELUM pernah diajukan rekognisi
                     if ($item->sertifikat_path && is_null($item->status_rekognisi)) {
                         $rekognisiData = [
                             'nama_lomba_eksternal' => $lomba?->nama_lomba ?? 'Prestasi Internal',
@@ -122,16 +123,15 @@ class RiwayatController extends Controller
                             'tingkat' => $lomba?->tingkat ?? 'internal',
                             'peringkat' => $item->peringkat,
                             'tanggal_diraih' => Carbon::parse($item->tanggal_diraih)->toDateString(),
-                            // --- [PERBAIKAN UTAMA DI SINI] ---
-                            // Mengirimkan URL lengkap sertifikat agar frontend bisa mengambilnya
                             'existing_sertifikat_url' => Storage::url($item->sertifikat_path), 
-                            // --- AKHIR PERBAIKAN ---
                             'id_prestasi_internal_sumber' => $item->id_prestasi,
                             'is_tim' => $item->id_tim ? 1 : 0,
                             'member_ids' => $item->tim ? $item->tim->members->pluck('id_user')->toArray() : [],
                             'nama_tim' => $item->tim ? $item->tim->nama_tim : null,
                         ];
                     }
+
+                    // Kondisi ini akan menampilkan status jika SUDAH pernah diajukan rekognisi
                     if (!is_null($item->status_rekognisi)) {
                         switch ($item->status_rekognisi) {
                             case 'menunggu': $statusRekognisi = 'Menunggu Rekognisi'; $statusRekognisiClass = 'status-menunggu'; break;

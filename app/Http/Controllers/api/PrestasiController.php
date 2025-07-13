@@ -7,7 +7,7 @@ use App\Models\Lomba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Prestasi;
-use App\Models\Tim; // <-- TAMBAHKAN BARIS INI
+use App\Models\Tim;
 use App\Models\User;
 use App\Models\RegistrasiLomba;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +23,7 @@ class PrestasiController extends Controller
      */
     public function store(Request $request)
     {
+        // --- [PERBAIKAN 1 DARI 2: TAMBAHKAN VALIDASI UNTUK ID SUMBER] ---
         $validator = Validator::make($request->all(), [
             // Validasi Tim
             'is_tim' => 'required|boolean',
@@ -37,6 +38,9 @@ class PrestasiController extends Controller
             'peringkat' => 'required|string|max:100',
             'tanggal_diraih' => 'required|date',
             'sertifikat' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+
+            // Validasi ID sumber (jika ini adalah pengajuan dari prestasi internal)
+            'id_prestasi_internal_sumber' => 'sometimes|nullable|exists:prestasi,id_prestasi',
         ]);
 
         if ($validator->fails()) {
@@ -55,47 +59,54 @@ class PrestasiController extends Controller
 
             // Jika ini adalah pengajuan tim
             if ($validatedData['is_tim']) {
-                // 1. Buat tim baru
                 $tim = Tim::create(['nama_tim' => $validatedData['nama_tim']]);
                 $idTim = $tim->id_tim;
 
-                // 2. Gabungkan ID anggota dari form dengan ID ketua
                 if (!empty($validatedData['member_ids'])) {
                     $anggotaIds = array_unique(array_merge($anggotaIds, $validatedData['member_ids']));
                 }
 
-                // 3. Attach semua anggota ke tabel pivot 'member_tim'
                 $tim->members()->attach($anggotaIds);
             }
 
-            // 4. Siapkan data dasar untuk setiap record prestasi
+            // Siapkan data dasar untuk setiap record prestasi
             $dataPrestasi = [
                 'lomba_dari' => 'eksternal',
-                'id_tim' => $idTim, // ID Tim (bisa null jika perorangan)
+                'id_tim' => $idTim,
                 'nama_lomba_eksternal' => $validatedData['nama_lomba_eksternal'],
                 'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
                 'tingkat' => $validatedData['tingkat'],
                 'peringkat' => $validatedData['peringkat'],
-                'tipe_prestasi' => 'pemenang', // Default 'pemenang' untuk rekognisi
+                'tipe_prestasi' => 'pemenang',
                 'tanggal_diraih' => $validatedData['tanggal_diraih'],
                 'sertifikat_path' => $sertifikatPath,
-                'status_verifikasi' => 'menunggu', // Default menunggu verifikasi
+                'status_verifikasi' => 'menunggu',
             ];
 
-            // 5. Buat record prestasi untuk SETIAP ANGGOTA
+            // Buat record prestasi untuk SETIAP ANGGOTA
             foreach ($anggotaIds as $userId) {
-                // Pastikan 'id_user' unik untuk setiap iterasi
                 $dataPrestasi['id_user'] = $userId;
                 Prestasi::create($dataPrestasi);
             }
 
+            // --- [PERBAIKAN 2 DARI 2: PERBARUI STATUS REKOGNISI PADA PRESTASI INTERNAL ASLI] ---
+            // Jika request ini berasal dari pengajuan rekognisi prestasi internal...
+            if ($request->filled('id_prestasi_internal_sumber')) {
+                // Cari prestasi internal asli yang menjadi sumber pengajuan
+                $prestasiSumber = Prestasi::find($request->id_prestasi_internal_sumber);
+                if ($prestasiSumber) {
+                    // Update statusnya, sehingga tombol 'Ajukan' tidak akan muncul lagi di riwayat
+                    $prestasiSumber->update(['status_rekognisi' => 'menunggu']);
+                }
+            }
+            // --- AKHIR PERBAIKAN ---
+
             DB::commit();
 
-            $message = $validatedData['is_tim'] ? 'Pengajuan prestasi berhasil dikirim untuk seluruh tim!' : 'Pengajuan prestasi berhasil dikirim!';
+            $message = $validatedData['is_tim'] ? 'Pengajuan rekognisi berhasil dikirim untuk seluruh tim!' : 'Pengajuan rekognisi berhasil dikirim!';
             return response()->json(['success' => true, 'message' => $message], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            // Hapus file yang terlanjur di-upload jika terjadi error
             if (isset($sertifikatPath) && Storage::disk('public')->exists($sertifikatPath)) {
                 Storage::disk('public')->delete($sertifikatPath);
             }
