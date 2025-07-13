@@ -10,12 +10,32 @@
             <li><a href="/dashboard/kemahasiswaan/mahasiswa">Mahasiswa</a></li>
         </ul>
         <div class="relative">
-            <!-- Button Kemahasiswaan FIT -->
-            <button id="profile-button" class="flex items-center bg-white p-2 rounded-lg cursor-pointer">
-                <span class="truncate font-semibold max-w-48">{{ Auth::user()->nama }}</span>
-                <span class="material-symbols-outlined">keyboard_arrow_down</span>
-            </button>
+            <div class="flex items-center gap-4">
+                <!-- Tombol Inbox/Notifikasi -->
+                <div class="relative">
+                    <button id="inbox-button" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer">
+                        <span class="material-symbols-outlined text-gray-600">notifications</span>
+                    </button>
+                    <!-- Badge untuk notifikasi belum dibaca (disembunyikan secara default) -->
+                    <span id="inbox-badge" class="absolute top-0 right-0 block h-5 min-w-5 px-1.5 text-xs font-medium text-white bg-red-500 rounded-full hidden">
+                        0
+                    </span>
+                </div>
 
+                <!-- Dropdown Inbox/Notifikasi -->
+                <div id="inbox-menu" class="absolute top-full right-4 lg:right-auto mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg hidden">
+                    <div class="p-3 font-semibold">Notifikasi</div>
+                    <div id="inbox-list" class="max-h-80 overflow-y-auto">
+                        <!-- Notifikasi akan diisi oleh JS di sini -->
+                        <p class="p-4 text-center text-sm text-gray-500">Memuat notifikasi...</p>
+                    </div>
+                </div>
+                <!-- Button Kemahasiswaan FIT -->
+                <button id="profile-button" class="flex items-center bg-white p-2 rounded-lg cursor-pointer">
+                    <span class="truncate font-semibold max-w-48">{{ Auth::user()->nama }}</span>
+                    <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                </button>
+            </div>
             <!-- Dropdown Modal -->
             <div id="profile-menu" class="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg min-w-50 hidden">
                 <!-- <a href="/edit-profile" class="block px-4 py-2 hover:bg-gray-100">Edit Profil</a> -->
@@ -44,31 +64,5 @@
 
 <!-- Script -->
 <script>
-    const menuBtn = document.getElementById('menu-button');
-    const closeBtn = document.getElementById('close-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const profileButton = document.getElementById('profile-button');
-    const profileMenu = document.getElementById('profile-menu');
-
-    menuBtn.addEventListener('click', () => {
-        mobileMenu.classList.remove('hidden');
-        mobileMenu.classList.add('flex');
-    });
-
-    closeBtn.addEventListener('click', () => {
-        mobileMenu.classList.remove('flex');
-        mobileMenu.classList.add('hidden');
-    });
-
-    // Toggle dropdown saat tombol diklik
-    profileButton.addEventListener('click', () => {
-        profileMenu.classList.toggle('hidden');
-    });
-
-    // Tutup dropdown saat klik di luar modal
-    document.addEventListener('click', (event) => {
-        if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
-            profileMenu.classList.add('hidden');
-        }
-    });
+    
 </script>

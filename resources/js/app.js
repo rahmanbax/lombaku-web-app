@@ -1,2 +1,3 @@
-import './bootstrap';
-import 'material-symbols';
+import "./bootstrap";
+import "material-symbols";
+import "./navbar-handler.js";

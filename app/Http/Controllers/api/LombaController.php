@@ -14,6 +14,8 @@ use App\Models\RegistrasiLomba;
 use App\Models\TahapLomba;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Models\Notifikasi;
+use App\Models\User;
 
 class LombaController extends Controller
 {
@@ -21,7 +23,7 @@ class LombaController extends Controller
      * Menampilkan semua data lomba.
      * GET /api/lomba
      */
-   public function index(Request $request)
+    public function index(Request $request)
     {
         // Mulai query builder dengan eager loading
         $query = Lomba::with(['tags', 'pembuat'])->withCount('registrasi');
@@ -31,7 +33,7 @@ class LombaController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_lomba', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('penyelenggara', 'like', '%' . $searchTerm . '%');
             });
         }
 
@@ -64,7 +66,7 @@ class LombaController extends Controller
             if ($request->has('status') && is_array($request->status)) {
                 // Ambil irisan antara status yang diminta dan status yang diizinkan (untuk keamanan)
                 $safeStatuses = array_intersect($request->status, $publiclyVisibleStatuses);
-                
+
                 if (!empty($safeStatuses)) {
                     $query->whereIn('status', $safeStatuses);
                 } else {
@@ -87,13 +89,13 @@ class LombaController extends Controller
                 $tagQuery->whereIn('tags.id_tag', $tagIds);
             });
         }
-        
+
         $perPage = $request->input('limit', 10);
         $lombas = $query->latest()->paginate($perPage);
-        
+
         // Tambahkan URL gambar ke setiap item lomba dalam koleksi paginasi
         $lombas->getCollection()->transform(function ($lomba) {
-            $lomba->foto_lomba_url = $lomba->foto_lomba 
+            $lomba->foto_lomba_url = $lomba->foto_lomba
                 ? Storage::url($lomba->foto_lomba)
                 : null; // Atau berikan URL default jika perlu: asset('images/default-lomba.jpg')
             return $lomba;
@@ -152,7 +154,7 @@ class LombaController extends Controller
             if ($request->hasFile('foto_lomba')) {
                 $file = $request->file('foto_lomba');
                 $fileName = 'lomba_' . time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                
+
                 // Simpan file ke storage
                 $image_path = $file->storeAs('foto_lomba', $fileName, 'public');
             }
@@ -194,12 +196,39 @@ class LombaController extends Controller
                 ]);
             }
 
+            // Kirim notifikasi HANYA JIKA lomba tersebut membutuhkan persetujuan
+            if ($statusLomba === 'belum disetujui') {
+                // 1. Cari semua user dengan role 'kemahasiswaan' atau 'admin_prodi'
+                // $penerimaNotifikasi = User::whereIn('role', ['kemahasiswaan', 'admin_prodi'])->get();
+
+                // 2. Siapkan data notifikasi yang akan digunakan berulang kali
+                $notifikasiData = Notifikasi::create([
+                    'id_user' => 1, // Akan diisi per penerima
+                    'tipe'    => 'PENGAJUAN_LOMBA_BARU',
+                    'judul'   => 'Pengajuan Lomba Baru',
+                    'pesan'   => "Pengajuan lomba baru <b>\"{$lomba->nama_lomba}\"</b> dari <b>{$user->nama}</b> memerlukan persetujuan Anda.",
+                    'data'    => json_encode([
+                        'id_lomba' => $lomba->id_lomba,
+                        'nama_pengaju' => $user->nama,
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // 3. Loop dan buat notifikasi untuk setiap penerima
+                // foreach ($penerimaNotifikasi as $penerima) {
+                //     $dataToInsert = $notifikasiData;
+                //     $dataToInsert['id_user'] = $penerima->id_user; // Set ID penerima
+                //     Notifikasi::create($dataToInsert);
+                // }
+            }
+
             DB::commit();
 
             Log::info('Lomba berhasil dibuat oleh user ID: ' . $user->id_user, ['lomba_id' => $lomba->id_lomba]);
 
             // PERBAIKAN: Tambahkan URL gambar ke response
-            $lomba->foto_lomba_url = $lomba->foto_lomba 
+            $lomba->foto_lomba_url = $lomba->foto_lomba
                 ? Storage::url($lomba->foto_lomba)
                 : asset('images/default-lomba.jpg');
 
@@ -247,7 +276,7 @@ class LombaController extends Controller
 
         // PERBAIKAN: Tambahkan URL gambar ke response
         $lomba->is_bookmarked = $isBookmarked;
-        $lomba->foto_lomba_url = $lomba->foto_lomba 
+        $lomba->foto_lomba_url = $lomba->foto_lomba
             ? Storage::url($lomba->foto_lomba)
             : asset('images/default-lomba.jpg');
 
@@ -297,10 +326,13 @@ class LombaController extends Controller
             return response()->json(['success' => false, 'message' => 'Validasi Gagal', 'errors' => $validator->errors()], 422);
         }
 
+        $statusLama = $lomba->status;
+
         $validatedData = $validator->validated();
 
-        if ($lomba->status === 'ditolak') {
+        if ($statusLama === 'ditolak') {
             $validatedData['status'] = 'belum disetujui';
+            $validatedData['alasan_penolakan'] = null; // Bersihkan alasan penolakan lama
         }
 
         if (isset($validatedData['lokasi']) && $validatedData['lokasi'] === 'online') {
@@ -346,8 +378,24 @@ class LombaController extends Controller
             $lomba->tags()->sync($request->tags);
         }
 
+        if ($statusLama === 'ditolak') {
+            // Jika status sebelumnya adalah 'ditolak', kirim notifikasi pengajuan ulang
+            $penerimaNotifikasi = User::whereIn('role', ['kemahasiswaan', 'admin_prodi'])->get();
+            $pengaju = Auth::user();
+
+            foreach ($penerimaNotifikasi as $penerima) {
+                Notifikasi::create([
+                    'id_user' => $penerima->id_user,
+                    'tipe'    => 'PENGAJUAN_LOMBA_BARU', // Kita bisa gunakan tipe yang sama dengan pengajuan baru
+                    'judul'   => 'Pengajuan Ulang Lomba',
+                    'pesan'   => "Lomba <b>\"{$lomba->nama_lomba}\"</b> yang sebelumnya ditolak, telah diperbaiki dan diajukan kembali oleh <b>{$pengaju->nama}</b> untuk ditinjau.",
+                    'data'    => json_encode(['id_lomba' => $lomba->id_lomba])
+                ]);
+            }
+        }
+
         // PERBAIKAN: Tambahkan URL gambar ke response
-        $lomba->foto_lomba_url = $lomba->foto_lomba 
+        $lomba->foto_lomba_url = $lomba->foto_lomba
             ? Storage::url($lomba->foto_lomba)
             : asset('images/default-lomba.jpg');
 
@@ -532,45 +580,48 @@ class LombaController extends Controller
      */
     public function setujuiLomba($id)
     {
-        // 1. Dapatkan user yang sedang terautentikasi
         $user = Auth::user();
 
-        // 2. Otorisasi: Pastikan hanya peran tertentu yang bisa menyetujui
-        // Anda bisa menyesuaikan array ini sesuai kebutuhan
-        if (!$user || !in_array($user->role, ['kemahasiswaan', 'admin_prodi'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
-            ], 403); // 403 Forbidden
+        // ... (kode otorisasi dan validasi Anda tetap sama) ...
+        if (!$user || !in_array($user->role, ['kemahasiswaan', 'admin_prodi'])) { /* ... */
         }
-
-        // 3. Cari lomba yang akan disetujui
         $lomba = Lomba::find($id);
-        if (!$lomba) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lomba tidak ditemukan'
-            ], 404); // 404 Not Found
+        if (!$lomba) { /* ... */
+        }
+        if ($lomba->status !== 'belum disetujui') { /* ... */
         }
 
-        // 4. Validasi Status: Pastikan hanya lomba yang 'belum disetujui' yang bisa diproses
-        if ($lomba->status !== 'belum disetujui') {
+        // ==========================================================
+        // === PERUBAHAN UTAMA DI SINI ===
+        // ==========================================================
+        DB::beginTransaction();
+        try {
+            // 1. Update status lomba
+            $lomba->status = 'disetujui';
+            $lomba->save();
+
+            // 2. Buat notifikasi untuk pembuat lomba
+            Notifikasi::create([
+                'id_user' => $lomba->id_pembuat, // Penerima notifikasi
+                'tipe'    => 'LOMBA_DISETUJUI',
+                'judul'   => 'Lomba Anda Telah Disetujui',
+                'pesan'   => "Selamat! Pengajuan lomba Anda <b>\"{$lomba->nama_lomba}\"</b> telah disetujui dan akan segera dipublikasikan.",
+                'data'    => json_encode(['id_lomba' => $lomba->id_lomba])
+            ]);
+
+            DB::commit();
+
+            // 3. Kembalikan respons sukses
             return response()->json([
-                'success' => false,
-                'message' => 'Lomba ini tidak dapat disetujui karena statusnya bukan "Belum Disetujui". Status saat ini: ' . $lomba->status
-            ], 422); // 422 Unprocessable Entity
+                'success' => true,
+                'message' => 'Lomba berhasil disetujui.',
+                'data' => $lomba
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal menyetujui lomba ID {$id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server.'], 500);
         }
-
-        // 5. Update status dan simpan
-        $lomba->status = 'disetujui';
-        $lomba->save();
-
-        // 6. Kembalikan respons sukses dengan data lomba yang sudah diupdate
-        return response()->json([
-            'success' => true,
-            'message' => 'Lomba berhasil disetujui.',
-            'data' => $lomba
-        ], 200);
     }
 
     /**
@@ -635,53 +686,54 @@ class LombaController extends Controller
      */
     public function tolakLomba(Request $request, $id)
     {
-        // 1. Validasi input: alasan penolakan wajib diisi
-        $validator = Validator::make($request->all(), [
-            'alasan_penolakan' => 'required|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal.',
-                'errors' => $validator->errors()
-            ], 422);
+        // ... (kode validasi dan otorisasi Anda tetap sama) ...
+        $validator = Validator::make($request->all(), [ /* ... */]);
+        if ($validator->fails()) { /* ... */
         }
-
-        // 2. Otorisasi: Pastikan hanya peran tertentu yang bisa menolak
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['kemahasiswaan', 'admin_prodi'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
-            ], 403);
+        if (!$user || !in_array($user->role, ['kemahasiswaan', 'admin_prodi'])) { /* ... */
         }
-
-        // 3. Cari lomba
         $lomba = Lomba::find($id);
-        if (!$lomba) {
-            return response()->json(['success' => false, 'message' => 'Lomba tidak ditemukan'], 404);
+        if (!$lomba) { /* ... */
+        }
+        if ($lomba->status !== 'belum disetujui') { /* ... */
         }
 
-        // 4. Pastikan statusnya masih 'belum disetujui'
-        if ($lomba->status !== 'belum disetujui') {
+        // ==========================================================
+        // === PERUBAHAN UTAMA DI SINI ===
+        // ==========================================================
+        DB::beginTransaction();
+        try {
+            // 1. Update status dan alasan penolakan
+            $lomba->status = 'ditolak';
+            $lomba->alasan_penolakan = $request->alasan_penolakan;
+            $lomba->save();
+
+            // 2. Buat notifikasi untuk pembuat lomba
+            Notifikasi::create([
+                'id_user' => $lomba->id_pembuat, // Penerima notifikasi
+                'tipe'    => 'LOMBA_DITOLAK',
+                'judul'   => 'Pengajuan Lomba Ditolak',
+                'pesan'   => "Mohon maaf, pengajuan lomba Anda <b>\"{$lomba->nama_lomba}\"</b> ditolak. Silakan periksa detailnya untuk melihat alasan penolakan.",
+                'data'    => json_encode([
+                    'id_lomba' => $lomba->id_lomba,
+                    'alasan_penolakan' => $request->alasan_penolakan,
+                ])
+            ]);
+
+            DB::commit();
+
+            // 3. Kembalikan respons sukses
             return response()->json([
-                'success' => false,
-                'message' => 'Lomba ini tidak dapat ditolak karena sudah diproses.'
-            ], 422);
+                'success' => true,
+                'message' => 'Lomba berhasil ditolak.',
+                'data' => $lomba
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal menolak lomba ID {$id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server.'], 500);
         }
-
-        // 5. Update status dan alasan penolakan
-        $lomba->status = 'ditolak';
-        $lomba->alasan_penolakan = $request->alasan_penolakan;
-        $lomba->save();
-
-        // 6. Kembalikan respons sukses
-        return response()->json([
-            'success' => true,
-            'message' => 'Lomba berhasil ditolak.',
-            'data' => $lomba
-        ], 200);
     }
 
     public function getMyLombaDitolak()

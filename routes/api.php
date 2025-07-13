@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\ProfilAdminLombaController;
 use App\Http\Controllers\API\RegistrasiLombaController;
 use App\Http\Controllers\API\RiwayatController;
 use App\Http\Controllers\api\TahapLombaController;
+use App\Http\Controllers\NotifikasiController;
 use App\Models\User;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -52,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->get('/mahasiswa/search', function (Request $request) {
     $search = $request->query('q');
-    
+
     if (!$search) {
         return response()->json([]);
     }
@@ -60,9 +61,9 @@ Route::middleware('auth:sanctum')->get('/mahasiswa/search', function (Request $r
     $users = User::where('role', 'mahasiswa')
         ->where(function ($query) use ($search) {
             $query->where('nama', 'LIKE', "%{$search}%")
-                  ->orWhereHas('profilMahasiswa', function ($subQuery) use ($search) {
-                      $subQuery->where('nim', 'LIKE', "%{$search}%");
-                  });
+                ->orWhereHas('profilMahasiswa', function ($subQuery) use ($search) {
+                    $subQuery->where('nim', 'LIKE', "%{$search}%");
+                });
         })
         ->with('profilMahasiswa:id_user,nim') // Hanya ambil data NIM yang relevan
         ->limit(10)
@@ -124,4 +125,8 @@ Route::apiResource('mahasiswa', MahasiswaController::class);
 Route::get('/profil', [ProfilAdminLombaController::class, 'show']);
 Route::post('/profil', [ProfilAdminLombaController::class, 'update']);
 
+// 1. Mengambil semua notifikasi milik user yang sedang login
+Route::get('/notifikasi/saya', [NotifikasiController::class, 'getMyNotifications']);
 
+// 2. Menandai semua notifikasi sebagai sudah dibaca
+Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllAsRead']);

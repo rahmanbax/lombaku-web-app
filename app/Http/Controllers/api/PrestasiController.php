@@ -105,68 +105,101 @@ class PrestasiController extends Controller
 
     public function berikan(Request $request)
     {
+        // 1. Validasi Input Awal
         $validator = Validator::make($request->all(), [
-            'id_user'             => 'required|exists:users,id_user',
-            'id_lomba'            => [
-                'required',
-                'exists:lomba,id_lomba',
-                Rule::unique('prestasi')->where(function ($query) use ($request) {
-                    return $query->where('id_user', $request->id_user);
-                }),
-            ],
+            'id_user'             => 'required|exists:users,id_user', // ID Ketua Tim/Pendaftar Individu
+            'id_lomba'            => 'required|exists:lomba,id_lomba',
             'peringkat'           => 'required|string|max:255',
             'tipe_prestasi'       => 'required|in:pemenang,peserta',
             'tanggal_diraih'      => 'required|date',
-            'sertifikat' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ], [
-            'id_lomba.unique' => 'Peserta ini sudah pernah diberikan prestasi untuk lomba yang sama.'
+            'sertifikat'          => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $validator->errors()], 422);
+            return response()->json(['success' => false, 'message' => 'Validasi gagal.', 'errors' => $validator->errors()], 422);
         }
 
-        DB::beginTransaction();
+        // 2. Temukan data registrasi asli untuk mendapatkan ID Tim
+        $registrasiAwal = RegistrasiLomba::where('id_lomba', $request->id_lomba)
+            ->where('id_mahasiswa', $request->id_user)
+            ->first();
+        if (!$registrasiAwal) {
+            return response()->json(['success' => false, 'message' => 'Data pendaftaran asli untuk peserta ini tidak ditemukan.'], 404);
+        }
 
+        // 3. Tentukan daftar user yang akan menerima prestasi
+        $userIdsToReceive = [];
+        if ($registrasiAwal->id_tim) {
+            // --- JIKA INI LOMBA KELOMPOK ---
+            // Ambil semua ID mahasiswa dari anggota tim
+            $userIdsToReceive = DB::table('member_tim')->where('id_tim', $registrasiAwal->id_tim)->pluck('id_mahasiswa')->all();
+        }
+
+        // Jika bukan kelompok atau tim tidak ditemukan, daftarnya hanya berisi ketua tim.
+        if (empty($userIdsToReceive)) {
+            $userIdsToReceive[] = $request->id_user;
+        }
+
+        // 4. Validasi kedua: Pastikan tidak ada anggota tim yang sudah punya prestasi di lomba ini
+        $existingPrestasiCount = Prestasi::where('id_lomba', $request->id_lomba)
+            ->whereIn('id_user', $userIdsToReceive)
+            ->count();
+        if ($existingPrestasiCount > 0) {
+            return response()->json(['success' => false, 'message' => 'Satu atau lebih anggota tim sudah pernah diberikan prestasi untuk lomba ini.'], 422);
+        }
+
+
+        // 5. Mulai Transaksi Database
+        DB::beginTransaction();
         try {
+            // 6. Simpan file sertifikat sekali saja
             $sertifikatPath = null;
             if ($request->hasFile('sertifikat')) {
                 $file = $request->file('sertifikat');
-                $fileName = 'sertifikat_lomba_' . $request->id_lomba . '_user_' . $request->id_user . '_' . time() . '.' . $file->getClientOriginalExtension();
+                // Buat nama file yang lebih umum untuk tim
+                $fileName = 'sertifikat_lomba_' . $request->id_lomba . '_tim_' . ($registrasiAwal->id_tim ?? $request->id_user) . '_' . time() . '.' . $file->getClientOriginalExtension();
                 $sertifikatPath = $file->storeAs('sertifikat', $fileName, 'public');
             }
 
-            $prestasi = Prestasi::create([
-                'id_user'             => $request->id_user,
+            // 7. Siapkan data dasar prestasi
+            $prestasiData = [
                 'id_lomba'            => $request->id_lomba,
                 'peringkat'           => $request->peringkat,
                 'tipe_prestasi'       => $request->tipe_prestasi,
                 'tanggal_diraih'      => $request->tanggal_diraih,
                 'sertifikat_path'     => $sertifikatPath,
                 'status_verifikasi'   => 'disetujui',
-                'lomba_dari'          => 'internal'
-            ]);
+                'lomba_dari'          => 'internal',
+                'id_verifikator'      => Auth::id(), // ID Verifikator (admin yang memberikan prestasi)
+            ];
 
-            $lombaId = $request->id_lomba;
-            $lomba = Lomba::find($lombaId);
+            // 8. Loop dan buat record prestasi untuk SETIAP ANGGOTA
+            foreach ($userIdsToReceive as $userId) {
+                $dataToInsert = $prestasiData;
+                $dataToInsert['id_user'] = $userId;
+                Prestasi::create($dataToInsert);
+            }
 
+            // 9. Cek apakah semua pendaftar sudah diberi prestasi untuk mengubah status lomba
+            $lomba = Lomba::find($request->id_lomba);
             if ($lomba) {
-                $totalPendaftarDiterima = $lomba->registrasi()
-                    ->where('status_verifikasi', 'diterima')
-                    ->count();
-                $totalPenerimaPrestasi = Prestasi::where('id_lomba', $lombaId)->count();
+                $totalPendaftarDiterima = $lomba->registrasi()->where('status_verifikasi', 'diterima')->count();
+                $totalPenerimaPrestasi = Prestasi::where('id_lomba', $request->id_lomba)->count();
+
+                // Logika ini mungkin perlu disesuaikan. Jika 1 tim (3 orang) menang dari 10 pendaftar,
+                // apakah lombanya selesai? Jika ya, logika ini benar. Jika tidak, perlu penyesuaian.
                 if ($totalPendaftarDiterima > 0 && $totalPendaftarDiterima === $totalPenerimaPrestasi) {
                     $lomba->status = 'selesai';
                     $lomba->save();
                 }
             }
 
+            // 10. Commit transaksi
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Prestasi berhasil diberikan.',
-                'data'    => $prestasi
+                'message' => 'Prestasi berhasil diberikan kepada ' . count($userIdsToReceive) . ' peserta.'
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();

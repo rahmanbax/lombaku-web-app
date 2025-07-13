@@ -7,6 +7,7 @@ use App\Models\Lomba;
 use App\Models\RegistrasiLomba;
 use App\Models\Tim;
 use App\Models\User;
+use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -92,7 +93,7 @@ class RegistrasiLombaController extends Controller
                 $memberIds[] = $user->id_user;
                 $tim->members()->attach(array_unique($memberIds));
             }
-            RegistrasiLomba::create([
+            $registrasi = RegistrasiLomba::create([
                 'id_mahasiswa'      => $user->id_user,
                 'id_lomba'          => $request->id_lomba,
                 'id_tim'            => $timId,
@@ -100,6 +101,41 @@ class RegistrasiLombaController extends Controller
                 'link_pengumpulan'  => $request->link_pengumpulan,
                 'status_verifikasi' => 'menunggu',
             ]);
+
+            $lomba = Lomba::findOrFail($request->id_lomba);
+
+            // =====================================================================
+            // === [2] TAMBAHAN UTAMA: Logika Pembuatan Notifikasi ===
+            // =====================================================================
+
+            if ($request->filled('id_dosen')) {
+                // --- Skenario 1: Kirim notifikasi ke Dosen Pembimbing ---
+                Notifikasi::create([
+                    'id_user' => $request->id_dosen, // Penerima adalah Dosen
+                    'tipe'    => 'PENGAJUAN_BIMBINGAN',
+                    'judul'   => 'Permintaan Bimbingan Lomba',
+                    'pesan'   => "Mahasiswa <b>{$user->nama}</b> meminta Anda untuk menjadi pembimbing di lomba <b>{$lomba->nama_lomba}</b>.",
+                    'data'    => json_encode([
+                        'id_lomba' => $lomba->id_lomba,
+                        'id_registrasi' => $registrasi->id_registrasi_lomba,
+                        'nama_mahasiswa' => $user->nama,
+                    ]),
+                ]);
+            } else {
+                // --- Skenario 2: Kirim notifikasi ke Admin Lomba ---
+                Notifikasi::create([
+                    'id_user' => $lomba->id_pembuat, // Penerima adalah Admin Lomba
+                    'tipe'    => 'PENDAFTAR_BARU',
+                    'judul'   => 'Pendaftar Baru di Lomba Anda',
+                    'pesan'   => "Mahasiswa <b>{$user->nama}</b> telah mendaftar di lomba Anda: <b>{$lomba->nama_lomba}</b>.",
+                    'data'    => json_encode([
+                        'id_lomba' => $lomba->id_lomba,
+                        'id_registrasi' => $registrasi->id_registrasi_lomba,
+                        'nama_mahasiswa' => $user->nama,
+                    ]),
+                ]);
+            }
+
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Pendaftaran lomba berhasil dikirim!'], 201);
         } catch (\Exception $e) {

@@ -194,8 +194,22 @@
 
                 <!-- Field Peringkat -->
                 <div>
-                    <label for="prestasi-peringkat-input" class="block text-sm font-medium text-gray-700">Peringkat / Pencapaian</label>
-                    <input type="text" name="peringkat" id="prestasi-peringkat-input" placeholder="Contoh: Juara 1, Finalis, Medali Emas" required class="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="prestasi-peringkat-select" class="block text-sm font-medium text-gray-700">Peringkat / Pencapaian <span class="text-red-500">*</span></label>
+
+                    <!-- Dropdown untuk pilihan umum -->
+                    <select id="prestasi-peringkat-select" name="peringkat" class="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Juara 1">Juara 1</option>
+                        <option value="Juara 2">Juara 2</option>
+                        <option value="Juara 3">Juara 3</option>
+                        <option value="Harapan 1">Harapan 1</option>
+                        <option value="Harapan 2">Harapan 2</option>
+                        <option value="Finalis">Finalis</option>
+                        <option value="Peserta">Peserta</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+
+                    <!-- Input teks untuk peringkat manual, disembunyikan secara default -->
+                    <input type="text" id="prestasi-peringkat-manual" name="peringkat" placeholder="Contoh: Best Speaker, Medali Emas" class="w-full mt-2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 hidden">
                 </div>
 
                 <!-- Field Tipe Prestasi -->
@@ -289,6 +303,54 @@
             const closePrestasiModalBtn = document.getElementById('close-prestasi-modal-btn');
             const batalPrestasiBtn = document.getElementById('batal-prestasi-btn');
             const kirimPrestasiBtn = document.getElementById('kirim-prestasi-btn');
+
+            // [BARU] Inisialisasi elemen untuk peringkat
+            const peringkatSelect = document.getElementById('prestasi-peringkat-select');
+            const peringkatManualInput = document.getElementById('prestasi-peringkat-manual');
+
+            // [BARU] Inisialisasi elemen untuk radio button tipe prestasi
+            const tipePrestasiRadios = document.querySelectorAll('input[name="tipe_prestasi"]');
+
+            // [BARU] Definisikan opsi untuk setiap tipe prestasi
+            const optionsForPemenang = [{
+                    value: 'Juara 1',
+                    text: 'Juara 1'
+                },
+                {
+                    value: 'Juara 2',
+                    text: 'Juara 2'
+                },
+                {
+                    value: 'Juara 3',
+                    text: 'Juara 3'
+                },
+                {
+                    value: 'Harapan 1',
+                    text: 'Harapan 1'
+                },
+                {
+                    value: 'Harapan 2',
+                    text: 'Harapan 2'
+                },
+                {
+                    value: 'lainnya',
+                    text: 'Lainnya (Input manual)'
+                }
+            ];
+
+            const optionsForPeserta = [{
+                    value: 'Finalis',
+                    text: 'Finalis'
+                },
+                {
+                    value: 'Peserta',
+                    text: 'Peserta'
+                },
+                {
+                    value: 'lainnya',
+                    text: 'Lainnya (Input manual)'
+                }
+            ];
 
             // [BARU] Elemen untuk Modal Detail Tim
             const timDetailModal = document.getElementById('tim-detail-modal');
@@ -606,6 +668,33 @@
                 }
             }
 
+            function updatePeringkatOptions(tipe) {
+                const options = (tipe === 'pemenang') ? optionsForPemenang : optionsForPeserta;
+
+                // Kosongkan dropdown yang ada
+                peringkatSelect.innerHTML = '';
+
+                // Isi dengan opsi yang baru
+                options.forEach(opt => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = opt.value;
+                    optionElement.textContent = opt.text;
+                    peringkatSelect.appendChild(optionElement);
+                });
+
+                // PENTING: Trigger event 'change' secara manual untuk menyesuaikan input manual
+                peringkatSelect.dispatchEvent(new Event('change'));
+            }
+
+            tipePrestasiRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        updatePeringkatOptions(this.value);
+                    }
+                });
+            });
+
+
             // Gantikan fungsi openPrestasiModal yang lama dengan yang baru ini:
             function openPrestasiModal(options) {
                 prestasiForm.reset();
@@ -616,16 +705,37 @@
                         prestasi
                     } = options;
                     prestasiForm.dataset.mode = 'edit';
-                    prestasiForm.dataset.prestasiId = prestasi.id_prestasi; // Simpan ID prestasi untuk URL update
+                    prestasiForm.dataset.prestasiId = prestasi.id_prestasi;
 
                     document.getElementById('prestasi-modal').querySelector('h3').textContent = "Edit Prestasi / Sertifikat";
                     prestasiModalSubtitle.textContent = `Untuk: ${options.mahasiswaNama}`;
 
-                    document.getElementById('prestasi-peringkat-input').value = prestasi.peringkat;
-                    document.getElementById('prestasi-tanggal-input').value = prestasi.tanggal_diraih;
-                    document.querySelector(`input[name="tipe_prestasi"][value="${prestasi.tipe_prestasi}"]`).checked = true;
+                    // 1. Set radio button Tipe Prestasi terlebih dahulu
+                    const tipePrestasiValue = prestasi.tipe_prestasi;
+                    document.querySelector(`input[name="tipe_prestasi"][value="${tipePrestasiValue}"]`).checked = true;
 
-                    // Buat field sertifikat tidak wajib saat edit
+                    // 2. Perbarui opsi dropdown berdasarkan Tipe Prestasi yang sudah di-set
+                    updatePeringkatOptions(tipePrestasiValue);
+
+                    // 3. Set nilai Peringkat
+                    const peringkatValue = prestasi.peringkat;
+                    const currentOptions = Array.from(peringkatSelect.options).map(opt => opt.value);
+
+                    if (currentOptions.includes(peringkatValue)) {
+                        peringkatSelect.value = peringkatValue;
+                    } else {
+                        peringkatSelect.value = 'lainnya';
+                    }
+
+                    // 4. Trigger event 'change' untuk menampilkan/menyembunyikan input manual dan mengisi nilainya
+                    peringkatSelect.dispatchEvent(new Event('change'));
+                    // Jika nilainya manual, pastikan inputnya terisi
+                    if (peringkatSelect.value === 'lainnya') {
+                        peringkatManualInput.value = peringkatValue;
+                    }
+
+                    // Mengisi sisa form
+                    document.getElementById('prestasi-tanggal-input').value = prestasi.tanggal_diraih.split('T')[0];
                     document.getElementById('prestasi-sertifikat-file').required = false;
 
                 } else {
@@ -641,12 +751,16 @@
                     prestasiForm.dataset.userId = registration.mahasiswa.id_user;
                     prestasiForm.dataset.lombaId = registration.id_lomba;
 
-                    // Buat field sertifikat wajib saat create
+                    // Set default radio button ke 'pemenang' dan update dropdown
+                    document.querySelector('input[name="tipe_prestasi"][value="pemenang"]').checked = true;
+                    updatePeringkatOptions('pemenang');
+
                     document.getElementById('prestasi-sertifikat-file').required = true;
                 }
 
                 prestasiModal.classList.remove('hidden');
             }
+
 
             function hidePrestasiModal() {
                 prestasiModal.classList.add('hidden');
@@ -715,6 +829,22 @@
                     if (registration && registration.tim) {
                         showTimDetailModal(registration.tim);
                     }
+                }
+            });
+
+            // event listener untuk input prestasi
+            peringkatSelect.addEventListener('change', function() {
+                const selectedValue = this.value;
+
+                if (selectedValue === 'lainnya') {
+                    peringkatManualInput.classList.remove('hidden');
+                    peringkatManualInput.value = '';
+                    peringkatManualInput.focus();
+                    peringkatManualInput.required = true;
+                } else {
+                    peringkatManualInput.classList.add('hidden');
+                    peringkatManualInput.value = selectedValue;
+                    peringkatManualInput.required = false; // Karena sudah diisi oleh dropdown
                 }
             });
 
@@ -813,26 +943,37 @@
             // Gantikan event listener prestasiForm yang lama dengan yang baru ini:
             prestasiForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                const kirimPrestasiBtn = document.getElementById('kirim-prestasi-btn'); // Ambil referensi tombol
                 kirimPrestasiBtn.disabled = true;
                 kirimPrestasiBtn.innerHTML = 'Mengirim...';
 
                 const mode = prestasiForm.dataset.mode;
-                const formData = new FormData(); // FormData lebih fleksibel untuk kedua mode
+                const formData = new FormData(); // Mulai dengan FormData kosong
 
-                // Ambil data umum dari form
-                formData.append('peringkat', document.getElementById('prestasi-peringkat-input').value);
-                formData.append('tipe_prestasi', document.querySelector('input[name="tipe_prestasi"]:checked').value);
-                formData.append('peringkat', document.getElementById('prestasi-peringkat-input').value);
-                formData.append('tipe_prestasi', document.querySelector('input[name="tipe_prestasi"]:checked').value);
+                // --- [PERBAIKAN UTAMA DI SINI] ---
+                // 1. Ambil nilai peringkat secara manual dan eksplisit
+                const peringkatSelect = document.getElementById('prestasi-peringkat-select');
+                const peringkatManualInput = document.getElementById('prestasi-peringkat-manual');
+                let peringkatValue = '';
 
-                // 2. [FIX] Ambil dan tambahkan tanggal dari hidden input
+                if (peringkatSelect.value === 'lainnya') {
+                    // Jika 'Lainnya' dipilih, ambil nilai dari input manual
+                    peringkatValue = peringkatManualInput.value.trim();
+                } else {
+                    // Jika tidak, ambil nilai dari dropdown
+                    peringkatValue = peringkatSelect.value;
+                }
+
+                // Tambahkan nilai peringkat yang sudah benar ke FormData
+                formData.append('peringkat', peringkatValue);
+
+                // 2. Ambil dan tambahkan data lainnya
+                formData.append('tipe_prestasi', document.querySelector('input[name="tipe_prestasi"]:checked').value);
                 formData.append('tanggal_diraih', document.getElementById('prestasi-tanggal-input').value);
 
-                // 3. [FIX] Ambil file dan tambahkan ke FormData JIKA ADA.
-                //    Kunci 'sertifikat_path' harus sesuai dengan yang diharapkan oleh validasi backend Anda.
                 const sertifikatFile = document.getElementById('prestasi-sertifikat-file').files[0];
                 if (sertifikatFile) {
-                    formData.append('sertifikat', sertifikatFile);
+                    formData.append('sertifikat', sertifikatFile); // Nama 'sertifikat' harus sesuai dengan backend
                 }
 
                 try {
@@ -842,18 +983,16 @@
                         formData.append('_method', 'PUT');
                         await axios.post(`/api/prestasi/${prestasiId}`, formData);
                         alert('Prestasi berhasil diperbarui!');
-                        location.reload();
+
                     } else {
                         // --- LOGIKA CREATE ---
                         formData.append('id_user', prestasiForm.dataset.userId);
                         formData.append('id_lomba', prestasiForm.dataset.lombaId);
                         await axios.post('/api/prestasi/berikan', formData);
                         alert('Prestasi berhasil disimpan dan sertifikat terkirim!');
-                        location.reload();
                     }
 
-                    hidePrestasiModal();
-                    await loadPageData(); // Refresh data halaman
+                    location.reload(); // Reload halaman setelah sukses
 
                 } catch (error) {
                     const msg = error.response?.data?.message || 'Gagal menyimpan prestasi.';
