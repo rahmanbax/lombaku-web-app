@@ -72,7 +72,9 @@ Route::get('/lomba/{lomba}/registrasi', [RegistrasiLombaController::class, 'crea
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
-
+Route::get('/hasil-rekognisi', function () {
+        return view('mahasiswa.lomba.hasilrekognisi'); // Arahkan ke view baru
+    })->name('hasil-rekognisi');
 Route::get('/ajukan-rekognisi', function () {
     return view('mahasiswa.lomba.ajukanrekognisi');
 })->name('rekognisi.create')->middleware('auth');

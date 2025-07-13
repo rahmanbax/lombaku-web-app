@@ -24,7 +24,7 @@
             <div class="bg-white rounded-xl shadow-md p-8">
                 <h1 class="text-2xl font-bold text-gray-800 mb-8">Edit Profil Mahasiswa</h1>
 
-                <!-- === BAGIAN BARU: FOTO PROFIL === -->
+                <!-- FOTO PROFIL -->
                 <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Foto Profil</h2>
                 <div class="flex items-center gap-6 mb-6">
                     <img id="foto-preview" src="https://ui-avatars.com/api/?name=?&background=E0E7FF&color=3730A3" alt="Preview Foto Profil" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
@@ -44,7 +44,21 @@
                     <div><label for="nim" class="form-label">NIM</label><input type="text" id="nim" name="nim" class="w-full p-2 border rounded-md form-input"><p id="error-nim" class="error-message"></p></div>
                     <div><label for="id_program_studi" class="form-label">Program Studi</label><select id="id_program_studi" name="id_program_studi" class="w-full p-2 border rounded-md form-input"><option value="">Memuat...</option></select><p id="error-id_program_studi" class="error-message"></p></div>
                     <div><label for="email" class="form-label">Email</label><input type="email" id="email" name="email" class="w-full p-2 border rounded-md form-input"><p id="error-email" class="error-message"></p></div>
-                    <div><label for="notelp" class="form-label">Nomor Telepon</label><input type="tel" id="notelp" name="notelp" class="w-full p-2 border rounded-md form-input"><p id="error-notelp" class="error-message"></p></div>
+                    
+                    <!-- PERBAIKAN PENTING PADA INPUT NOMOR TELEPON -->
+                    <div>
+                        <label for="notelp" class="form-label">Nomor Telepon</label>
+                        <input 
+                            type="tel" 
+                            id="notelp" 
+                            name="notelp" 
+                            class="w-full p-2 border rounded-md form-input"
+                            pattern="[0-9]*"       {{-- Memastikan hanya digit --}}
+                            inputmode="numeric"    {{-- Membantu keyboard numerik di mobile --}}
+                        >
+                        <p id="error-notelp" class="error-message"></p>
+                    </div>
+                    <!-- AKHIR PERBAIKAN -->
                 </div>
 
                 <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 mt-8">Informasi Personal</h2>
@@ -69,6 +83,8 @@
         const successMessage = document.getElementById('success-message');
         const fotoInput = document.getElementById('foto_profile');
         const fotoPreview = document.getElementById('foto-preview');
+        // Pastikan token CSRF diatur untuk Axios
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         const populateForm = (data) => {
             const profile = data.data;
@@ -79,7 +95,6 @@
             document.getElementById('tanggal_lahir').value = profile.tanggal_lahir ? profile.tanggal_lahir.split('T')[0] : '';
             document.getElementById('jenis_kelamin').value = profile.jenis_kelamin || '';
 
-            // Set preview foto profil awal
             if (profile.user.foto_profile) {
                 fotoPreview.src = `/storage/${profile.user.foto_profile}`;
             } else {
@@ -111,7 +126,7 @@
             const [profileRes, prodiRes] = await Promise.all([ axios.get('/api/profil-mahasiswa'), axios.get('/api/program-studi') ]);
             if (profileRes.data.success) {
                 populateForm(profileRes.data);
-                if(prodiRes.data.data) { // Cek 'data' bukan 'success'
+                if(prodiRes.data.data) {
                     populateProdi(prodiRes.data.data, profileRes.data.data.id_program_studi);
                 }
             }
@@ -132,6 +147,16 @@
             }
         });
 
+        // PERBAIKAN PENTING PADA VALIDASI REAL-TIME NOMOR TELEPON
+        const notelpInput = document.getElementById('notelp');
+        if (notelpInput) {
+            notelpInput.addEventListener('input', function(e) {
+                // Hapus karakter non-digit dari nilai input secara real-time
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+        // AKHIR PERBAIKAN
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
@@ -140,9 +165,11 @@
             displayErrors({});
             
             const formData = new FormData(form);
+            // Laravel akan mengenali _method sebagai PATCH/PUT
+            formData.append('_method', 'POST'); // Atau 'PATCH' jika route Anda POST tapi method PATCH
 
             try {
-                // Gunakan axios untuk POST, ia akan mengatur header dengan benar untuk FormData
+                // Endpoint POST /api/profil-mahasiswa dengan _method PATCH
                 const response = await axios.post('/api/profil-mahasiswa', formData);
                 successMessage.textContent = response.data.message;
                 successMessage.style.display = 'block';

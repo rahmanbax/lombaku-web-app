@@ -94,7 +94,7 @@
                     <a href="{{ route('status')}}" class="dropdown-item block px-4 py-2 text-gray-700">Riwayat Kegiatan</a>
                     <a href="{{ route('bookmark') }}" class="dropdown-item block px-4 py-2 text-gray-700">Lomba Disimpan</a>
                     <a href="{{ route('rekognisi.create') }}" class="dropdown-item block px-4 py-2 text-gray-700">Ajukan Rekognisi Prestasi</a>
-                    
+                    <a href="{{ route('hasil-rekognisi') }}" class="dropdown-item block px-4 py-2 text-gray-700">Hasil Rekognisi</a>
                     {{-- === INILAH PERBAIKANNYA === --}}
                     @if(in_array(Auth::user()->role, ['dosen', 'admin_lomba', 'kemahasiswaan']))
                         <div class="border-t my-1"></div>
