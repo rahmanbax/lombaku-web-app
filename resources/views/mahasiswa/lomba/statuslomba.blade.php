@@ -92,7 +92,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Memperbaiki header CSRF
     const csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
     const axiosInstance = axios.create({
         headers: {
@@ -110,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
     
-    // Fungsi untuk mengubah URL file menjadi objek File
     async function urlToFile(url, filename, mimeType){
         try {
             const res = await fetch(url);
@@ -129,13 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const formData = new FormData();
             
-            // --- [PERBAIKAN UTAMA DI SINI] ---
-            // Tambahkan semua data dari rekognisiData ke formData
-            // Kecuali 'existing_sertifikat_url' karena akan diubah jadi objek File 'sertifikat'
             for (const key in rekognisiData) {
                 if (key !== 'existing_sertifikat_url' && rekognisiData[key] !== null) { 
                     if (Array.isArray(rekognisiData[key])) {
-                        // Untuk array seperti member_ids, tambahkan setiap elemen secara terpisah
                         rekognisiData[key].forEach(val => formData.append(`${key}[]`, val));
                     } else {
                         formData.append(key, rekognisiData[key]);
@@ -143,43 +137,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Mengambil sertifikat dari URL dan mengubahnya menjadi objek File
-            // Kemudian menambahkannya ke FormData dengan nama 'sertifikat'
             if (rekognisiData.existing_sertifikat_url) {
                 const sertifikatUrl = rekognisiData.existing_sertifikat_url;
-                // Ambil nama file dari URL
                 const fileName = sertifikatUrl.substring(sertifikatUrl.lastIndexOf('/') + 1);
-                // Coba tebak MIME type, atau buat lebih robust jika perlu
                 const mimeType = fileName.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'; 
                 const sertifikatFile = await urlToFile(sertifikatUrl, fileName, mimeType);
                 formData.append('sertifikat', sertifikatFile);
-            } else {
-                // Jika tidak ada existing_sertifikat_url, controller akan menganggap 'sertifikat' tidak ada
-                // Ini akan memicu validasi "required" jika tidak ada sertifikat baru yang diupload
-                // Pastikan PrestasiController memiliki validasi 'sertifikat' => 'required|file'
-                // dan tidak lagi bergantung pada 'required_without:existing_sertifikat_path'
             }
-            // --- AKHIR PERBAIKAN ---
 
-            // POST data sebagai multipart/form-data
             const response = await axiosInstance.post('/api/prestasi', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             
             Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.data.message || 'Pengajuan rekognisi berhasil dikirim.', timer: 2000, showConfirmButton: false });
             
-            const rekognisiBadge = cardElement.querySelector('.item-rekognisi-badge');
-            rekognisiBadge.textContent = 'Menunggu Rekognisi';
-            rekognisiBadge.className = 'item-rekognisi-badge status-badge status-menunggu';
-            buttonElement.remove();
+            // Panggil ulang fetchRiwayat() untuk memuat ulang data dari server,
+            // ini adalah cara paling andal untuk merefleksikan state terbaru dari database.
+            fetchRiwayat(window.location.href); // Gunakan URL saat ini untuk menjaga halaman paginasi
 
         } catch (error) {
             console.error('Gagal mengajukan rekognisi:', error);
             const errorMessage = error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.';
             Swal.fire({ icon: 'error', title: 'Oops...', text: errorMessage });
-        } finally {
             buttonElement.disabled = false;
             buttonElement.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan`;
         }
@@ -242,9 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemTeamMembers.textContent = `Anggota: ${item.team_info.members}`;
                 itemTeamName.classList.remove('hidden');
                 itemTeamMembers.classList.remove('hidden');
-            } else {
-                itemTeamName.classList.add('hidden');
-                itemTeamMembers.classList.add('hidden');
             }
 
             actionsContainer.innerHTML = '';
@@ -253,7 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemIcon.innerHTML = `<i class="fas fa-medal text-yellow-500"></i>`;
                 itemIcon.className += ' bg-yellow-100';
                 const sertifikatLink = document.createElement('a');
-                // URL ini harus cocok dengan cara file diakses di server Anda
                 sertifikatLink.href = `/storage/${item.sertifikat_path}`; 
                 sertifikatLink.target = '_blank';
                 sertifikatLink.className = 'text-blue-600 hover:text-blue-800 text-sm font-medium';
@@ -261,17 +236,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 actionsContainer.appendChild(sertifikatLink);
             }
 
+            // Tombol "Ajukan" hanya akan dibuat jika backend mengirim `rekognisi_data`
             if (item.rekognisi_data) {
                 const rekognisiBtn = document.createElement('button');
                 rekognisiBtn.type = 'button';
                 rekognisiBtn.className = 'bg-orange-100 text-orange-800 hover:bg-orange-200 text-sm font-semibold py-1 px-3 rounded-full transition-colors';
                 rekognisiBtn.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan`;
                 
-                rekognisiBtn.dataset.rekognisiData = JSON.stringify(item.rekognisi_data);
-                
                 rekognisiBtn.addEventListener('click', () => {
-                    const data = JSON.parse(rekognisiBtn.dataset.rekognisiData);
-                    ajukanRekognisi(data, rekognisiBtn, card);
+                    ajukanRekognisi(item.rekognisi_data, rekognisiBtn, card);
                 });
                 actionsContainer.appendChild(rekognisiBtn);
             }
@@ -293,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nav = document.createElement('nav'); nav.className = 'flex items-center space-x-2';
         data.links.forEach(link => {
             if (!link.url) return;
-            const a = document.createElement('a'); a.href = '#'; a.innerHTML = link.label; a.className = 'pagination-link';
+            const a = document.createElement('a'); a.href = '#'; a.innerHTML = link.label.replace('«', '«').replace('»', '»'); a.className = 'pagination-link';
             if (link.url === null) a.classList.add('disabled'); 
             else a.addEventListener('click', (e) => { e.preventDefault(); fetchRiwayat(link.url); });
             if (link.active) a.classList.add('active', 'bg-blue-500', 'text-white', 'border-blue-500');

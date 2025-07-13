@@ -12,6 +12,11 @@ class Prestasi extends Model
     protected $table = 'prestasi';
     protected $primaryKey = 'id_prestasi';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'id_user',
         'lomba_dari',
@@ -27,35 +32,47 @@ class Prestasi extends Model
         'status_verifikasi',
         'id_verifikator',
         'catatan_verifikasi',
+        'status_rekognisi', // <-- [PERBAIKAN KRITIS] Tambahkan ini!
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
     protected $casts = [
         'tanggal_diraih' => 'date',
     ];
 
+    /**
+     * Get the user that owns the prestasi.
+     */
     public function mahasiswa()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
 
+    /**
+     * Get the user who verified the prestasi.
+     */
     public function verifikator()
     {
         return $this->belongsTo(User::class, 'id_verifikator', 'id_user');
     }
 
+    /**
+     * Get the lomba associated with the prestasi.
+     */
     public function lomba()
     {
         return $this->belongsTo(Lomba::class, 'id_lomba', 'id_lomba');
     }
+    
+    /**
+     * Get the team associated with the prestasi.
+     */
     public function tim()
     {
         return $this->belongsTo(Tim::class, 'id_tim', 'id_tim');
     }
-    // --- METHOD DI BAWAH INI DIHAPUS KARENA SALAH TEMPAT ---
-    /* 
-    public function prestasi()
-    {
-        return $this->hasMany(\App\Models\Prestasi::class, 'user_id', 'id');
-    }
-    */
 }
