@@ -16,6 +16,7 @@ class Prestasi extends Model
         'id_user',
         'lomba_dari',
         'id_lomba',
+        'id_tim',
         'nama_lomba_eksternal',
         'penyelenggara_eksternal',
         'tingkat',
@@ -36,17 +37,20 @@ class Prestasi extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
-    
+
     public function verifikator()
     {
         return $this->belongsTo(User::class, 'id_verifikator', 'id_user');
     }
-    
+
     public function lomba()
     {
         return $this->belongsTo(Lomba::class, 'id_lomba', 'id_lomba');
     }
-
+    public function tim()
+    {
+        return $this->belongsTo(Tim::class, 'id_tim', 'id_tim');
+    }
     // --- METHOD DI BAWAH INI DIHAPUS KARENA SALAH TEMPAT ---
     /* 
     public function prestasi()

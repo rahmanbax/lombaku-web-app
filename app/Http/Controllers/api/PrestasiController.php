@@ -7,6 +7,8 @@ use App\Models\Lomba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Prestasi;
+use App\Models\Tim; // <-- TAMBAHKAN BARIS INI
+use App\Models\User;
 use App\Models\RegistrasiLomba;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -21,72 +23,83 @@ class PrestasiController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nama_lomba_eksternal'  => 'required|string|max:255',
+        $validator = Validator::make($request->all(), [
+            // Validasi Tim
+            'is_tim' => 'required|boolean',
+            'nama_tim' => 'required_if:is_tim,1|nullable|string|max:255',
+            'member_ids' => 'sometimes|nullable|array',
+            'member_ids.*' => 'exists:users,id_user',
+
+            // Validasi Detail Prestasi
+            'nama_lomba_eksternal' => 'required|string|max:255',
             'penyelenggara_eksternal' => 'required|string|max:255',
-            'tingkat'               => 'required|in:internal,nasional,internasional',
-            'peringkat'             => 'required|string|max:100',
-            'tanggal_diraih'        => 'required|date',
-            'sertifikat'            => 'required_without:existing_sertifikat_path|nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-            'existing_sertifikat_path' => 'nullable|string',
-            'id_prestasi_internal_sumber' => 'nullable|exists:prestasi,id_prestasi', // Validasi sumber prestasi internal
+            'tingkat' => 'required|in:internal,nasional,internasional',
+            'peringkat' => 'required|string|max:100',
+            'tanggal_diraih' => 'required|date',
+            'sertifikat' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $sertifikatPath = null;
-        
-        if ($request->hasFile('sertifikat')) {
-            $sertifikatPath = $request->file('sertifikat')->store('sertifikat_prestasi', 'public');
-        } 
-        elseif ($request->filled('existing_sertifikat_path')) {
-            $sertifikatPath = $request->existing_sertifikat_path;
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Validasi gagal.', 'errors' => $validator->errors()], 422);
         }
 
-        if (is_null($sertifikatPath)) {
-            return response()->json(['message' => 'Bukti sertifikat wajib ada.'], 422);
-        }
+        $validatedData = $validator->validated();
+        $sertifikatPath = $request->file('sertifikat')->store('sertifikat_prestasi', 'public');
 
         DB::beginTransaction();
         try {
-            // Langkah 1: Buat record prestasi 'eksternal' baru untuk pengajuan rekognisi
-            Prestasi::create([
-                'id_user' => Auth::id(), 
-                'lomba_dari' => 'eksternal',
-                'nama_lomba_eksternal'  => $validatedData['nama_lomba_eksternal'],
-                'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
-                'tingkat'               => $validatedData['tingkat'],
-                'peringkat'             => $validatedData['peringkat'],
-                'tanggal_diraih'        => $validatedData['tanggal_diraih'],
-                'sertifikat_path'       => $sertifikatPath,
-                'status_verifikasi'     => 'menunggu',
-                'id_prestasi_internal_sumber' => $validatedData['id_prestasi_internal_sumber'] ?? null,
-            ]);
+            $user = Auth::user();
+            $idTim = null;
+            // Anggota tim selalu dimulai dengan user yang sedang login (ketua tim)
+            $anggotaIds = [$user->id_user];
 
-            // Langkah 2: Jika ini berasal dari pengajuan rekognisi, update status prestasi internal asli
-            if (!empty($validatedData['id_prestasi_internal_sumber'])) {
-                $prestasiInternalAsli = Prestasi::find($validatedData['id_prestasi_internal_sumber']);
-                if ($prestasiInternalAsli && $prestasiInternalAsli->id_user == Auth::id()) {
-                    $prestasiInternalAsli->status_rekognisi = 'menunggu';
-                    $prestasiInternalAsli->save();
+            // Jika ini adalah pengajuan tim
+            if ($validatedData['is_tim']) {
+                // 1. Buat tim baru
+                $tim = Tim::create(['nama_tim' => $validatedData['nama_tim']]);
+                $idTim = $tim->id_tim;
+
+                // 2. Gabungkan ID anggota dari form dengan ID ketua
+                if (!empty($validatedData['member_ids'])) {
+                    $anggotaIds = array_unique(array_merge($anggotaIds, $validatedData['member_ids']));
                 }
+
+                // 3. Attach semua anggota ke tabel pivot 'member_tim'
+                $tim->members()->attach($anggotaIds);
+            }
+
+            // 4. Siapkan data dasar untuk setiap record prestasi
+            $dataPrestasi = [
+                'lomba_dari' => 'eksternal',
+                'id_tim' => $idTim, // ID Tim (bisa null jika perorangan)
+                'nama_lomba_eksternal' => $validatedData['nama_lomba_eksternal'],
+                'penyelenggara_eksternal' => $validatedData['penyelenggara_eksternal'],
+                'tingkat' => $validatedData['tingkat'],
+                'peringkat' => $validatedData['peringkat'],
+                'tipe_prestasi' => 'pemenang', // Default 'pemenang' untuk rekognisi
+                'tanggal_diraih' => $validatedData['tanggal_diraih'],
+                'sertifikat_path' => $sertifikatPath,
+                'status_verifikasi' => 'menunggu', // Default menunggu verifikasi
+            ];
+
+            // 5. Buat record prestasi untuk SETIAP ANGGOTA
+            foreach ($anggotaIds as $userId) {
+                // Pastikan 'id_user' unik untuk setiap iterasi
+                $dataPrestasi['id_user'] = $userId;
+                Prestasi::create($dataPrestasi);
             }
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan rekognisi prestasi berhasil dikirim!'
-            ], 201);
-
+            $message = $validatedData['is_tim'] ? 'Pengajuan prestasi berhasil dikirim untuk seluruh tim!' : 'Pengajuan prestasi berhasil dikirim!';
+            return response()->json(['success' => true, 'message' => $message], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            if ($request->hasFile('sertifikat') && isset($sertifikatPath) && Storage::disk('public')->exists($sertifikatPath)) {
+            // Hapus file yang terlanjur di-upload jika terjadi error
+            if (isset($sertifikatPath) && Storage::disk('public')->exists($sertifikatPath)) {
                 Storage::disk('public')->delete($sertifikatPath);
             }
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server.', 'error' => $e->getMessage()], 500);
         }
     }
 

@@ -60,6 +60,8 @@
                 <p class="item-type text-xs font-semibold uppercase tracking-wider"></p>
                 <h3 class="item-name font-bold text-gray-800"></h3>
                 <p class="item-tingkat text-gray-500 text-sm mt-1"></p>
+                <p class="item-team-name font-semibold text-gray-700 text-sm mt-1 hidden"></p>
+                <p class="item-team-members text-gray-500 text-xs mt-1 hidden"></p>
             </div>
         </div>
         <div class="md:col-span-2 flex flex-col justify-center"><span class="md:hidden text-gray-600 text-sm">Tanggal</span><span class="item-tanggal text-gray-800"></span></div>
@@ -90,7 +92,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // Memperbaiki header CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+    const axiosInstance = axios.create({
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        }
+    });
+
     const container = document.getElementById('history-list-container');
     const loadingState = document.getElementById('loading-state');
     const paginationContainer = document.getElementById('pagination-container');
@@ -100,15 +110,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
     
+    // Fungsi untuk mengubah URL file menjadi objek File
+    async function urlToFile(url, filename, mimeType){
+        try {
+            const res = await fetch(url);
+            const buf = await res.arrayBuffer();
+            return new File([buf], filename, {type:mimeType});
+        } catch (error) {
+            console.error('Error fetching file from URL:', error);
+            throw new Error('Gagal mengambil file sertifikat untuk rekognisi.');
+        }
+    }
+
     const ajukanRekognisi = async (rekognisiData, buttonElement, cardElement) => {
         buttonElement.disabled = true;
         buttonElement.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> Mengajukan...`;
+
         try {
-            const response = await axios.post('/api/prestasi', rekognisiData);
+            const formData = new FormData();
+            
+            // --- [PERBAIKAN UTAMA DI SINI] ---
+            // Tambahkan semua data dari rekognisiData ke formData
+            // Kecuali 'existing_sertifikat_url' karena akan diubah jadi objek File 'sertifikat'
+            for (const key in rekognisiData) {
+                if (key !== 'existing_sertifikat_url' && rekognisiData[key] !== null) { 
+                    if (Array.isArray(rekognisiData[key])) {
+                        // Untuk array seperti member_ids, tambahkan setiap elemen secara terpisah
+                        rekognisiData[key].forEach(val => formData.append(`${key}[]`, val));
+                    } else {
+                        formData.append(key, rekognisiData[key]);
+                    }
+                }
+            }
+
+            // Mengambil sertifikat dari URL dan mengubahnya menjadi objek File
+            // Kemudian menambahkannya ke FormData dengan nama 'sertifikat'
+            if (rekognisiData.existing_sertifikat_url) {
+                const sertifikatUrl = rekognisiData.existing_sertifikat_url;
+                // Ambil nama file dari URL
+                const fileName = sertifikatUrl.substring(sertifikatUrl.lastIndexOf('/') + 1);
+                // Coba tebak MIME type, atau buat lebih robust jika perlu
+                const mimeType = fileName.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'; 
+                const sertifikatFile = await urlToFile(sertifikatUrl, fileName, mimeType);
+                formData.append('sertifikat', sertifikatFile);
+            } else {
+                // Jika tidak ada existing_sertifikat_url, controller akan menganggap 'sertifikat' tidak ada
+                // Ini akan memicu validasi "required" jika tidak ada sertifikat baru yang diupload
+                // Pastikan PrestasiController memiliki validasi 'sertifikat' => 'required|file'
+                // dan tidak lagi bergantung pada 'required_without:existing_sertifikat_path'
+            }
+            // --- AKHIR PERBAIKAN ---
+
+            // POST data sebagai multipart/form-data
+            const response = await axiosInstance.post('/api/prestasi', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
             Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.data.message || 'Pengajuan rekognisi berhasil dikirim.', timer: 2000, showConfirmButton: false });
             
             const rekognisiBadge = cardElement.querySelector('.item-rekognisi-badge');
-            // Menampilkan status "Menunggu Rekognisi" setelah berhasil diajukan
             rekognisiBadge.textContent = 'Menunggu Rekognisi';
             rekognisiBadge.className = 'item-rekognisi-badge status-badge status-menunggu';
             buttonElement.remove();
@@ -117,15 +179,16 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Gagal mengajukan rekognisi:', error);
             const errorMessage = error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.';
             Swal.fire({ icon: 'error', title: 'Oops...', text: errorMessage });
+        } finally {
             buttonElement.disabled = false;
             buttonElement.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan`;
         }
     };
-
+    
     const fetchRiwayat = async (url = '/api/riwayat') => {
         loadingState.style.display = 'block'; container.innerHTML = ''; container.appendChild(loadingState);
         try {
-            const response = await axios.get(url, { params: { filter: currentFilter === 'all' ? null : currentFilter }});
+            const response = await axiosInstance.get(url, { params: { filter: currentFilter === 'all' ? null : currentFilter }});
             renderItems(response.data.data);
             renderPagination(response.data);
         } catch (error) {
@@ -160,13 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
             statusBadge.textContent = item.status_text;
             if (item.status_class) statusBadge.classList.add(item.status_class);
 
-            // =============================================================
-            // [PERBAIKAN UTAMA ADA DI SINI]
-            // Logika diubah untuk menampilkan status dan class dinamis dari API
             const rekognisiBadge = card.querySelector('.item-rekognisi-badge');
             if (item.status_rekognisi) {
-                rekognisiBadge.textContent = item.status_rekognisi; // Gunakan teks dari API
-                // Reset class dan tambahkan class status yang sesuai dari API
+                rekognisiBadge.textContent = item.status_rekognisi;
                 rekognisiBadge.className = 'item-rekognisi-badge';
                 if (item.status_rekognisi_class) {
                     rekognisiBadge.classList.add('status-badge', item.status_rekognisi_class);
@@ -174,7 +233,19 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 rekognisiBadge.innerHTML = `<span class="text-gray-400">-</span>`;
             }
-            // =============================================================
+
+            const itemTeamName = card.querySelector('.item-team-name');
+            const itemTeamMembers = card.querySelector('.item-team-members');
+
+            if (item.team_info) {
+                itemTeamName.textContent = `Tim: ${item.team_info.nama_tim}`;
+                itemTeamMembers.textContent = `Anggota: ${item.team_info.members}`;
+                itemTeamName.classList.remove('hidden');
+                itemTeamMembers.classList.remove('hidden');
+            } else {
+                itemTeamName.classList.add('hidden');
+                itemTeamMembers.classList.add('hidden');
+            }
 
             actionsContainer.innerHTML = '';
 
@@ -182,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemIcon.innerHTML = `<i class="fas fa-medal text-yellow-500"></i>`;
                 itemIcon.className += ' bg-yellow-100';
                 const sertifikatLink = document.createElement('a');
-                sertifikatLink.href = `/storage/${item.sertifikat_path}`;
+                // URL ini harus cocok dengan cara file diakses di server Anda
+                sertifikatLink.href = `/storage/${item.sertifikat_path}`; 
                 sertifikatLink.target = '_blank';
                 sertifikatLink.className = 'text-blue-600 hover:text-blue-800 text-sm font-medium';
                 sertifikatLink.innerHTML = `<i class="fas fa-certificate mr-1"></i> Lihat`;
@@ -194,7 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 rekognisiBtn.type = 'button';
                 rekognisiBtn.className = 'bg-orange-100 text-orange-800 hover:bg-orange-200 text-sm font-semibold py-1 px-3 rounded-full transition-colors';
                 rekognisiBtn.innerHTML = `<i class="fas fa-file-import mr-1"></i> Ajukan`;
-                rekognisiBtn.addEventListener('click', () => ajukanRekognisi(item.rekognisi_data, rekognisiBtn, card));
+                
+                rekognisiBtn.dataset.rekognisiData = JSON.stringify(item.rekognisi_data);
+                
+                rekognisiBtn.addEventListener('click', () => {
+                    const data = JSON.parse(rekognisiBtn.dataset.rekognisiData);
+                    ajukanRekognisi(data, rekognisiBtn, card);
+                });
                 actionsContainer.appendChild(rekognisiBtn);
             }
             
@@ -210,12 +288,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const renderPagination = (data) => {
-        paginationContainer.innerHTML = ''; if (data.last_page <= 1) return;
+        paginationContainer.innerHTML = ''; 
+        if (data.last_page <= 1) return;
         const nav = document.createElement('nav'); nav.className = 'flex items-center space-x-2';
         data.links.forEach(link => {
             if (!link.url) return;
             const a = document.createElement('a'); a.href = '#'; a.innerHTML = link.label; a.className = 'pagination-link';
-            if (link.url === null) a.classList.add('disabled'); else a.addEventListener('click', (e) => { e.preventDefault(); fetchRiwayat(link.url); });
+            if (link.url === null) a.classList.add('disabled'); 
+            else a.addEventListener('click', (e) => { e.preventDefault(); fetchRiwayat(link.url); });
             if (link.active) a.classList.add('active', 'bg-blue-500', 'text-white', 'border-blue-500');
             nav.appendChild(a);
         });

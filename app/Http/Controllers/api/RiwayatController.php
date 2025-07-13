@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage; // <-- Tambahkan ini
 
 class RiwayatController extends Controller
 {
@@ -28,7 +29,6 @@ class RiwayatController extends Controller
         if ($filter === 'all' || $filter === 'lomba') {
             $claimedLombaIds = $user->prestasi()->whereNotNull('id_lomba')->pluck('id_lomba')->toArray();
             
-            // Konversi hasil map langsung menjadi array untuk menghindari galat
             $partisipasiItems = $user->registrasiLomba()
                                 ->with(['lomba', 'tim.members', 'dosenPembimbing'])
                                 ->get()
@@ -42,7 +42,10 @@ class RiwayatController extends Controller
                     case 'diterima':
                         $statusText = 'Pendaftaran Diterima'; $statusClass = 'status-diterima';
                         if ($lomba?->status === 'berlangsung') $statusText = 'Lomba Berlangsung';
-                        if ($lomba?->status === 'selesai') { $statusText = 'Lomba Selesai'; $statusClass = 'status-prestasi'; }
+                        if ($lomba?->status === 'selesai') { 
+                            $statusText = 'Lomba Selesai'; 
+                            $statusClass = 'status-prestasi'; 
+                        }
                         break;
                     case 'ditolak': $statusText = 'Pendaftaran Ditolak'; break;
                 }
@@ -50,23 +53,32 @@ class RiwayatController extends Controller
                 $mainDate = $lomba?->tanggal_mulai_lomba ?? $item->created_at?->toDateString();
 
                 return [
-                    'id' => 'reg-' . $item->id_registrasi_lomba, 'type' => 'Partisipasi Lomba',
-                    'nama' => $lomba?->nama_lomba ?? 'Lomba Telah Dihapus', 'tanggal' => $mainDate,
-                    'status_text' => $statusText, 'status_class' => $statusClass, 
-                    'tingkat' => ucfirst($lomba?->tingkat ?? 'Tidak Diketahui'), // [MODIFIKASI] Mengganti 'kategori' menjadi 'tingkat'
-                    'sertifikat_path' => null, 'action_text' => $actionText, 'action_url' => $actionUrl,
-                    'lomba_id' => $lomba?->id_lomba, 'lomba_status' => $lomba?->status,
+                    'id' => 'reg-' . $item->id_registrasi_lomba,
+                    'type' => 'Partisipasi Lomba',
+                    'nama' => $lomba?->nama_lomba ?? 'Lomba Telah Dihapus',
+                    'tanggal' => $mainDate,
+                    'status_text' => $statusText,
+                    'status_class' => $statusClass, 
+                    'tingkat' => ucfirst($lomba?->tingkat ?? 'Tidak Diketahui'),
+                    'sertifikat_path' => null, 
+                    'action_text' => $actionText,
+                    'action_url' => $actionUrl,
+                    'lomba_id' => $lomba?->id_lomba,
+                    'lomba_status' => $lomba?->status,
                     'has_claimed_prestasi' => $lomba ? in_array($lomba->id_lomba, $claimedLombaIds) : true,
                     'rekognisi_data' => null,
                     'status_rekognisi' => null, 
                     'status_rekognisi_class' => null,
+                    'team_info' => null,
                 ];
-            })->all(); // <-- PERBAIKAN: Ubah menjadi array
+            })->all(); 
         }
 
         if ($filter === 'all' || $filter === 'prestasi') {
-            // Konversi hasil map langsung menjadi array untuk menghindari galat
-            $prestasiItems = $user->prestasi()->with('lomba.pembuat')->get()->map(function ($item) {
+            $prestasiItems = $user->prestasi()
+                                ->with(['lomba.pembuat', 'tim.members'])
+                                ->get()
+                                ->map(function ($item) {
                 $lomba = $item->lomba;
                 $rekognisiData = null;
                 $statusRekognisi = null;
@@ -74,6 +86,15 @@ class RiwayatController extends Controller
                 $statusText = '';
                 $statusClass = '';
                 $type = '';
+                
+                $teamInfo = null;
+                if ($item->tim) {
+                    $memberNames = $item->tim->members->pluck('nama')->toArray();
+                    $teamInfo = [
+                        'nama_tim' => $item->tim->nama_tim,
+                        'members' => implode(', ', $memberNames),
+                    ];
+                }
 
                 if ($item->lomba_dari === 'eksternal') {
                     $type = 'Pengajuan Prestasi';
@@ -93,6 +114,7 @@ class RiwayatController extends Controller
                     $type = 'Prestasi Internal';
                     $statusText = $item->peringkat;
                     $statusClass = 'status-prestasi';
+                    
                     if ($item->sertifikat_path && is_null($item->status_rekognisi)) {
                         $rekognisiData = [
                             'nama_lomba_eksternal' => $lomba?->nama_lomba ?? 'Prestasi Internal',
@@ -100,8 +122,14 @@ class RiwayatController extends Controller
                             'tingkat' => $lomba?->tingkat ?? 'internal',
                             'peringkat' => $item->peringkat,
                             'tanggal_diraih' => Carbon::parse($item->tanggal_diraih)->toDateString(),
-                            'existing_sertifikat_path' => $item->sertifikat_path,
+                            // --- [PERBAIKAN UTAMA DI SINI] ---
+                            // Mengirimkan URL lengkap sertifikat agar frontend bisa mengambilnya
+                            'existing_sertifikat_url' => Storage::url($item->sertifikat_path), 
+                            // --- AKHIR PERBAIKAN ---
                             'id_prestasi_internal_sumber' => $item->id_prestasi,
+                            'is_tim' => $item->id_tim ? 1 : 0,
+                            'member_ids' => $item->tim ? $item->tim->members->pluck('id_user')->toArray() : [],
+                            'nama_tim' => $item->tim ? $item->tim->nama_tim : null,
                         ];
                     }
                     if (!is_null($item->status_rekognisi)) {
@@ -120,18 +148,19 @@ class RiwayatController extends Controller
                     'type' => $type,
                     'nama' => $lomba?->nama_lomba ?? $item->nama_lomba_eksternal,
                     'tanggal' => $mainDate,
-                    'status_text' => $statusText, 'status_class' => $statusClass,
+                    'status_text' => $statusText,
+                    'status_class' => $statusClass,
                     'tingkat' => ucfirst($lomba?->tingkat ?? $item->tingkat ?? 'Tidak Diketahui'),
                     'sertifikat_path' => $item->sertifikat_path,
                     'action_text' => null, 'action_url' => null,
                     'rekognisi_data' => $rekognisiData,
                     'status_rekognisi' => $statusRekognisi,
                     'status_rekognisi_class' => $statusRekognisiClass,
+                    'team_info' => $teamInfo,
                 ];
-            })->all(); // <-- PERBAIKAN: Ubah menjadi array
+            })->all();
         }
         
-        // PERBAIKAN: Gabungkan sebagai array PHP biasa, lalu buat koleksi baru
         $kegiatanGabunganArray = array_merge($partisipasiItems, $prestasiItems);
         $kegiatanGabungan = collect($kegiatanGabunganArray);
         
@@ -142,7 +171,7 @@ class RiwayatController extends Controller
         
         $paginatedItems = new LengthAwarePaginator(
             $currentItems, 
-            $kegiatanTersortir->count(), // Gunakan count dari koleksi
+            $kegiatanTersortir->count(),
             $perPage, 
             $currentPage, 
             ['path' => request()->url(), 'query' => $request->query()]
