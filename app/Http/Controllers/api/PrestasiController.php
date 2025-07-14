@@ -35,7 +35,7 @@ class PrestasiController extends Controller
             'nama_lomba_eksternal' => 'required|string|max:255',
             'penyelenggara_eksternal' => 'required|string|max:255',
             'tingkat' => 'required|in:internal,nasional,internasional',
-            'peringkat' => 'required|string|max:100',
+            'peringkat' => 'required|string|max:100', // <-- TIDAK PERLU DIUBAH, SUDAH BENAR
             'tanggal_diraih' => 'required|date',
             'sertifikat' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
 
