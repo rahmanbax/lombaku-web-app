@@ -15,6 +15,7 @@ use App\Http\Controllers\api\ProgramStudiController;
 use App\Http\Controllers\API\PrestasiController;
 use App\Http\Controllers\Api\ProfilAdminLombaController;
 use App\Http\Controllers\API\RegistrasiLombaController;
+use App\Http\Controllers\API\RekognisiController;
 use App\Http\Controllers\API\RiwayatController;
 use App\Http\Controllers\api\TahapLombaController;
 use App\Http\Controllers\NotifikasiController;
@@ -124,6 +125,9 @@ Route::apiResource('tags', TagController::class)->only(['index']);
 Route::apiResource('mahasiswa', MahasiswaController::class);
 Route::get('/profil', [ProfilAdminLombaController::class, 'show']);
 Route::post('/profil', [ProfilAdminLombaController::class, 'update']);
+
+// Gunakan {nim} sebagai parameter untuk kejelasan
+Route::get('/mahasiswa/{nim}/rekognisi', [RekognisiController::class, 'getForMahasiswaByNim']);
 
 // 1. Mengambil semua notifikasi milik user yang sedang login
 Route::get('/notifikasi/saya', [NotifikasiController::class, 'getMyNotifications']);

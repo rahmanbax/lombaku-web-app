@@ -755,5 +755,35 @@ class DatabaseSeeder extends Seeder
             ['id_user' => 6, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/Andi Hermawan-Peserta-Design Challenge 2025.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
             ['id_user' => 7, 'lomba_dari' => 'internal', 'tipe_prestasi' => 'peserta', 'id_lomba' => 12, 'nama_lomba_eksternal' => null, 'penyelenggara_eksternal' => null, 'tingkat' => 'nasional', 'peringkat' => 'Peserta', 'tanggal_diraih' => now()->subMonth()->addDays(5), 'sertifikat_path' => 'sertifikat/Siti Aminah-Peserta-Design Challenge 2025.pdf', 'status_verifikasi' => 'disetujui', 'id_verifikator' => 3, 'catatan_verifikasi' => 'Sertifikat Partisipasi.'],
         ]);
+
+        DB::table('rekognisi')->insert([
+            // Rekognisi untuk Prestasi #1 (Andi - Juara 1 Hackathon)
+            [
+                'id_prestasi' => 1,
+                'mata_kuliah' => 'Proyek Perangkat Lunak',
+                'jenis_rekognisi' => 'penuh',
+                'bobot_nilai' => "A",
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            // Rekognisi lain untuk Prestasi #1
+            [
+                'id_prestasi' => 1,
+                'mata_kuliah' => 'Pemrograman Web Lanjut',
+                'jenis_rekognisi' => 'asessment 2',
+                'bobot_nilai' => "AB",
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            // Rekognisi untuk Prestasi #3 (Rina - Finalis UI/UX)
+            [
+                'id_prestasi' => 3,
+                'mata_kuliah' => 'Desain Antarmuka Pengguna',
+                'jenis_rekognisi' => 'assessment 1',
+                'bobot_nilai' => "B",
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+        ]);
     }
 }

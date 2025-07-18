@@ -117,6 +117,30 @@
             </div>
         </section>
 
+        <section class="mt-10">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Daftar Rekognisi</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nama Prestasi</th>
+                            <th scope="col" class="px-6 py-3">Mata Kuliah Direkognisi</th>
+                            <th scope="col" class="px-6 py-3">Jenis Rekognisi</th>
+                            <th scope="col" class="px-6 py-3 text-center">Bobot</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekognisi-table-body">
+                        <!-- Loading state -->
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                Memuat data rekognisi...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <!-- Modal untuk Detail Tim -->
@@ -160,6 +184,8 @@
                 renderStatCards(mahasiswa.stats);
                 renderRiwayatLomba(mahasiswa.registrasi_lomba, mahasiswa.prestasi); // Kirim juga data prestasi untuk pengecekan
                 renderPrestasi(mahasiswa.prestasi);
+                fetchRekognisi(mahasiswaNim);
+
 
             } catch (error) {
                 console.error('Gagal memuat data detail mahasiswa:', error);
@@ -274,6 +300,52 @@
             `;
                 tbody.innerHTML += row;
             });
+        }
+
+        /**
+         * Mengambil dan merender daftar rekognisi SKS untuk mahasiswa.
+         */
+        async function fetchRekognisi(nim) {
+            const tbody = document.getElementById('rekognisi-table-body');
+            if (!tbody) return;
+
+            try {
+                const response = await axios.get(`/api/mahasiswa/${nim}/rekognisi`);
+                tbody.innerHTML = ''; // Kosongkan loading state
+
+                if (response.data.success && response.data.data.length > 0) {
+                    response.data.data.forEach(rekognisi => {
+                        const row = document.createElement('tr'); // Buat elemen <tr>
+                        row.className = 'bg-gray-50 hover:bg-gray-100';
+
+                        // Ambil info prestasi dengan aman
+                        const namaPrestasi = rekognisi.prestasi?.lomba?.nama_lomba || rekognisi.prestasi?.nama_lomba_eksternal || 'Prestasi Eksternal';
+                        const peringkat = rekognisi.prestasi?.peringkat || 'N/A';
+
+                        // Isi konten baris dengan string HTML
+                        row.innerHTML = `
+                    <td class="px-6 py-4 font-medium">${peringkat} - ${namaPrestasi}</td>
+                    <td class="px-6 py-4">${rekognisi.mata_kuliah}</td>
+                    <td class="px-6 py-4 capitalize">${rekognisi.jenis_rekognisi}</td>
+                    <td class="px-6 py-4 text-center font-semibold">${rekognisi.bobot_nilai}</td>
+                `;
+
+                        // === PERBAIKAN DI SINI ===
+                        // Gunakan appendChild untuk menambahkan elemen DOM, bukan innerHTML +=
+                        tbody.appendChild(row);
+                        // ========================
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Mahasiswa ini belum memiliki rekognisi SKS.</td></tr>';
+                }
+            } catch (error) {
+                if (error.response && error.response.status === 404) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Mahasiswa ini belum memiliki rekognisi SKS.</td></tr>';
+                } else {
+                    console.error('Error fetching rekognisi:', error);
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data rekognisi.</td></tr>';
+                }
+            }
         }
 
         function openTeamModal(teamData) {
