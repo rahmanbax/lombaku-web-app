@@ -41,6 +41,9 @@ return new class extends Migration
             $table->date('tanggal_diraih');
             $table->string('sertifikat_path');
 
+            // Kolom tier lomba
+            $table->enum('tier_lomba', ['1', '2', '3'])->nullable();
+
             // --- Kolom Verifikasi ---
             $table->enum('status_verifikasi', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
             $table->foreignId('id_verifikator')->nullable()->constrained('users', 'id_user')->onDelete('set null');

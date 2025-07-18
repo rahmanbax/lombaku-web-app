@@ -122,6 +122,7 @@ class PrestasiController extends Controller
             'id_lomba'            => 'required|exists:lomba,id_lomba',
             'peringkat'           => 'required|string|max:255',
             'tipe_prestasi'       => 'required|in:pemenang,peserta',
+            'tier_lomba'          => 'required|in:1,2,3',
             'tanggal_diraih'      => 'required|date',
             'sertifikat'          => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -231,6 +232,7 @@ class PrestasiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'peringkat'     => 'sometimes|required|string|max:255',
+            'tier_lomba'    => 'sometimes|required|in:1,2,3',
             'tipe_prestasi' => 'sometimes|required|in:pemenang,peserta',
             'tanggal_diraih' => 'sometimes|required|date',
             'sertifikat'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',

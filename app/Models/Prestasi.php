@@ -33,6 +33,7 @@ class Prestasi extends Model
         'id_verifikator',
         'catatan_verifikasi',
         'status_rekognisi', // <-- [PERBAIKAN KRITIS] Tambahkan ini!
+        'tier_lomba', 
     ];
 
     /**

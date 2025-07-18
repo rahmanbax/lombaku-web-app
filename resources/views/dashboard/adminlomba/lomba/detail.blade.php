@@ -227,6 +227,19 @@
                     </div>
                 </div>
 
+                <!-- ========================================================== -->
+                <!-- === BAGIAN BARU: Field Tier Lomba === -->
+                <!-- ========================================================== -->
+                <div>
+                    <label for="prestasi-tier-select" class="block text-sm font-medium text-gray-700">Tier Lomba</label>
+                    <select name="tier_lomba" id="prestasi-tier-select" required class="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="" disabled selected>Pilih Tier</option>
+                        <option value="1">Tier 1 (Internasional Bereputasi)</option>
+                        <option value="2">Tier 2 (Nasional Bereputasi)</option>
+                        <option value="3">Tier 3 (Lainnya)</option>
+                    </select>
+                </div>
+
                 <!-- Field Tanggal Diraih (disembunyikan dengan benar) -->
                 <input type="hidden" name="tanggal_diraih" id="prestasi-tanggal-input" value="{{ date('Y-m-d') }}" required>
 
@@ -734,6 +747,8 @@
                         peringkatManualInput.value = peringkatValue;
                     }
 
+                    document.getElementById('prestasi-tier-select').value = prestasi.tier_lomba;
+
                     // Mengisi sisa form
                     document.getElementById('prestasi-tanggal-input').value = prestasi.tanggal_diraih.split('T')[0];
                     document.getElementById('prestasi-sertifikat-file').required = false;
@@ -943,56 +958,64 @@
             // Gantikan event listener prestasiForm yang lama dengan yang baru ini:
             prestasiForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                const kirimPrestasiBtn = document.getElementById('kirim-prestasi-btn'); // Ambil referensi tombol
+                const kirimPrestasiBtn = document.getElementById('kirim-prestasi-btn');
                 kirimPrestasiBtn.disabled = true;
                 kirimPrestasiBtn.innerHTML = 'Mengirim...';
 
-                const mode = prestasiForm.dataset.mode;
-                const formData = new FormData(); // Mulai dengan FormData kosong
+                // === PERBAIKAN UTAMA DI SINI ===
 
-                // --- [PERBAIKAN UTAMA DI SINI] ---
-                // 1. Ambil nilai peringkat secara manual dan eksplisit
-                const peringkatSelect = document.getElementById('prestasi-peringkat-select');
-                const peringkatManualInput = document.getElementById('prestasi-peringkat-manual');
-                let peringkatValue = '';
+                // 1. Buat FormData langsung dari elemen form.
+                // Ini akan otomatis mengambil SEMUA input yang punya 'name':
+                // - peringkat (dari select atau input manual, tergantung mana yang aktif)
+                // - tipe_prestasi
+                // - tier_lomba
+                // - tanggal_diraih
+                // - sertifikat (file)
+                const formData = new FormData(prestasiForm);
 
-                if (peringkatSelect.value === 'lainnya') {
-                    // Jika 'Lainnya' dipilih, ambil nilai dari input manual
-                    peringkatValue = peringkatManualInput.value.trim();
-                } else {
-                    // Jika tidak, ambil nilai dari dropdown
-                    peringkatValue = peringkatSelect.value;
+                // 2. Tambahkan data yang tidak ada di dalam form (dari dataset)
+                formData.append('id_user', prestasiForm.dataset.userId);
+                formData.append('id_lomba', prestasiForm.dataset.lombaId);
+
+                // 3. Kita perlu menangani kasus 'peringkat lainnya' secara eksplisit
+                // karena FormData akan mengambil nilai dari dropdown ('lainnya')
+                // bukan dari input manual.
+                if (document.getElementById('prestasi-peringkat-select').value === 'lainnya') {
+                    const peringkatManual = document.getElementById('prestasi-peringkat-manual').value;
+                    // Timpa nilai 'peringkat' di formData dengan nilai dari input manual
+                    formData.set('peringkat', peringkatManual);
                 }
-
-                // Tambahkan nilai peringkat yang sudah benar ke FormData
-                formData.append('peringkat', peringkatValue);
-
-                // 2. Ambil dan tambahkan data lainnya
-                formData.append('tipe_prestasi', document.querySelector('input[name="tipe_prestasi"]:checked').value);
-                formData.append('tanggal_diraih', document.getElementById('prestasi-tanggal-input').value);
 
                 const sertifikatFile = document.getElementById('prestasi-sertifikat-file').files[0];
                 if (sertifikatFile) {
-                    formData.append('sertifikat', sertifikatFile); // Nama 'sertifikat' harus sesuai dengan backend
+                    formData.append('sertifikat', sertifikatFile);
+                }
+
+                // =============================
+
+                // Debugging untuk memastikan semuanya ada
+                console.log("Data yang akan dikirim:");
+                for (let [key, value] of formData.entries()) {
+                    console.log(`- ${key}:`, value);
                 }
 
                 try {
-                    if (mode === 'edit') {
-                        // --- LOGIKA UPDATE ---
-                        const prestasiId = prestasiForm.dataset.prestasiId;
-                        formData.append('_method', 'PUT');
-                        await axios.post(`/api/prestasi/${prestasiId}`, formData);
-                        alert('Prestasi berhasil diperbarui!');
+                    const mode = prestasiForm.dataset.mode;
+                    let url;
 
+                    if (mode === 'edit') {
+                        const prestasiId = prestasiForm.dataset.prestasiId;
+                        url = `/api/prestasi/${prestasiId}`;
+                        formData.append('_method', 'PUT');
+                        await axios.post(url, formData);
+                        alert('Prestasi berhasil diperbarui!');
                     } else {
-                        // --- LOGIKA CREATE ---
-                        formData.append('id_user', prestasiForm.dataset.userId);
-                        formData.append('id_lomba', prestasiForm.dataset.lombaId);
-                        await axios.post('/api/prestasi/berikan', formData);
+                        url = '/api/prestasi/berikan';
+                        await axios.post(url, formData);
                         alert('Prestasi berhasil disimpan dan sertifikat terkirim!');
                     }
 
-                    location.reload(); // Reload halaman setelah sukses
+                    location.reload();
 
                 } catch (error) {
                     const msg = error.response?.data?.message || 'Gagal menyimpan prestasi.';
