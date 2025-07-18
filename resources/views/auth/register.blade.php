@@ -103,7 +103,7 @@
                         <label for="nim" class="block text-sm font-medium text-gray-700 mb-2">NIM</label>
                         <!-- PERBAIKAN: name diubah dari "nim_atau_nip" menjadi "nim" -->
                         <input type="text" id="nim" name="nim" value="{{ old('nim') }}"
-                            class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="NIM Maksimal 6 karakter" required>
+                            class="input-field w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="NIM Maksimal 8 karakter" required>
                     </div>
                     <div>
                         <label for="id_program_studi_mhs" class="block text-sm font-medium text-gray-700 mb-2">Program Studi</label>
